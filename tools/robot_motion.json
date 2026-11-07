@@ -1,0 +1,75 @@
+{
+  "upper": [
+    "Part__Feature1804",
+    "Part__Feature1812",
+    "Part__Feature615",
+    "Part__Feature1795",
+    "Part__Feature1810"
+  ],
+  "lower": [
+    "Part__Feature888",
+    "Part__Feature1796",
+    "Part__Feature442",
+    "Part__Feature1697",
+    "Part__Feature1803"
+  ],
+  "grab": [
+    "Part__Feature020",
+    "Part__Feature035",
+    "Part__Feature062",
+    "Part__Feature076",
+    "Part__Feature088",
+    "Part__Feature130",
+    "Part__Feature141",
+    "Part__Feature148",
+    "Part__Feature158",
+    "Part__Feature175",
+    "Part__Feature186",
+    "Part__Feature196",
+    "Part__Feature232",
+    "Part__Feature243",
+    "Part__Feature247",
+    "Part__Feature255",
+    "Part__Feature275",
+    "Part__Feature284",
+    "Part__Feature323",
+    "Part__Feature332",
+    "Part__Feature458",
+    "Part__Feature475",
+    "Part__Feature487",
+    "Part__Feature567",
+    "Part__Feature635",
+    "Part__Feature647",
+    "Part__Feature652",
+    "Part__Feature675",
+    "Part__Feature702",
+    "Part__Feature709",
+    "Part__Feature718",
+    "Part__Feature782",
+    "Part__Feature796",
+    "Part__Feature882",
+    "Part__Feature909",
+    "Part__Feature910",
+    "Part__Feature939",
+    "Part__Feature1801",
+    "Part__Feature1805",
+    "Part__Feature1811"
+  ],
+  "L": 145.71547627186447,
+  "theta": 52.09794297527092,
+  "U": [
+    -9.5,
+    0.0,
+    102.75843263974
+  ],
+  "P2": [
+    -9.5,
+    0.0,
+    62.75843263974
+  ],
+  "J": [
+    80.0149885,
+    0.0,
+    217.7369822
+  ]
+}

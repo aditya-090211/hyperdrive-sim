@@ -1,0 +1,14 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>stadium still</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#0d0e10}canvas{display:block;width:100vw;height:100vh}</style>
+<script type="importmap">{ "imports": { "three": "../lib/three.module.js" } }</script>
+</head><body><canvas id="c"></canvas>
+<script type="module">
+// renders the stills used behind Overdrive Scout, the legal pages and the sign-in fallback (tools/render-stadium.cjs)
+import { createStadium } from '../js/stadium.js';
+await document.fonts.load('700 40px "Instrument Sans"').catch(() => {});
+const st = await createStadium(document.getElementById('c'), { mobile: false, assets: '../assets/' });
+window.shoot = (angle, height, radius) => { st.shot.height = height; st.shot.radius = radius; st.still(8, angle); return document.getElementById('c').toDataURL('image/jpeg', 0.86); };
+window.ready = true;
+</script></body></html>

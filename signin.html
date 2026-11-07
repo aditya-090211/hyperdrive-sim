@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in · Overdrive 009</title>
+<meta name="description" content="Sign in or create your Overdrive account: one email and password for the HYPERDRIVE simulator and Overdrive Scout.">
+<meta name="theme-color" content="#0d0e10">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://hyperdrive-sim.vercel.app/signin">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0e10'/%3E%3Cpath d='M22.6 7.7A11 11 0 1 0 22.6 24.3' stroke='%23f2ede3' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M14.6 10.6l5.6 5.4-5.6 5.4' stroke='%23e2531b' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=Martian+Mono:wght@400..600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/od.css?v=6">
+<link rel="stylesheet" href="css/signin.css?v=8">
+<script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script>
+<!-- the form first; the 3D backdrop loads behind it at low priority -->
+<link rel="modulepreload" href="js/signin.js">
+<link rel="modulepreload" href="js/auth-client.js">
+<link rel="modulepreload" href="js/supabase-config.js">
+<link rel="modulepreload" href="js/layout.js">
+<link rel="preload" href="assets/robot.json?v=3" as="fetch" crossorigin fetchpriority="low">
+<link rel="preload" href="assets/robot.bin?v=3" as="fetch" crossorigin fetchpriority="low">
+<link rel="preload" href="assets/field.json?v=3" as="fetch" crossorigin fetchpriority="low">
+<link rel="preload" href="assets/field.bin?v=3" as="fetch" crossorigin fetchpriority="low">
+<script src="lib/supabase.umd.js" defer></script>
+<script type="module" src="js/signin.js"></script>
+</head>
+<body class="signin">
+<a class="skip" href="#panel">Skip to sign-in</a>
+<div class="still" aria-hidden="true"></div>
+<canvas id="stage" aria-hidden="true"></canvas>
+<div class="shade" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Main">
+  <a class="brand" href="/" aria-label="Overdrive 009 home">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="#f2ede3" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#e2531b" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Overdrive</span><span class="num">009</span>
+  </a>
+  <a class="lnk opt" href="/sim">Simulator</a>
+  <a class="lnk opt" href="/scout">Scout</a>
+</nav>
+
+<main class="panel" id="panel">
+  <p class="eyebrow">Overdrive account</p>
+  <h1>One account for the simulator <em>and Scout.</em></h1>
+  <p class="lede">Your matches, settings and team follow you between the HYPERDRIVE simulator and Overdrive Scout.</p>
+
+  <section id="signed-out" hidden>
+    <div class="seg mode-seg" role="tablist" aria-label="Account">
+      <button type="button" role="tab" id="tab-in" aria-selected="true" aria-pressed="true">Sign in</button>
+      <button type="button" role="tab" id="tab-up" aria-selected="false" aria-pressed="false">Create account</button>
+    </div>
+    <form id="auth-form" novalidate>
+      <div class="fld" id="name-fld" hidden><label class="lab" for="nm">Your name</label><div class="field"><input id="nm" type="text" autocomplete="name" maxlength="32" placeholder="Shown to your team"></div></div>
+      <div class="fld"><label class="lab" for="em">Email</label><div class="field"><input id="em" type="email" autocomplete="email" inputmode="email" required></div></div>
+      <div class="fld"><label class="lab" for="pw">Password</label><div class="field"><input id="pw" type="password" autocomplete="current-password" minlength="8" required><button class="b b-ghost sm pw-eye" type="button" id="pw-eye" aria-label="Show password" aria-pressed="false">Show</button></div></div>
+      <button class="b b-primary lg block" type="submit" id="submit">Sign in</button>
+      <p class="err" id="err" role="alert"></p>
+      <div class="row-2 under"><button class="b b-ghost sm" type="button" id="forgot">Forgot your password?</button></div>
+      <p class="help" id="pw-help" hidden>At least 8 characters. Use something you do not use anywhere else.</p>
+    </form>
+  </section>
+
+  <section id="signed-in" hidden>
+    <div class="who"><span class="avatar" id="who-initials">?</span><div><b id="who-name"></b><small id="who-email"></small></div></div>
+    <p class="team" id="who-team"></p>
+    <div class="ctas"><a class="b b-primary" id="go-next" href="/">Continue</a><a class="b b-glass" href="/sim">Simulator</a><a class="b b-glass" href="/scout">Scout</a></div>
+    <button class="b b-ghost sm" id="signout" type="button">Sign out</button>
+  </section>
+
+  <p class="fine">By continuing you agree to the <a href="/terms">Terms</a> and the <a href="/privacy">Privacy Policy</a>.</p>
+</main>
+
+<div class="match-tag" aria-hidden="true"><i></i>A simulated qualification match at the IIT Bombay Open Air Theatre</div>
+<noscript><div class="noscript">Signing in needs JavaScript. Turn it on and reload.</div></noscript>
+</body>
+</html>

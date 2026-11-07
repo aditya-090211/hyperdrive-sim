@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HYPERDRIVE reel renderer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<script type="importmap">{ "imports": { "three": "../lib/three.module.js" } }</script>
+<style>
+  :root { --red: #ff4759; --blue: #3f7dff; --gold: #ffbf2f; }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #06080c; }
+  #view, #view canvas { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+  #ov { position: absolute; inset: 0; pointer-events: none; font-family: Inter, sans-serif; color: #fff; }
+  .shade-top { position: absolute; left: 0; right: 0; top: 0; height: 760px; background: linear-gradient(180deg, rgba(6,8,12,.92) 0%, rgba(6,8,12,.55) 45%, rgba(6,8,12,0)); }
+  .shade-bot { position: absolute; left: 0; right: 0; bottom: 0; height: 640px; background: linear-gradient(0deg, rgba(6,8,12,.85), rgba(6,8,12,0)); }
+  .vignette { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 50%, transparent 55%, rgba(0,0,0,.55) 100%); }
+  .flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+  .el { position: absolute; opacity: 0; will-change: transform, opacity, filter; }
+  .eyebrow { left: 80px; top: 300px; display: flex; align-items: center; gap: 16px; height: 62px; padding: 0 26px; border-radius: 99px; border: 2px solid rgba(255,255,255,.22); background: rgba(255,255,255,.06); font: 700 26px/1 Inter; letter-spacing: .14em; }
+  .eyebrow i { width: 14px; height: 14px; border-radius: 50%; background: #2ee59d; box-shadow: 0 0 18px #2ee59d; }
+  .logo { font: 700 148px/0.9 'Chakra Petch'; letter-spacing: .03em; background: linear-gradient(100deg, #fff 0%, #fff 45%, #ffd479 55%, #fff 70%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 10px 40px rgba(0,0,0,.6)); }
+  .logo span { background: linear-gradient(90deg, var(--red), var(--gold) 50%, var(--blue)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .t-logo { left: 72px; top: 400px; }
+  .sub { left: 84px; top: 600px; font: 800 44px/1.2 Inter; letter-spacing: .32em; color: rgba(255,255,255,.88); }
+  .head { left: 80px; top: 330px; font: 700 118px/0.95 'Chakra Petch'; letter-spacing: .01em; text-transform: uppercase; text-shadow: 0 8px 40px rgba(0,0,0,.65); }
+  .head em { font-style: normal; color: var(--gold); }
+  .bar { left: 84px; top: 300px; height: 10px; width: 150px; border-radius: 6px; background: linear-gradient(90deg, var(--red), var(--gold), var(--blue)); transform-origin: left center; }
+  .cap { left: 84px; font: 600 40px/1.35 Inter; color: rgba(236,240,247,.9); max-width: 900px; text-shadow: 0 4px 24px rgba(0,0,0,.7); }
+  .chip { display: inline-flex; align-items: center; gap: 14px; height: 70px; padding: 0 28px; border-radius: 20px; background: rgba(14,17,23,.82); border: 2px solid rgba(255,255,255,.14); font: 700 32px/1 Inter; letter-spacing: .04em; backdrop-filter: blur(10px); }
+  .chip b { color: var(--gold); }
+  .pop { font: 700 120px/1 'Chakra Petch'; color: #ffd479; text-shadow: 0 0 30px rgba(255,191,47,.8), 0 8px 30px rgba(0,0,0,.7); transform-origin: center; }
+  .badge { font: 700 54px/1 'Chakra Petch'; letter-spacing: .06em; padding: 22px 34px; border-radius: 22px; background: rgba(46,229,157,.18); border: 3px solid rgba(46,229,157,.7); color: #b6f7da; text-shadow: 0 4px 20px rgba(0,0,0,.5); }
+  .badge.gold { background: rgba(255,191,47,.18); border-color: rgba(255,191,47,.8); color: #ffe3a3; }
+  /* mini scoreboard */
+  .sb { left: 50%; top: 250px; display: grid; grid-template-columns: 1fr auto 1fr; filter: drop-shadow(0 18px 40px rgba(0,0,0,.6)); }
+  .sb > div { height: 128px; display: flex; align-items: center; justify-content: center; }
+  .sb .r { width: 300px; border-radius: 26px 0 0 26px; background: linear-gradient(90deg, rgba(255,71,89,.7), rgba(255,71,89,.35)), #0f131a; gap: 24px; }
+  .sb .b { width: 300px; border-radius: 0 26px 26px 0; background: linear-gradient(270deg, rgba(63,125,255,.7), rgba(63,125,255,.35)), #0f131a; gap: 24px; }
+  .sb .m { width: 230px; background: #0f131a; flex-direction: column; gap: 8px; }
+  .sb .n { font: 700 30px/1 'Chakra Petch'; letter-spacing: .2em; }
+  .sb .s { font: 700 84px/1 'Chakra Petch'; }
+  .sb .clk { font: 700 60px/1 'Chakra Petch'; }
+  .sb .ph { font: 800 18px/1 Inter; letter-spacing: .2em; color: #8b94a5; }
+  /* end card */
+  .end-shade { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 48%, rgba(6,8,12,.72), rgba(6,8,12,.9)); opacity: 0; }
+  .end-logo { left: 0; right: 0; top: 600px; text-align: center; }
+  .end-logo .logo { font-size: 150px; }
+  .end-sub { left: 0; right: 0; top: 790px; text-align: center; font: 800 44px/1.2 Inter; letter-spacing: .16em; }
+  .url { left: 50%; top: 910px; display: flex; align-items: center; gap: 20px; height: 112px; padding: 0 44px; border-radius: 30px; background: linear-gradient(180deg, #ffd36a, #ffbf2f); color: #1d1300; font: 800 50px/1 Inter; box-shadow: 0 20px 70px rgba(255,191,47,.45); white-space: nowrap; }
+  .url svg { width: 52px; height: 52px; }
+  .feat { left: 0; right: 0; top: 1080px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; padding: 0 60px; }
+  .feat span { height: 64px; padding: 0 24px; display: inline-flex; align-items: center; border-radius: 18px; border: 2px solid rgba(255,255,255,.18); background: rgba(14,17,23,.75); font: 700 29px/1 Inter; color: #e6ebf2; }
+  .bio { left: 0; right: 0; top: 1300px; text-align: center; font: 700 38px/1 Inter; letter-spacing: .1em; color: rgba(255,255,255,.75); }
+  .tick { position: absolute; left: 84px; right: 84px; top: 210px; height: 6px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; opacity: 0; }
+  .tick i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--red), var(--gold), var(--blue)); }
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div id="ov">
+  <div class="vignette"></div>
+  <div class="shade-top" id="shadeTop"></div>
+  <div class="shade-bot" id="shadeBot"></div>
+  <div class="tick" id="tick"><i></i></div>
+
+  <!-- scene A: hook -->
+  <div class="el eyebrow" id="a-eye"><i></i>NRL 2026 · HYPERDRIVE</div>
+  <div class="el t-logo" id="a-logo"><div class="logo">HYPER<span>DRIVE</span></div></div>
+  <div class="el sub" id="a-sub">THE MATCH SIMULATOR</div>
+
+  <!-- scene B -->
+  <div class="el bar" id="b-bar"></div>
+  <div class="el head" id="b-head">Real robot<br><em>CAD.</em></div>
+  <div class="el cap" id="b-cap" style="top:600px">The NRL kit robot, straight from its STEP file. Arm, gripper and drive all move.</div>
+
+  <!-- scene C -->
+  <div class="el bar" id="c-bar"></div>
+  <div class="el head" id="c-head">Real<br><em>physics.</em></div>
+  <div class="el cap" id="c-cap" style="top:600px">Every ring threads onto the pole for real. Miss, and it bounces off.</div>
+  <div class="el pop" id="c-pop">+3</div>
+
+  <!-- scene D -->
+  <div class="el sb" id="d-sb"><div class="r"><span class="n">RED</span><span class="s" id="d-rs">0</span></div><div class="m"><span class="clk" id="d-clk">2:30</span><span class="ph">CORE SCORING</span></div><div class="b"><span class="s" id="d-bs">0</span><span class="n">BLUE</span></div></div>
+  <div class="el head" id="d-head" style="top:440px">4 robots.<br><em>Full field.</em></div>
+  <div class="el cap" id="d-cap" style="top:700px">Every pole, vault, star map and space station from the 2026 game manual.</div>
+
+  <!-- scene E -->
+  <div class="el bar" id="e-bar"></div>
+  <div class="el head" id="e-head">Every rule.<br><em>Scored live.</em></div>
+  <div class="el cap" id="e-cap" style="top:600px">Starburst, Star Maps, Level Up and fouls, judged automatically.</div>
+  <div class="el badge gold" id="e-lvl">LEVEL UP · 0:30</div>
+  <div class="el badge" id="e-dock">DOCKED +8</div>
+
+  <!-- scene F: end card -->
+  <div class="end-shade" id="endShade"></div>
+  <div class="el end-logo" id="f-logo"><div class="logo">HYPER<span>DRIVE</span></div></div>
+  <div class="el end-sub" id="f-sub">PLAY FREE IN YOUR BROWSER</div>
+  <div class="el url" id="f-url"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1300" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5z" fill="#1d1300"/></svg>hyperdrive-sim.vercel.app</div>
+  <div class="el feat" id="f-feat"><span>No download</span><span>Keyboard · gamepad · touch</span><span>Free account</span></div>
+  <div class="el bio" id="f-bio">LINK IN BIO ↗</div>
+  <div class="flash" id="flash"></div>
+</div>
+<script type="module" src="./promo.js"></script>
+</body>
+</html>

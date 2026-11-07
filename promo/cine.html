@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HYPERDRIVE cinematic reel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;700;800&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<script type="importmap">{ "imports": { "three": "../lib/three.module.js" } }</script>
+<style>
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  #view, #view canvas { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+  #ov { position: absolute; inset: 0; pointer-events: none; color: #fff; font-family: Inter, sans-serif; -webkit-font-smoothing: antialiased; }
+  .el { position: absolute; opacity: 0; will-change: transform, opacity, filter, clip-path; }
+  .k { display: block; font: 600 22px/1 Inter; letter-spacing: .42em; color: rgba(255,255,255,.72); margin-bottom: 24px; padding-left: .42em; }
+  .t { display: inline-block; font: 800 78px/1.02 'Inter Tight'; letter-spacing: -.005em; text-transform: uppercase; text-shadow: 0 2px 34px rgba(0,0,0,.65); }
+  .t i { font-style: normal; font-weight: 200; }
+  .ln { display: block; margin: 30px auto 0; width: 64px; height: 2px; background: rgba(255,255,255,.55); }
+  /* opening line */
+  .open { left: 0; right: 0; top: 330px; text-align: center; }
+  .open .t { font-size: 62px; }
+  /* team bug (top right) */
+  .bug { top: 196px; right: 58px; display: flex; align-items: baseline; gap: 10px; padding-left: 14px; border-left: 2px solid rgba(255,255,255,.75); font: 800 28px/1 'Inter Tight'; letter-spacing: .04em; color: rgba(255,255,255,.9); text-shadow: 0 2px 16px rgba(0,0,0,.6); }
+  .bug span { font-weight: 200; }
+  .byline { left: 0; right: 0; top: 940px; text-align: center; font: 600 20px/1 Inter; letter-spacing: .5em; padding-left: .5em; color: rgba(255,255,255,.62); }
+  .team { left: 0; right: 0; top: 1190px; text-align: center; }
+  .team .k { margin-bottom: 18px; font-size: 18px; color: rgba(255,255,255,.55); }
+  .team .tm { display: inline-block; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.3); font: 800 64px/1 'Inter Tight'; letter-spacing: .02em; color: #fff; }
+  .team .tm span { font-weight: 200; margin-left: 14px; }
+  /* lower-third captions */
+  .cap { left: 0; right: 0; top: 1250px; text-align: center; }
+  /* title */
+  .title, .end-logo { left: 0; right: 0; text-align: center; }
+  .title { top: 700px; }
+  .logo { display: inline-block; position: relative; font: 800 150px/0.9 'Inter Tight'; letter-spacing: -.015em; color: #fff; text-shadow: 0 6px 50px rgba(0,0,0,.6); }
+  .logo span { font-weight: 200; }
+  .glint { position: absolute; left: 0; top: 0; white-space: nowrap; background: linear-gradient(105deg, transparent 44%, rgba(255,255,255,.55) 50%, transparent 56%); background-size: 300% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+  .glint span { font-weight: 200; }
+  .rule { left: 50%; top: 860px; width: 420px; height: 1px; margin-left: -210px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); }
+  .sub { left: 0; right: 0; top: 888px; text-align: center; font: 600 24px/1 Inter; letter-spacing: .46em; padding-left: .46em; color: rgba(255,255,255,.82); }
+  /* score callout */
+  .pop { text-align: center; width: 220px; }
+  .pop b { display: block; font: 800 96px/1 'Inter Tight'; color: #fff; text-shadow: 0 4px 30px rgba(0,0,0,.6); }
+  .pop small { display: block; margin-top: 10px; font: 600 18px/1 Inter; letter-spacing: .38em; padding-left: .38em; color: rgba(255,255,255,.72); }
+  .badge { left: 0; right: 0; top: 1060px; text-align: center; }
+  .badge span { display: inline-flex; align-items: center; gap: 18px; padding: 20px 34px; border: 1px solid rgba(255,255,255,.35); border-radius: 8px; font: 600 28px/1 Inter; letter-spacing: .3em; color: #fff; background: rgba(6,8,12,.6); }
+  .badge i { width: 10px; height: 10px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 10px rgba(61,220,132,.7); }
+  /* end card */
+  .end-logo { top: 610px; }
+  .end-sub { left: 0; right: 0; top: 780px; text-align: center; font: 600 24px/1 Inter; letter-spacing: .42em; padding-left: .42em; color: rgba(255,255,255,.85); }
+  .cta { left: 0; right: 0; top: 880px; text-align: center; font: 500 22px/1 Inter; letter-spacing: .34em; padding-left: .34em; color: rgba(255,255,255,.62); }
+  .url { left: 50%; top: 940px; display: flex; align-items: center; gap: 16px; height: 96px; padding: 0 40px 0 34px; border-radius: 48px; background: #fff; color: #07090c; font: 700 42px/1 Inter; letter-spacing: -.01em; white-space: nowrap; box-shadow: 0 20px 60px rgba(0,0,0,.55); }
+  .url svg { width: 36px; height: 36px; }
+  .bio { left: 0; right: 0; top: 1090px; text-align: center; font: 600 20px/1 Inter; letter-spacing: .5em; padding-left: .5em; color: rgba(255,255,255,.6); }
+  .e-made { left: 0; right: 0; top: 650px; text-align: center; font: 600 30px/1 Inter; letter-spacing: .46em; padding-left: .46em; color: rgba(255,255,255,.75); }
+  .e-team { left: 0; right: 0; top: 708px; text-align: center; }
+  .e-team .tm { display: inline-block; font: 800 122px/1 'Inter Tight'; letter-spacing: -.01em; color: #fff; text-shadow: 0 6px 50px rgba(0,0,0,.6); }
+  .e-team .tm span { font-weight: 200; margin-left: 22px; }
+  .e-live { left: 0; right: 0; top: 935px; text-align: center; font: 600 28px/1 Inter; letter-spacing: .46em; padding-left: .46em; color: rgba(255,255,255,.65); }
+  #eUrl { left: 50%; }
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div id="ov">
+  <div class="el open" id="open"><span class="k">OVERDRIVE 009 PRESENTS</span><span class="t">The NRL 2026<br><i>simulation game</i></span></div>
+  <div class="el bug" id="bug"><b>OVERDRIVE</b><span>009</span></div>
+
+  <div class="el cap" id="cap1"><span class="k">NRL KIT ROBOT</span><span class="t">Real robot <i>CAD</i></span><span class="ln"></span></div>
+  <div class="el cap" id="cap2"><span class="k">RIGID-BODY SIMULATION</span><span class="t">Real <i>physics</i></span><span class="ln"></span></div>
+  <div class="el cap" id="cap3"><span class="k">2026 GAME MANUAL</span><span class="t">Every rule.<br><i>Scored live.</i></span><span class="ln"></span></div>
+  <div class="el cap" id="cap4"><span class="k">FULL 12 &times; 12 FT FIELD</span><span class="t">4 robots.<br><i>2 squads.</i></span><span class="ln"></span></div>
+  <div class="el pop" id="pop"><b>+3</b><small>HIGH POLE</small></div>
+  <div class="el badge" id="badge"><span><i></i>DOCKED &middot; +8</span></div>
+
+  <div class="el rule" id="rule"></div>
+  <div class="el title" id="title"><div class="logo">HYPER<span>DRIVE</span><div class="glint" id="glint">HYPER<span>DRIVE</span></div></div></div>
+  <div class="el sub" id="sub">NRL 2026 SIMULATION GAME</div>
+  <div class="el byline" id="byline">BY OVERDRIVE 009</div>
+
+  <div class="el end-logo" id="endLogo"><div class="logo">HYPER<span>DRIVE</span><div class="glint" id="glint2">HYPER<span>DRIVE</span></div></div></div>
+  <div class="el end-sub" id="endSub">THE NRL 2026 SIMULATION GAME</div>
+  <div class="el cta" id="cta">PLAY FREE IN YOUR BROWSER</div>
+  <div class="el url" id="url"><svg viewBox="0 0 24 24"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5z" fill="#07090c"/></svg>hyperdrive-sim.vercel.app</div>
+  <div class="el bio" id="bio">LINK IN BIO</div>
+
+  <!-- edit end card -->
+  <div class="el e-made" id="eMade">MADE BY NRL TEAM</div>
+  <div class="el e-team" id="eTeam"><div class="tm">OVERDRIVE<span>009</span></div></div>
+  <div class="el e-live" id="eLive">LIVE AT</div>
+  <div class="el url" id="eUrl" style="top:1010px"><svg viewBox="0 0 24 24"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5z" fill="#07090c"/></svg>hyperdrive-sim.vercel.app</div>
+  <div class="el team" id="team"><span class="k">A SIMULATOR BY TEAM</span><div class="tm">OVERDRIVE<span>009</span></div></div>
+</div>
+<script type="module" src="./cine.js"></script>
+</body>
+</html>

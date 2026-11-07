@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Overdrive 009 · Simulator and scouting for NRL 2026</title>
+<meta name="description" content="A physics simulator and a scouting app for teams playing NRL 2026 HYPERDRIVE. Built by Overdrive 009, free for every team.">
+<meta name="theme-color" content="#0d0e10">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="Overdrive 009">
+<meta property="og:description" content="Practise the match. Scout the field. A simulator and a scouting app for NRL 2026 HYPERDRIVE teams.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://hyperdrive-sim.vercel.app/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0e10'/%3E%3Cpath d='M22.6 7.7A11 11 0 1 0 22.6 24.3' stroke='%23f2ede3' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M14.6 10.6l5.6 5.4-5.6 5.4' stroke='%23e2531b' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=Martian+Mono:wght@400..600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/od.css?v=6">
+<link rel="stylesheet" href="css/landing.css?v=7">
+<script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script>
+<!-- fetch the whole module graph and the robot model in parallel; the field streams in after the hero -->
+<link rel="modulepreload" href="lib/three.module.js">
+<link rel="modulepreload" href="js/landing.js">
+<link rel="modulepreload" href="js/robot-model.js">
+<link rel="modulepreload" href="js/arena.js">
+<link rel="modulepreload" href="js/config.js">
+<link rel="modulepreload" href="js/physics-core.js">
+<link rel="modulepreload" href="js/layout.js">
+<link rel="modulepreload" href="js/governor.js">
+<link rel="modulepreload" href="lib/BufferGeometryUtils.js">
+<link rel="preload" href="assets/robot.json?v=3" as="fetch" crossorigin>
+<link rel="preload" href="assets/robot.bin?v=3" as="fetch" crossorigin>
+<link rel="modulepreload" href="js/field.js">
+<link rel="preload" href="assets/field.json?v=3" as="fetch" crossorigin fetchpriority="low">
+<link rel="preload" href="assets/field.bin?v=3" as="fetch" crossorigin fetchpriority="low">
+<script src="js/redirect.js"></script>
+</head>
+<body class="landing">
+<a class="skip" href="#top">Skip to content</a>
+<canvas id="stage" aria-hidden="true"></canvas>
+<div class="shade l" aria-hidden="true"></div><div class="shade r" aria-hidden="true"></div><div class="shade c" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Main">
+  <a class="brand" href="#top" aria-label="Overdrive 009, top of page">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="#f2ede3" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#e2531b" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Overdrive</span><span class="num">009</span>
+  </a>
+  <a class="lnk opt" href="#robot">Robot</a>
+  <a class="lnk opt" href="#sim">Simulator</a>
+  <a class="lnk opt" href="#scout">Scout</a>
+  <a class="b b-glass sm nav-cta" href="/sim" data-go="sim">Open the simulator</a>
+  <i class="nav-progress" aria-hidden="true"></i>
+</nav>
+
+<main id="top">
+  <section class="sec hero" data-sec="0">
+    <div class="copy">
+      <p class="eyebrow reveal">Overdrive 009 · <span class="long">National Robotics League</span><span class="short">NRL</span> 2026</p>
+      <h1 class="reveal lines"><span class="ln"><span>Practise the match.</span></span><span class="ln"><span><em>Scout the field.</em></span></span></h1>
+      <p class="lede reveal">A physics simulator and a scouting app for teams playing HYPERDRIVE. Built by Overdrive 009, free for every team in the league.</p>
+      <div class="ctas reveal">
+        <a class="b b-primary lg" href="/sim" data-go="sim">Open the simulator</a>
+        <a class="b b-glass lg" href="/scout" data-go="scout">Start scouting</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="robot" data-sec="1">
+    <div class="copy">
+      <p class="eyebrow reveal">01 &nbsp;The robot</p>
+      <h2 class="reveal lines"><span class="ln"><span>Our robot, <em>straight from its CAD.</em></span></span></h2>
+      <p class="lede reveal">This is the model our team builds from. The simulator drives the same mesh, so what you practise with is what we run.</p>
+      <dl class="specs reveal">
+        <div><dt>Drive</dt><dd>Four-wheel tank, 110 mm wheels</dd></div>
+        <div><dt>Footprint</dt><dd>300 × 412 mm with bumpers</dd></div>
+        <div><dt>Arm</dt><dd>Parallelogram, 146 mm links, claw stays level</dd></div>
+        <div><dt>Gripper</dt><dd>Two-finger claw for COREs</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec right" id="sim" data-sec="2">
+    <div class="copy">
+      <p class="eyebrow reveal">02 &nbsp;Simulator</p>
+      <h2 class="reveal lines"><span class="ln"><span>Drive HYPERDRIVE <em>before you reach the venue.</em></span></span></h2>
+      <p class="lede reveal">The official field at the IIT Bombay Open Air Theatre, both divisions, rigid-body physics and live scoring by the 2026 manual.</p>
+      <dl class="specs reveal">
+        <div><dt>Field</dt><dd>Space Stations, vaults, poles and tape from the NRL CAD</dd></div>
+        <div><dt>Physics</dt><dd>Motor torque, battery sag, tyre grip, a tilting deck</dd></div>
+        <div><dt>Online</dt><dd>Each driver on their own laptop</dd></div>
+        <div><dt>Your code</dt><dd>Run your AUTO and TELEOP OpModes</dd></div>
+      </dl>
+      <a class="b b-primary lg reveal" href="/sim" data-go="sim">Open the simulator <svg class="i arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </section>
+
+  <section class="sec" id="scout" data-sec="3">
+    <div class="copy">
+      <p class="eyebrow reveal">03 &nbsp;Overdrive Scout</p>
+      <h2 class="reveal lines"><span class="ln"><span>Scouting your drive team <em>will actually use.</em></span></span></h2>
+      <p class="lede reveal">One scout, one robot, one thumb. Large counters for every scoring action, a running points tally, reports that wait on the phone when the Wi-Fi drops, and rankings as soon as they sync.</p>
+      <dl class="specs reveal">
+        <div><dt>Phones first</dt><dd>No zooming, no tiny buttons</dd></div>
+        <div><dt>Offline</dt><dd>Reports queue on the device and upload later</dd></div>
+        <div><dt>Your team</dt><dd>Join with a code and see every scout's reports</dd></div>
+        <div><dt>Account</dt><dd>One email and password for Scout and the simulator</dd></div>
+      </dl>
+      <a class="b b-primary lg reveal" href="/scout" data-go="scout">Start scouting <svg class="i arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </section>
+
+  <section class="sec center" id="team" data-sec="4">
+    <div class="copy">
+      <p class="eyebrow reveal">04 &nbsp;The team</p>
+      <h2 class="reveal lines"><span class="ln"><span>Overdrive <em>009</em></span></span></h2>
+      <p class="lede reveal">A student team in the National Robotics League. We build these tools so every team can practise and scout well, not only the teams with the most people.</p>
+      <div class="ctas reveal">
+        <a class="b b-primary lg" href="/sim" data-go="sim">Open the simulator</a>
+        <a class="b b-glass lg" href="/scout" data-go="scout">Start scouting</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span>© 2026 Overdrive 009. Not affiliated with the National Robotics League.</span>
+  <nav aria-label="Legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/sim">Simulator</a><a href="/scout">Scout</a></nav>
+</footer>
+
+<div class="loader" id="loader" aria-hidden="true"><i id="loader-bar"></i></div>
+<noscript><style>.reveal,.lines .ln>span,.specs div>*{opacity:1!important;transform:none!important}.specs div::before,.specs div:last-child::after{transform:none!important}</style></noscript>
+<script type="module" src="js/landing.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Overdrive Scout · NRL 2026 scouting</title>
+<meta name="description" content="Overdrive Scout: match and pit scouting for NRL 2026 HYPERDRIVE, built by Overdrive 009. Works offline, made for phones.">
+<meta name="theme-color" content="#0d0e10">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="canonical" href="https://hyperdrive-sim.vercel.app/scout">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0e10'/%3E%3Cpath d='M22.6 7.7A11 11 0 1 0 22.6 24.3' stroke='%23fff' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M14.6 10.6l5.6 5.4-5.6 5.4' stroke='%23e2531b' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=Martian+Mono:wght@400..600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/od.css?v=6">
+<link rel="stylesheet" href="css/scout.css?v=6">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/assets/scout-icon.svg">
+<link rel="modulepreload" href="js/scout/app.js">
+<link rel="modulepreload" href="js/scout/store.js">
+<link rel="modulepreload" href="js/scout/game.js">
+<link rel="modulepreload" href="js/auth-client.js">
+<link rel="modulepreload" href="js/supabase-config.js">
+<link rel="modulepreload" href="js/handoff.js">
+<script src="lib/supabase.umd.js" defer></script>
+<script type="module" src="js/scout/app.js"></script>
+</head>
+<body class="scout" data-stage="loading">
+<a class="skip" href="#app">Skip to content</a>
+<div class="backdrop" aria-hidden="true"></div>
+
+<header class="topbar nav" id="topbar" hidden>
+  <a class="brand" href="/" aria-label="Overdrive home">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="#f2ede3" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#e2531b" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="brand-t">Scout</span>
+  </a>
+  <span class="team-pill" title="Your team"><b id="tb-team">—</b><span id="tb-team-name"></span></span>
+  <button class="event-btn" id="tb-event-btn" type="button" aria-label="Switch event"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span id="tb-event">No event</span><svg class="i chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+  <button class="sync" id="tb-sync" type="button" data-state="ok" aria-label="Sync status"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 0 1-.6-10A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></svg><span id="tb-sync-n"></span></button>
+  <button class="avatar-btn" id="tb-avatar" type="button" aria-label="Team and account">?</button>
+</header>
+
+<main id="app" tabindex="-1">
+  <div class="boot"><div class="spin" aria-hidden="true"></div><span>Loading Overdrive Scout…</span></div>
+</main>
+
+<nav class="tabbar nav" id="tabbar" aria-label="Sections" hidden></nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<noscript><div class="noscript">Overdrive Scout needs JavaScript. Turn it on and reload.</div></noscript>
+</body>
+</html>

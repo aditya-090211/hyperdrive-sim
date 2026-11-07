@@ -1,0 +1,12 @@
+{
+  "name": "Overdrive Scout",
+  "short_name": "Scout",
+  "description": "Match and pit scouting for NRL 2026 HYPERDRIVE, by Overdrive 009.",
+  "id": "/scout",
+  "start_url": "/scout",
+  "scope": "/scout",
+  "display": "standalone",
+  "background_color": "#0d0e10",
+  "theme_color": "#0d0e10",
+  "icons": [{ "src": "/assets/scout-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HYPERDRIVE November update reel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wght@400;500&family=Inter+Tight:wght@200;800&family=Inter:wght@600&display=swap" rel="stylesheet">
+<script type="importmap">{ "imports": { "three": "../lib/three.module.js" } }</script>
+<style>
+  :root { --cream: #f2ede3; --ink: #0d0e10; --od: #e2531b; }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  #view, #view canvas { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+  /* cine.js's own overlay ids are kept (hidden) so its overlay code has something to write to */
+  #cineOv { display: none; }
+  #ov { position: absolute; inset: 0; pointer-events: none; color: var(--cream); -webkit-font-smoothing: antialiased; }
+  .el { position: absolute; left: 92px; right: 92px; opacity: 0; will-change: transform, opacity, filter; }
+  .mono { font: 500 25px/1.3 'Martian Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: rgba(242, 237, 227, .82); }
+  .mono b { color: var(--od); font-weight: 500; }
+  .ser { font: 400 128px/0.94 'Instrument Serif', serif; letter-spacing: -0.02em; text-shadow: 0 4px 40px rgba(0, 0, 0, .45); }
+  .ser i { font-style: italic; }
+  .ser.md { font-size: 104px; }
+  .card { top: 1180px; }
+  .card .mono { margin-bottom: 30px; }
+  .card.hi { top: 290px; }
+  .word { top: 1240px; font: 400 170px/0.9 'Instrument Serif', serif; letter-spacing: -0.02em; text-shadow: 0 4px 40px rgba(0, 0, 0, .5); }
+  .word i { font-style: italic; }
+  .pop { left: 0; right: auto; font: 500 30px/1 'Martian Mono', monospace; letter-spacing: .1em; color: var(--cream); white-space: nowrap; }
+  .pop b { display: block; font: 400 150px/0.9 'Instrument Serif', serif; letter-spacing: -0.02em; margin-bottom: 10px; }
+  /* exploded-view callouts */
+  #co { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+  #co line { stroke: rgba(242, 237, 227, .7); stroke-width: 1.5; }
+  #co circle { fill: var(--od); }
+  .cl { position: absolute; left: 0; right: auto; font: 500 26px/1.35 'Martian Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--cream); white-space: nowrap; }
+  .cl small { display: block; font-size: 19px; color: rgba(242, 237, 227, .6); letter-spacing: .1em; }
+  /* end card */
+  .eword { top: 1060px; font: 400 196px/0.9 'Instrument Serif', serif; letter-spacing: -0.02em; text-shadow: 0 4px 50px rgba(0, 0, 0, .5); }
+  .eword i { font-style: italic; }
+  .etop { top: 300px; }
+  .esub { top: 1262px; font: 400 36px/1.35 'Instrument Sans', sans-serif; color: rgba(242, 237, 227, .86); }
+  .eurl { top: 1390px; left: 92px; right: auto; display: flex; align-items: center; gap: 18px; height: 92px; padding: 0 40px 0 34px; border-radius: 10px; background: var(--cream); color: var(--ink); font: 500 38px/1 'Instrument Sans', sans-serif; white-space: nowrap; }
+  .eurl svg { width: 30px; height: 30px; }
+  .eteam { top: 1530px; }
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div id="cineOv"></div>
+<div id="ov">
+  <svg id="co" viewBox="0 0 1080 1920"></svg>
+
+  <div class="el card hi" id="tHook"><div class="mono">Overdrive 009 · <b>November update</b></div><div class="ser">Rebuilt<br><i>from the CAD up.</i></div></div>
+
+  <div class="el card hi" id="tRobot"><div class="mono"><b>01</b> · New robot CAD</div><div class="ser md">NRL-2026 <i>robot.</i></div></div>
+  <div class="el cl" id="c0">Geared claw<small>Two-finger, closes on the ring</small></div>
+  <div class="el cl" id="c1">Parallelogram arm<small>145.7 mm links · stays level</small></div>
+  <div class="el cl" id="c2">4-motor skid steer<small>110 mm wheels · tyre slip</small></div>
+  <div class="el cl" id="c3">3S pack<small>Voltage sags under load</small></div>
+
+  <div class="el word" id="wGrip">Grip.</div>
+  <div class="el word" id="wLift"><i>Lift.</i></div>
+
+  <div class="el card" id="tField"><div class="mono"><b>02</b> · Official field CAD</div><div class="ser">115,000<br><i>triangles.</i></div></div>
+  <div class="el card" id="tField2"><div class="mono"><b>02</b> · Official field CAD</div><div class="ser md">Every pole,<br><i>ramp and vault.</i></div></div>
+
+  <div class="el card hi" id="tVenue"><div class="mono"><b>03</b> · The venue</div><div class="ser md">IIT Bombay<br><i>Open Air Theatre.</i></div></div>
+  <div class="el card hi" id="tVenue2"><div class="mono"><b>03</b> · The venue</div><div class="ser md">Alpha <i>and</i><br>Bravo.</div></div>
+
+    <div class="el pop" id="pop"><b>+3</b>High pole</div>
+  <div class="el card" id="tStation"><div class="mono"><b>04</b> · Space station physics</div><div class="ser md">Tilting deck.<br><i>Real balance.</i></div></div>
+  <div class="el card" id="tArena"><div class="mono">Four robots · every rule</div><div class="ser md">Played <i>live.</i></div></div>
+
+  <div class="el card hi" id="tWeb"><div class="mono"><b>05</b> · New website</div><div class="ser md">A new<br><i>front door.</i></div></div>
+  <div class="el card hi" id="tScout"><div class="mono"><b>06</b> · Overdrive Scout</div><div class="ser md">Scout. Rank.<br><i>Pick.</i></div></div>
+  <div class="el card hi" id="tAcct"><div class="mono"><b>07</b> · One account</div><div class="ser md">One sign-in,<br><i>both apps.</i></div></div>
+  <div class="el card hi" id="tPwa"><div class="mono"><b>08</b> · Installable</div><div class="ser md">Works offline<br><i>at the venue.</i></div></div>
+
+  <div class="el mono etop" id="eTop">November update · <b>Live now</b></div>
+  <div class="el eword" id="eWord">HYPER<i>DRIVE</i></div>
+  <div class="el esub" id="eSub">The simulator and Scout,<br>free for every NRL team.</div>
+  <div class="el eurl" id="eUrl"><svg viewBox="0 0 24 24"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5z" fill="#0d0e10"/></svg>hyperdrive-sim.vercel.app</div>
+  <div class="el mono eteam" id="eTeam">Built by <b>Overdrive 009</b></div>
+</div>
+<script>window.AD_MODE = true;</script>
+<script type="module" src="./cine.js"></script>
+<script type="module" src="./update.js"></script>
+</body>
+</html>

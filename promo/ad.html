@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HYPERDRIVE ad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;700;800;900&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<script type="importmap">{ "imports": { "three": "../lib/three.module.js" } }</script>
+<style>
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  #view, #view canvas { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+  #ov { position: absolute; inset: 0; pointer-events: none; color: #fff; font-family: Inter, sans-serif; -webkit-font-smoothing: antialiased; }
+  .el { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; will-change: transform, opacity, filter; }
+  /* kinetic words: one hard-hitting word per beat */
+  .w { top: 1210px; }
+  .w b { display: block; font: 900 168px/0.9 'Inter Tight'; letter-spacing: -0.02em; text-transform: uppercase; text-shadow: 0 6px 60px rgba(0,0,0,.7); }
+  .w b i { font-style: normal; font-weight: 200; }
+  .w small { display: block; margin-bottom: 26px; font: 600 24px/1 Inter; letter-spacing: .5em; padding-left: .5em; color: rgba(255,255,255,.72); }
+  .w .ghost { position: absolute; left: 0; right: 0; top: 0; color: transparent; -webkit-text-stroke: 2px rgba(255,255,255,.55); text-shadow: none; }
+  .kick { top: 300px; font: 600 30px/1 Inter; letter-spacing: .55em; padding-left: .55em; color: rgba(255,255,255,.78); }
+  .kick span { display: block; margin-top: 20px; font: 200 58px/1 'Inter Tight'; letter-spacing: .08em; padding-left: 0; color: #fff; }
+  .pop { top: 520px; }
+  .pop b { display: block; font: 900 150px/1 'Inter Tight'; letter-spacing: -.02em; }
+  .pop small { display: block; margin-top: 8px; font: 600 22px/1 Inter; letter-spacing: .45em; padding-left: .45em; color: rgba(255,255,255,.75); }
+  /* end card (the logo itself is 3D, drawn in the scene) */
+  .esub { top: 800px; font: 600 30px/1 Inter; letter-spacing: .44em; padding-left: .44em; color: rgba(255,255,255,.86); }
+  .ecta { top: 892px; font: 500 26px/1 Inter; letter-spacing: .36em; padding-left: .36em; color: rgba(255,255,255,.6); }
+  .url { left: 50%; right: auto; top: 954px; display: flex; align-items: center; gap: 16px; height: 96px; padding: 0 42px 0 34px; border-radius: 48px; background: #fff; color: #07090c; font: 700 42px/1 Inter; letter-spacing: -.01em; white-space: nowrap; box-shadow: 0 20px 60px rgba(0,0,0,.55); }
+  .url svg { width: 36px; height: 36px; }
+  .eteam { top: 1150px; }
+  .eteam small { display: block; margin-bottom: 18px; font: 600 19px/1 Inter; letter-spacing: .5em; padding-left: .5em; color: rgba(255,255,255,.55); }
+  .eteam b { display: inline-block; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.3); font: 800 60px/1 'Inter Tight'; letter-spacing: .02em; }
+  .eteam b span { font-weight: 200; margin-left: 14px; }
+  .bio { top: 1290px; font: 600 19px/1 Inter; letter-spacing: .5em; padding-left: .5em; color: rgba(255,255,255,.5); }
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div id="ov">
+  <div class="el kick" id="kick">OVERDRIVE 009 PRESENTS<span>the NRL 2026 simulator</span></div>
+  <div class="el w" id="wCad"><small>BUILT FROM THE</small><b>REAL <i>CAD</i></b></div>
+  <div class="el w" id="wPhys"><small>RIGID-BODY</small><b>REAL <i>PHYSICS</i></b></div>
+  <div class="el w" id="w4"><b>4 <i>ROBOTS</i></b></div>
+  <div class="el w" id="w2"><b>2 <i>SQUADS</i></b></div>
+  <div class="el w" id="wClash"><b>CLASH</b></div>
+  <div class="el w" id="wGrab"><b>GRAB</b></div>
+  <div class="el w" id="wLift"><b>LIFT</b></div>
+  <div class="el w" id="wScore"><b>SCORE</b></div>
+  <div class="el pop" id="pop"><b>+3</b><small>HIGH POLE</small></div>
+  <div class="el w" id="wBal"><b>BAL<i>ANCE</i></b></div>
+  <div class="el w" id="wRule"><small>2026 GAME MANUAL</small><b>EVERY <i>RULE</i></b></div>
+  <div class="el w" id="wLive"><small>SCORED</small><b>LIVE</b></div>
+
+  <div class="el esub" id="eSub">THE NRL 2026 SIMULATION GAME</div>
+  <div class="el ecta" id="eCta">PLAY FREE IN YOUR BROWSER</div>
+  <div class="el url" id="eUrl"><svg viewBox="0 0 24 24"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5z" fill="#07090c"/></svg>hyperdrive-sim.vercel.app</div>
+  <div class="el eteam" id="eTeam"><small>BUILT BY NRL TEAM</small><b>OVERDRIVE<span>009</span></b></div>
+  <div class="el bio" id="eBio">LINK IN BIO</div>
+</div>
+<script>window.AD_MODE = true;</script>
+<script type="module" src="./cine.js"></script>
+<script type="module" src="./ad.js"></script>
+</body>
+</html>

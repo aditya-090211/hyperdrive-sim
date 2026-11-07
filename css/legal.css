@@ -1,0 +1,28 @@
+/* Terms and Privacy pages */
+.legal-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--ink); }
+.legal-bg::before { content: ''; position: absolute; inset: -24px; background: url('../assets/stadium-wide.jpg') center / cover no-repeat; filter: blur(6px) saturate(0.85); }
+.legal-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13, 14, 16, 0.8), rgba(13, 14, 16, 0.94) 38%); }
+@media (max-width: 767px), (max-width: 1024px) and (orientation: portrait) { .legal-bg::before { background-image: url('../assets/stadium-tall.jpg'); } }
+.prose b { color: var(--text); font-weight: 600; }
+/* narrow phones: the date line breaks between its two dates, never inside one */
+.prose .updated span { white-space: nowrap; }
+
+/* ---- alignment pass: the nav spans the footer's measure; its last link's text mirrors the mark's inset */
+body.legal .nav { width: min(var(--wrap), calc(100% - 2 * var(--gutter))); padding-right: 4px; }
+@media (max-width: 767px) { body.legal .nav { padding-right: 0; } }
+.prose h2 { margin: var(--s-7) 0 var(--s-3); }
+
+/* ---- scroll-driven motion: a reading-progress hairline, and each section rising in as it enters (compositor-only).
+   The first lines arrive with the page-load animation; everything after them enters with the scroll instead. */
+.nav-progress { display: none; }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-progress { display: block; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--od); transform-origin: 0 50%; scale: 0 1; pointer-events: none;
+      animation: odProgress linear both; animation-timeline: scroll(root block); }
+    @keyframes odProgress { to { scale: 1 1; } }
+    body.legal .prose > :nth-child(n+5) { animation: odEnter linear both; animation-timeline: view(); animation-range: entry 0% cover 22%; }
+    body.legal .prose > h2:nth-child(n+5) { animation-name: odEnterHead; }
+    @keyframes odEnter { from { opacity: 0; translate: 0 28px; } }
+    @keyframes odEnterHead { from { opacity: 0; translate: -20px 0; } }
+  }
+}

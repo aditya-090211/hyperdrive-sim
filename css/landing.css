@@ -1,0 +1,209 @@
+/* Overdrive 009 landing page: a fixed 3D stage behind editorial copy */
+html { scroll-behavior: smooth; }
+body.landing { overflow-x: hidden; }
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+/* an ink wash on the copy side so cream type stays legible over the daylight venue. Three fixed layers (left, right,
+   centre) cross-fade as the copy changes sides: gradients cannot interpolate, opacity can. */
+.shade { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.9s var(--ease-out), visibility 0s 0.9s; }
+.shade.l { opacity: 1; visibility: visible; background: linear-gradient(90deg, rgba(13, 14, 16, 0.94) 0%, rgba(13, 14, 16, 0.82) 32%, rgba(13, 14, 16, 0.22) 60%, rgba(13, 14, 16, 0) 74%); }
+.shade.r { background: linear-gradient(270deg, rgba(13, 14, 16, 0.94) 0%, rgba(13, 14, 16, 0.86) 36%, rgba(13, 14, 16, 0.3) 62%, rgba(13, 14, 16, 0) 78%); }
+.shade.c { background: radial-gradient(62% 58% at 50% 52%, rgba(13, 14, 16, 0.93), rgba(13, 14, 16, 0.72) 68%, rgba(13, 14, 16, 0.5)); }
+body.at-right .shade.l, body.at-center .shade.l { opacity: 0; visibility: hidden; }
+body.at-right .shade.r, body.at-center .shade.c { opacity: 1; visibility: visible; transition: opacity 0.9s var(--ease-out), visibility 0s; }
+/* (an invisible layer is hidden outright, so a laptop GPU never composites three full-screen washes) */
+main, .foot { position: relative; z-index: 2; }
+.foot { background: var(--ink); border-top: 1px solid var(--line); width: 100%; padding-left: max(var(--gutter), calc((100vw - var(--wrap)) / 2)); padding-right: max(var(--gutter), calc((100vw - var(--wrap)) / 2)); }
+
+.sec { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding: calc(var(--s-10) + var(--safe-t)) max(var(--gutter), calc((100vw - var(--wrap)) / 2)) var(--s-9); }
+.sec .copy { width: min(540px, 100%); }
+.sec.right { justify-content: flex-end; }
+.sec.center { justify-content: center; text-align: center; }
+.sec.center .copy { width: min(640px, 100%); }
+.sec.center .ctas { justify-content: center; }
+.hero { align-items: flex-end; padding-bottom: max(13vh, var(--s-9)); }
+
+h1, h2 { font-family: var(--serif); font-weight: 400; margin: 0; }
+.hero h1 { margin: var(--s-5) 0; font-size: clamp(52px, 7.4vw, 112px); line-height: 0.96; letter-spacing: -0.024em; }
+.sec h2 { margin: var(--s-4) 0 var(--s-5); font-size: clamp(40px, 4.6vw, 68px); line-height: 1.02; letter-spacing: -0.018em; }
+h1 em, h2 em { color: var(--cream-2); }
+.lede { margin: 0; max-width: 500px; color: #d6d0c5; font-size: clamp(16px, 1.25vw, 18px); line-height: 1.7; }
+.ctas { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
+.sec .b.lg.reveal { margin-top: var(--s-6); }
+
+/* specifications as a ruled list rather than cards */
+.specs { margin: var(--s-6) 0 0; padding: 0; }
+.specs div { position: relative; display: grid; grid-template-columns: 130px 1fr; gap: var(--s-4); padding: var(--s-3) 0; }
+/* the rules are drawn in, left to right, as the list reveals */
+.specs div::before, .specs div:last-child::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--line-2); transform: scaleX(0); transform-origin: left; transition: transform 0.9s var(--ease-out); }
+.specs div:last-child::after { top: auto; bottom: 0; }
+.specs.in div::before, .specs.in div:last-child::after { transform: none; }
+.specs div > * { opacity: 0; transform: translateX(-10px); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
+.specs.in div > * { opacity: 1; transform: none; }
+.specs dt { font: 500 11px/1.9 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream-2); opacity: 0.78; }
+.specs dd { margin: 0; color: var(--text); font-size: 15px; line-height: 1.55; }
+
+/* copy settles in once, slowly, in reading order */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 1s var(--ease-out), transform 1s var(--ease-out); }
+.reveal.in { opacity: 1; transform: none; }
+.copy > .reveal:nth-child(2) { transition-delay: 0.08s; } .copy > .reveal:nth-child(3) { transition-delay: 0.26s; }
+.copy > .reveal:nth-child(4) { transition-delay: 0.36s; } .copy > .reveal:nth-child(5) { transition-delay: 0.46s; }
+.hero .copy > .reveal:nth-child(3) { transition-delay: 0.5s; } .hero .copy > .reveal:nth-child(4) { transition-delay: 0.62s; }
+/* headlines rise line by line out of a mask */
+.reveal.lines { opacity: 1; transform: none; }
+.lines .ln { display: block; overflow: hidden; padding: 0 0.12em 0.1em 0; margin-bottom: -0.1em; }
+.lines .ln > span { display: block; transform: translateY(108%); transition: transform 1.05s var(--ease-out); }
+.lines.in .ln > span { transform: none; }
+.lines .ln:nth-child(2) > span { transition-delay: 0.1s; }
+.copy > .lines.in .ln > span { transition-delay: 0.08s; } .copy > .lines.in .ln:nth-child(2) > span { transition-delay: 0.18s; }
+.specs div:nth-child(2) > *, .specs div:nth-child(2)::before { transition-delay: 0.42s; }
+.specs div:nth-child(1) > *, .specs div:nth-child(1)::before { transition-delay: 0.36s; }
+.specs div:nth-child(3) > *, .specs div:nth-child(3)::before { transition-delay: 0.48s; }
+.specs div:nth-child(4) > *, .specs div:nth-child(4)::before, .specs div:last-child::after { transition-delay: 0.54s; }
+/* the copy drifts and dims as the camera leaves its section (set from the render loop, desktop only) */
+@media (min-width: 768px) { .sec .copy { will-change: opacity, transform; } }
+/* the page arrives: nav first, then the hero copy */
+@keyframes navIn { from { opacity: 0; transform: translate(-50%, -10px); } }
+body.landing .nav { animation: navIn 0.8s var(--ease-out) 0.1s backwards; }
+.nav-cta { transition: background-color 0.35s var(--ease-out), color 0.35s var(--ease-out), border-color 0.35s var(--ease-out); }
+body.past-hero .nav-cta { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+
+/* leaving for the simulator or Scout: the copy steps aside while the camera moves */
+body.leaving main, body.leaving .foot, body.leaving .nav { opacity: 0; transition: opacity 0.6s var(--ease); pointer-events: none; }
+body.leaving .shade { opacity: 0 !important; }
+
+.loader { position: fixed; z-index: 60; left: 0; right: 0; top: 0; height: 2px; pointer-events: none; }
+.loader i { display: block; height: 100%; width: 0; background: var(--od); transition: width 0.5s var(--ease), opacity 0.8s; }
+.loader.done i { opacity: 0; }
+body.no-3d { background: radial-gradient(120% 80% at 70% 30%, #1c1d22, var(--ink)); }
+
+/* landscape tablets and small laptops: the same split, with a wider wash so the copy column stays on ink */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .shade.l { background: linear-gradient(90deg, rgba(13, 14, 16, 0.94) 0%, rgba(13, 14, 16, 0.84) 42%, rgba(13, 14, 16, 0.2) 70%, rgba(13, 14, 16, 0) 84%); }
+  .shade.r { background: linear-gradient(270deg, rgba(13, 14, 16, 0.94) 0%, rgba(13, 14, 16, 0.86) 42%, rgba(13, 14, 16, 0.25) 70%, rgba(13, 14, 16, 0) 84%); }
+  .sec .copy { width: min(500px, 56vw); }
+}
+/* phones and portrait tablets: the stage on top, the copy stacked underneath on an ink wash */
+@media (max-width: 767px), (max-width: 1024px) and (orientation: portrait) {
+  .shade.l, body.at-right .shade.l, body.at-center .shade.l { opacity: 1; visibility: visible; background: linear-gradient(0deg, rgba(13, 14, 16, 0.97) 0%, rgba(13, 14, 16, 0.9) 48%, rgba(13, 14, 16, 0.08) 80%); }
+  .shade.r, .shade.c { display: none; }
+  .sec, .sec.right, .sec.center { align-items: flex-end; justify-content: flex-start; text-align: left; padding: 48vh var(--gutter) var(--s-8); }
+  .sec .copy, .sec.center .copy { width: min(600px, 100%); }
+  .sec.center .ctas { justify-content: flex-start; }
+  .hero { padding-top: 42vh; padding-bottom: var(--s-8); }
+}
+@media (max-width: 767px) { .specs div { grid-template-columns: 1fr; gap: var(--s-1); } }
+@media (max-width: 479px) { .ctas .b.lg { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal, .lines .ln > span, .specs div > * { opacity: 1; transform: none; } .specs div::before, .specs div:last-child::after { transform: none; } }
+
+/* ---- round 2 */
+.eyebrow .short { display: none; }
+@media (max-width: 479px) { .eyebrow .long { display: none; } .eyebrow .short { display: inline; } }
+/* desktop: sections settle where the camera has finished moving, so copy is never left half-faded */
+/* phones and portrait tablets: copy carries its own ink backing as it scrolls over the venue */
+@media (max-width: 767px), (max-width: 1024px) and (orientation: portrait) {
+  .sec .copy { position: relative; isolation: isolate; }
+  .sec .copy::before { content: ''; position: absolute; z-index: -1; inset: -56px calc(-1 * var(--gutter)) -32px; background: linear-gradient(180deg, rgba(13, 14, 16, 0), rgba(13, 14, 16, 0.9) 72px); pointer-events: none; }
+  body.landing::before { content: ''; position: fixed; z-index: 40; left: 0; right: 0; top: 0; height: calc(76px + var(--safe-t)); pointer-events: none; background: linear-gradient(180deg, rgba(13, 14, 16, 0.95) 60%, rgba(13, 14, 16, 0)); }
+}
+
+/* ---- layout pass: nothing collides, nothing breaks badly */
+/* split layout: the hero column is wide enough for each headline line to stay whole ("Practise the match." is ~6.1em) */
+@media (min-width: 1025px), (min-width: 768px) and (orientation: landscape) { .hero .copy { width: min(720px, 100%); } }
+/* stacked: the copy's ink backing runs to both screen edges instead of stopping short as a visible box */
+@media (max-width: 767px), (max-width: 1024px) and (orientation: portrait) {
+  .sec .copy::before { left: calc(-1 * var(--gutter)); right: auto; width: 100vw; }
+}
+/* phones held sideways (and other very short windows): the copy is taller than the screen, so the nav scrolls away with
+   the page instead of sitting over the headline, the type tightens, and copy stays at full strength while it is read */
+@media (min-width: 768px) and (max-height: 500px) and (orientation: landscape) {
+  body.landing .nav { position: absolute; }
+  .sec { padding-top: calc(var(--s-8) + 28px + var(--safe-t)); padding-bottom: var(--s-7); }
+  .hero { padding-bottom: var(--s-7); }
+  .hero h1 { margin: var(--s-3) 0; font-size: clamp(44px, 7vw, 64px); }
+  .sec h2 { margin: var(--s-3) 0 var(--s-4); font-size: clamp(32px, 4.2vw, 40px); }
+  .lede { font-size: 15px; line-height: 1.6; }
+  .ctas, .sec .b.lg.reveal { margin-top: var(--s-5); }
+  .specs { margin-top: var(--s-4); }
+  .specs div { padding: var(--s-2) 0; }
+  .specs dd { font-size: 14px; }
+  .sec .copy { opacity: 1 !important; transform: none !important; }
+}
+
+/* ---- alignment pass: one left edge for the nav and the copy, exact insets, rhythm on the --s-* scale */
+/* the nav spans the same measure as the sections, so its left edge is the copy's left edge at every width */
+body.landing .nav { width: min(var(--wrap), calc(100% - 2 * var(--gutter))); padding-right: 9px; }
+/* the nav button sits with the same inset on its top, right and bottom (nav 56 / 52 px, button 36 / 44 px, 1 px border) */
+@media (pointer: coarse) { body.landing .nav { padding-right: 5px; } }
+@media (max-width: 767px) { body.landing .nav { padding-right: 7px; } }
+@media (max-width: 767px) and (pointer: coarse) { body.landing .nav { padding-right: 3px; } }
+/* the last headline line keeps its descender room, so the gap under a headline is exactly its margin */
+.lines .ln:last-child { margin-bottom: 0; }
+/* spec labels and values share a baseline */
+.specs div { align-items: baseline; }
+
+/* ---- scroll-driven motion (compositor-only: opacity, translate, scale). The IntersectionObserver entrance keeps the
+   hero; every other section's copy enters with the scroll instead, never both on one element. */
+.nav-progress { display: none; }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* reading progress: a hairline of accent along the nav's lower edge */
+    .nav-progress { display: block; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--od); transform-origin: 0 50%; scale: 0 1; pointer-events: none;
+      animation: odProgress linear both; animation-timeline: scroll(root block); }
+    @keyframes odProgress { to { scale: 1 1; } }
+
+    .sec { view-timeline: --sec block; }
+    .sec:not(.hero) h2 { view-timeline: --hd block; }
+    /* hand the entrance over from the observer to the scroll */
+    .sec:not(.hero) .copy > .reveal:not(.lines), .sec:not(.hero) .specs div > * { opacity: 1; transform: none; transition: none; }
+    .sec:not(.hero) .lines .ln > span, .sec:not(.hero) .specs div::before, .sec:not(.hero) .specs div:last-child::after { transform: none; transition: none; }
+
+    .sec:not(.hero) .copy > .eyebrow { animation: odSlide linear both; }
+    .sec:not(.hero) .lines .ln > span { animation: odLine linear both; }
+    .sec:not(.hero) .copy > .lede, .sec:not(.hero) .copy > .ctas, .sec:not(.hero) .copy > .b { animation: odRiseIn linear both; }
+    .sec:not(.hero) .specs div { animation: odSlide linear both; }
+    .sec:not(.hero) .specs div::before, .sec:not(.hero) .specs div:last-child::after { animation: odRule linear both; }
+    .sec:not(.hero) h2, .hero h1 { animation: odDrift linear both; animation-timeline: --sec; animation-range: cover 0% cover 100%; }
+    .hero h1 { animation-name: odLift; animation-range: exit 0% exit 100%; }
+    .sec.right .copy > .eyebrow, .sec.right .specs div { animation-name: odSlideR; }
+    @keyframes odSlide { from { opacity: 0; translate: -28px 0; } }
+    @keyframes odSlideR { from { opacity: 0; translate: 28px 0; } }
+    @keyframes odLine { from { translate: 0 108%; } }
+    @keyframes odRiseIn { from { opacity: 0; translate: 0 24px; } }
+    @keyframes odRule { from { scale: 0 1; } }
+    /* headline and body copy part slightly as a section passes: zero offset where the camera rests */
+    @keyframes odDrift { from { translate: 0 20px; } 50% { translate: 0 0; } to { translate: 0 -20px; } }
+    @keyframes odLift { to { translate: 0 -56px; } }
+
+    /* side-by-side layout: each section fills the screen and the camera rests when it is fully in; the copy fades in from
+       the render loop over the last ~40 % of that entry, so the staggered entrances run there and end exactly at rest */
+    @media (min-width: 1025px), (min-width: 768px) and (orientation: landscape) {
+      .sec:not(.hero) .copy > .eyebrow, .sec:not(.hero) .lines .ln > span, .sec:not(.hero) .copy > .lede, .sec:not(.hero) .copy > .ctas,
+      .sec:not(.hero) .copy > .b, .sec:not(.hero) .specs div, .sec:not(.hero) .specs div::before, .sec:not(.hero) .specs div:last-child::after { animation-timeline: --sec; }
+      .sec:not(.hero) .copy > .eyebrow { animation-range: entry 52% entry 82%; }
+      .sec:not(.hero) .lines .ln:nth-child(1) > span { animation-range: entry 56% entry 88%; }
+      .sec:not(.hero) .lines .ln:nth-child(2) > span { animation-range: entry 62% entry 92%; }
+      .sec:not(.hero) .copy > .lede { animation-range: entry 64% entry 94%; }
+      .sec:not(.hero) .specs div:nth-child(1), .sec:not(.hero) .specs div:nth-child(1)::before { animation-range: entry 68% entry 95%; }
+      .sec:not(.hero) .specs div:nth-child(2), .sec:not(.hero) .specs div:nth-child(2)::before { animation-range: entry 71% entry 96%; }
+      .sec:not(.hero) .specs div:nth-child(3), .sec:not(.hero) .specs div:nth-child(3)::before { animation-range: entry 72% entry 95%; }
+      .sec:not(.hero) .specs div:nth-child(4), .sec:not(.hero) .specs div:nth-child(4)::before, .sec:not(.hero) .specs div:last-child::after { animation-range: entry 75% entry 96%; }
+      .sec:not(.hero) .copy > .ctas, .sec:not(.hero) .copy > .b { animation-range: entry 76% entry 96%; }
+    }
+    /* stacked layout: copy rises up from below the stage, so each piece enters on its own as it comes into view */
+    @media (max-width: 767px), (max-width: 1024px) and (orientation: portrait) {
+      .sec:not(.hero) .copy > .eyebrow, .sec:not(.hero) .copy > .lede, .sec:not(.hero) .copy > .ctas, .sec:not(.hero) .copy > .b, .sec:not(.hero) .specs div { animation-timeline: view(); animation-range: entry 0% cover 24%; }
+      .sec:not(.hero) .specs div::before, .sec:not(.hero) .specs div:last-child::after { animation-timeline: --row; animation-range: entry 0% cover 30%; }
+      .sec:not(.hero) .specs div { view-timeline: --row block; }
+      .sec:not(.hero) .lines .ln > span { animation-timeline: --hd; animation-range: entry 0% cover 26%; }
+      .sec:not(.hero) .lines .ln:nth-child(2) > span { animation-range: entry 20% cover 32%; }
+      .sec:not(.hero) h2 { animation-timeline: view(); }
+    }
+    /* phones held sideways keep their copy at full strength (see above), so it enters the stacked way, element by element */
+    @media (min-width: 768px) and (max-height: 500px) and (orientation: landscape) {
+      .sec:not(.hero) .copy > .eyebrow, .sec:not(.hero) .copy > .lede, .sec:not(.hero) .copy > .ctas, .sec:not(.hero) .copy > .b, .sec:not(.hero) .specs div { animation-timeline: view(); animation-range: entry 0% cover 24%; }
+      .sec:not(.hero) .specs div { view-timeline: --row block; }
+      .sec:not(.hero) .specs div::before, .sec:not(.hero) .specs div:last-child::after { animation-timeline: --row; animation-range: entry 0% cover 30%; }
+      .sec:not(.hero) .lines .ln > span { animation-timeline: --hd; animation-range: entry 0% cover 26%; }
+    }
+  }
+}
