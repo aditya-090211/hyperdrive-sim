@@ -3,61 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Overdrive 009 · Simulator and scouting for NRL 2026</title>
-<meta name="description" content="A physics simulator and a scouting app for teams playing NRL 2026 HYPERDRIVE. Built by Overdrive 009, free for every team.">
-<meta name="theme-color" content="#0d0e10">
+<title>Overdrive 009 · NRL 2026 robotics team</title>
+<meta name="description" content="Overdrive 009 is a student team in the National Robotics League 2026. Our HYPERDRIVE robot, the simulator and scouting app we built for every team, and Viora, our Changemakers project.">
+<meta name="theme-color" content="#14171b">
 <meta name="color-scheme" content="dark">
 <meta property="og:title" content="Overdrive 009">
-<meta property="og:description" content="Practise the match. Scout the field. A simulator and a scouting app for NRL 2026 HYPERDRIVE teams.">
+<meta property="og:description" content="A student team in the National Robotics League 2026. Our robot, our HYPERDRIVE simulator, Overdrive Scout and Viora.">
 <meta property="og:type" content="website">
-<link rel="canonical" href="https://hyperdrive-sim.vercel.app/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0e10'/%3E%3Cpath d='M22.6 7.7A11 11 0 1 0 22.6 24.3' stroke='%23f2ede3' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M14.6 10.6l5.6 5.4-5.6 5.4' stroke='%23e2531b' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=Martian+Mono:wght@400..600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/od.css?v=6">
-<link rel="stylesheet" href="css/landing.css?v=7">
+<meta property="og:url" content="https://overdrive009.in/">
+<meta property="og:image" content="https://overdrive009.in/assets/site/poster-wide-1280.webp">
+<link rel="canonical" href="https://overdrive009.in/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314171b'/%3E%3Cpath d='M22.6 7.7A11 11 0 1 0 22.6 24.3' stroke='%23ede6da' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M14.6 10.6l5.6 5.4-5.6 5.4' stroke='%23e4483f' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preload" href="assets/fonts/big-shoulders-display.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" as="image" type="image/avif" media="(max-aspect-ratio: 2/3)" imagesrcset="assets/site/poster-tall-540.avif 540w, assets/site/poster-tall-1080.avif 1080w" imagesizes="100vw" fetchpriority="high">
+<link rel="preload" as="image" type="image/avif" media="(min-aspect-ratio: 2/3) and (orientation: portrait)" imagesrcset="assets/site/poster-mid-768.avif 768w, assets/site/poster-mid-1536.avif 1536w" imagesizes="100vw" fetchpriority="high">
+<link rel="preload" as="image" type="image/avif" media="(orientation: landscape)" imagesrcset="assets/site/poster-wide-1280.avif 1280w, assets/site/poster-wide-1920.avif 1920w, assets/site/poster-wide-2560.avif 2560w" imagesizes="100vw" fetchpriority="high">
+<link rel="stylesheet" href="css/od.css?v=7">
+<link rel="stylesheet" href="css/landing.css?v=8">
 <script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script>
-<!-- fetch the whole module graph and the robot model in parallel; the field streams in after the hero -->
-<link rel="modulepreload" href="lib/three.module.js">
-<link rel="modulepreload" href="js/landing.js">
-<link rel="modulepreload" href="js/robot-model.js">
-<link rel="modulepreload" href="js/arena.js">
-<link rel="modulepreload" href="js/config.js">
-<link rel="modulepreload" href="js/physics-core.js">
-<link rel="modulepreload" href="js/layout.js">
-<link rel="modulepreload" href="js/governor.js">
-<link rel="modulepreload" href="lib/BufferGeometryUtils.js">
-<link rel="preload" href="assets/robot.json?v=3" as="fetch" crossorigin>
-<link rel="preload" href="assets/robot.bin?v=3" as="fetch" crossorigin>
-<link rel="modulepreload" href="js/field.js">
-<link rel="preload" href="assets/field.json?v=3" as="fetch" crossorigin fetchpriority="low">
-<link rel="preload" href="assets/field.bin?v=3" as="fetch" crossorigin fetchpriority="low">
 <script src="js/redirect.js"></script>
 </head>
 <body class="landing">
-<a class="skip" href="#top">Skip to content</a>
+<a class="skip" href="#main">Skip to content</a>
+<picture class="poster" aria-hidden="true">
+  <source type="image/avif" media="(max-aspect-ratio: 2/3)" srcset="assets/site/poster-tall-540.avif 540w, assets/site/poster-tall-1080.avif 1080w" sizes="100vw">
+  <source type="image/webp" media="(max-aspect-ratio: 2/3)" srcset="assets/site/poster-tall-540.webp 540w, assets/site/poster-tall-1080.webp 1080w" sizes="100vw">
+  <source type="image/avif" media="(orientation: portrait)" srcset="assets/site/poster-mid-768.avif 768w, assets/site/poster-mid-1536.avif 1536w" sizes="100vw">
+  <source type="image/webp" media="(orientation: portrait)" srcset="assets/site/poster-mid-768.webp 768w, assets/site/poster-mid-1536.webp 1536w" sizes="100vw">
+  <source type="image/avif" srcset="assets/site/poster-wide-1280.avif 1280w, assets/site/poster-wide-1920.avif 1920w, assets/site/poster-wide-2560.avif 2560w" sizes="100vw">
+  <img src="assets/site/poster-wide-1280.webp" srcset="assets/site/poster-wide-1280.webp 1280w, assets/site/poster-wide-1920.webp 1920w, assets/site/poster-wide-2560.webp 2560w" sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high" decoding="async">
+</picture>
 <canvas id="stage" aria-hidden="true"></canvas>
-<div class="shade l" aria-hidden="true"></div><div class="shade r" aria-hidden="true"></div><div class="shade c" aria-hidden="true"></div>
+<div class="shade" aria-hidden="true"></div>
 
 <nav class="nav" aria-label="Main">
-  <a class="brand" href="#top" aria-label="Overdrive 009, top of page">
-    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="#f2ede3" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#e2531b" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <a class="brand" href="#main" aria-label="Overdrive 009, top of page">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="#ede6da" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#e4483f" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span>Overdrive</span><span class="num">009</span>
   </a>
+  <a class="lnk opt" href="#team">Team</a>
   <a class="lnk opt" href="#robot">Robot</a>
-  <a class="lnk opt" href="#sim">Simulator</a>
-  <a class="lnk opt" href="#scout">Scout</a>
+  <a class="lnk opt" href="#season">Season</a>
+  <a class="lnk opt" href="#built">Software</a>
+  <a class="lnk opt" href="#viora">Viora</a>
   <a class="b b-glass sm nav-cta" href="/sim" data-go="sim">Open the simulator</a>
   <i class="nav-progress" aria-hidden="true"></i>
 </nav>
 
-<main id="top">
-  <section class="sec hero" data-sec="0">
+<main id="main">
+  <!-- ============================================================ hero: the robot on its plinth -->
+  <section class="sec stage hero" data-key="0" aria-labelledby="hero-h">
     <div class="copy">
-      <p class="eyebrow reveal">Overdrive 009 · <span class="long">National Robotics League</span><span class="short">NRL</span> 2026</p>
-      <h1 class="reveal lines"><span class="ln"><span>Practise the match.</span></span><span class="ln"><span><em>Scout the field.</em></span></span></h1>
-      <p class="lede reveal">A physics simulator and a scouting app for teams playing HYPERDRIVE. Built by Overdrive 009, free for every team in the league.</p>
+      <p class="eyebrow reveal"><span class="long">National Robotics League</span><span class="short">NRL</span> 2026 · HYPERDRIVE</p>
+      <h1 id="hero-h" class="reveal lines"><span class="ln"><span>Overdrive</span></span><span class="ln"><span><em>009</em></span></span></h1>
+      <p class="lede reveal">We are a student robotics team. This is our robot for HYPERDRIVE, and below it the simulator and scouting app we built so every team in the league can practise and scout.</p>
       <div class="ctas reveal">
         <a class="b b-primary lg" href="/sim" data-go="sim">Open the simulator</a>
         <a class="b b-glass lg" href="/scout" data-go="scout">Start scouting</a>
@@ -65,70 +65,290 @@
     </div>
   </section>
 
-  <section class="sec" id="robot" data-sec="1">
-    <div class="copy">
-      <p class="eyebrow reveal">01 &nbsp;The robot</p>
-      <h2 class="reveal lines"><span class="ln"><span>Our robot, <em>straight from its CAD.</em></span></span></h2>
-      <p class="lede reveal">This is the model our team builds from. The simulator drives the same mesh, so what you practise with is what we run.</p>
-      <dl class="specs reveal">
-        <div><dt>Drive</dt><dd>Four-wheel tank, 110 mm wheels</dd></div>
-        <div><dt>Footprint</dt><dd>300 × 412 mm with bumpers</dd></div>
-        <div><dt>Arm</dt><dd>Parallelogram, 146 mm links, claw stays level</dd></div>
-        <div><dt>Gripper</dt><dd>Two-finger claw for COREs</dd></div>
-      </dl>
-    </div>
-  </section>
-
-  <section class="sec right" id="sim" data-sec="2">
-    <div class="copy">
-      <p class="eyebrow reveal">02 &nbsp;Simulator</p>
-      <h2 class="reveal lines"><span class="ln"><span>Drive HYPERDRIVE <em>before you reach the venue.</em></span></span></h2>
-      <p class="lede reveal">The official field at the IIT Bombay Open Air Theatre, both divisions, rigid-body physics and live scoring by the 2026 manual.</p>
-      <dl class="specs reveal">
-        <div><dt>Field</dt><dd>Space Stations, vaults, poles and tape from the NRL CAD</dd></div>
-        <div><dt>Physics</dt><dd>Motor torque, battery sag, tyre grip, a tilting deck</dd></div>
-        <div><dt>Online</dt><dd>Each driver on their own laptop</dd></div>
-        <div><dt>Your code</dt><dd>Run your AUTO and TELEOP OpModes</dd></div>
-      </dl>
-      <a class="b b-primary lg reveal" href="/sim" data-go="sim">Open the simulator <svg class="i arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    </div>
-  </section>
-
-  <section class="sec" id="scout" data-sec="3">
-    <div class="copy">
-      <p class="eyebrow reveal">03 &nbsp;Overdrive Scout</p>
-      <h2 class="reveal lines"><span class="ln"><span>Scouting your drive team <em>will actually use.</em></span></span></h2>
-      <p class="lede reveal">One scout, one robot, one thumb. Large counters for every scoring action, a running points tally, reports that wait on the phone when the Wi-Fi drops, and rankings as soon as they sync.</p>
-      <dl class="specs reveal">
-        <div><dt>Phones first</dt><dd>No zooming, no tiny buttons</dd></div>
-        <div><dt>Offline</dt><dd>Reports queue on the device and upload later</dd></div>
-        <div><dt>Your team</dt><dd>Join with a code and see every scout's reports</dd></div>
-        <div><dt>Account</dt><dd>One email and password for Scout and the simulator</dd></div>
-      </dl>
-      <a class="b b-primary lg reveal" href="/scout" data-go="scout">Start scouting <svg class="i arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    </div>
-  </section>
-
-  <section class="sec center" id="team" data-sec="4">
-    <div class="copy">
-      <p class="eyebrow reveal">04 &nbsp;The team</p>
-      <h2 class="reveal lines"><span class="ln"><span>Overdrive <em>009</em></span></span></h2>
-      <p class="lede reveal">A student team in the National Robotics League. We build these tools so every team can practise and scout well, not only the teams with the most people.</p>
-      <div class="ctas reveal">
-        <a class="b b-primary lg" href="/sim" data-go="sim">Open the simulator</a>
-        <a class="b b-glass lg" href="/scout" data-go="scout">Start scouting</a>
+  <!-- ============================================================ the team -->
+  <section class="sec solid team" id="team" aria-labelledby="team-h">
+    <div class="wrap team-grid">
+      <p class="eyebrow">The team</p>
+      <h2 id="team-h" class="statement rise">A student team in the <em>National Robotics League 2026.</em></h2>
+      <div class="team-body rise">
+        <p>We build, wire and drive one robot for HYPERDRIVE and write the code it runs. We also wrote the software on this page, and any NRL team can use it.</p>
+        <dl class="facts">
+          <div><dt>Team number</dt><dd>009</dd></div>
+          <div><dt>League</dt><dd>National Robotics League 2026</dd></div>
+          <div><dt>Game</dt><dd>HYPERDRIVE</dd></div>
+          <!-- TODO: real team members (names and roles) -->
+          <div><dt>Members</dt><dd class="tbd">To be added</dd></div>
+          <!-- TODO: school -->
+          <div><dt>School</dt><dd class="tbd">To be added</dd></div>
+          <!-- TODO: city -->
+          <div><dt>City</dt><dd class="tbd">To be added</dd></div>
+        </dl>
       </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ the robot (3D close-up) -->
+  <section class="sec stage right" id="robot" data-key="1" aria-labelledby="robot-h">
+    <div class="copy">
+      <p class="eyebrow reveal">01 · The robot</p>
+      <h2 id="robot-h" class="reveal lines"><span class="ln"><span>Four wheels, one arm,</span></span><span class="ln"><span><em>a claw for COREs.</em></span></span></h2>
+      <dl class="specs reveal">
+        <div><dt>Drive</dt><dd>Four-motor skid-steer on 110 mm wheels</dd></div>
+        <div><dt>Frame</dt><dd>300 × 412 mm bumper frame, 21 mm off the floor</dd></div>
+        <div><dt>Arm</dt><dd>Servo parallelogram, 145.7 mm links, so the claw stays level</dd></div>
+        <div><dt>Claw</dt><dd>Two geared fingers that close around a CORE</dd></div>
+        <div><dt>Power</dt><dd>One 3S pack for all four motors</dd></div>
+        <div><dt>Control</dt><dd>HexaNRL firmware, 100 Hz loop</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============================================================ the robot, measured -->
+  <section class="sec solid drawing" id="drawing" aria-labelledby="drawing-h">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow">Measured on the CAD</p>
+        <h2 id="drawing-h" class="rise">Traced from the model <em>the simulator drives.</em></h2>
+        <p class="lede rise">Every line here comes from our robot's CAD file, in millimetres. Move the arm: the parallelogram keeps the claw level from the floor to straight up.</p>
+      </header>
+      <div class="draw-grid">
+        <figure class="draw side rise">
+          <svg class="draw-svg" viewBox="-178 -252 420 300" role="img" aria-labelledby="side-t side-d">
+<title id="side-t">Side view of the Overdrive 009 robot</title>
+<desc id="side-d">Traced from the robot CAD, in millimetres. 110 mm wheels on a 145 mm wheelbase, a 300 mm long bumper frame 21 mm off the floor, and a parallelogram arm with 145.7 mm links holding a 95 by 30 mm CORE.</desc>
+<g class="ref"><line x1="-178" y1="0" x2="242" y2="0" class="floor"/>
+<line x1="60" y1="-105.2" x2="242" y2="-105.2"/><text x="240" y="-109" text-anchor="end">STAR pole top 105</text>
+<line x1="60" y1="-130.3" x2="242" y2="-130.3"/><text x="240" y="-134" text-anchor="end">HIGH pole top 130</text></g>
+<g class="cad"><path d="M-71.5 -106.8 -73.5 -106.8 -83.0 -104.5 -88.2 -104.0 -93.8 -102.5 -110.5 -90.2 -112.0 -88.0 -114.8 -85.8 -123.5 -66.0 -123.5 -49.0 -121.2 -38.5 -111.8 -19.8 -108.5 -17.8 -106.5 -15.2 -91.8 -7.8 -82.0 -4.2 -62.0 -4.8 -61.2 -5.2 -57.0 -5.5 -38.8 -15.2 -34.5 -20.5 -29.0 -29.0 -24.8 -33.8 -21.2 -54.8 -21.8 -66.2 -30.5 -85.8 -33.5 -88.5 -34.0 -89.8 -51.8 -102.5ZM-73.8 -58.0 -71.8 -58.0 -69.5 -56.0 -69.8 -54.0 -71.2 -52.2 -73.8 -52.2 -75.5 -54.0 -75.8 -56.5Z"/><path d="M-76.8 -110.0 -89.5 -107.5 -97.8 -104.0 -104.5 -100.0 -109.2 -96.2 -116.5 -88.2 -120.8 -81.8 -125.5 -70.5 -127.0 -63.5 -127.5 -50.2 -125.2 -38.8 -121.5 -29.8 -115.8 -20.8 -106.0 -11.2 -98.2 -6.2 -87.5 -2.0 -82.0 -0.8 -70.0 0.0 -64.8 -0.5 -56.0 -2.5 -48.0 -5.8 -38.0 -12.2 -34.8 -15.0 -30.0 -20.2 -24.5 -28.2 -19.8 -39.5 -18.0 -48.5 -17.5 -54.0 -17.8 -60.5 -20.0 -71.5 -23.5 -80.0 -29.0 -88.8 -33.2 -93.8 -39.0 -98.8 -47.2 -104.0 -57.2 -108.0 -64.2 -109.5ZM-76.2 -104.0 -65.0 -103.5 -55.2 -101.0 -46.0 -96.2 -38.8 -90.5 -31.0 -81.0 -26.5 -71.8 -24.0 -61.5 -23.8 -50.5 -26.0 -39.8 -30.2 -30.2 -35.8 -22.8 -44.5 -14.8 -53.5 -9.8 -63.8 -6.8 -76.0 -6.2 -84.8 -7.5 -95.0 -11.5 -103.5 -17.0 -111.2 -25.0 -116.0 -32.5 -120.5 -44.8 -121.5 -52.8 -120.8 -64.5 -117.5 -74.8 -112.5 -83.5 -104.5 -92.2 -96.2 -98.0 -86.8 -102.0Z"/><path d="M-73.8 -59.0 -76.0 -57.2 -76.5 -54.0 -75.2 -52.0 -72.0 -51.0 -70.5 -51.5 -69.2 -52.8 -68.5 -55.2 -70.0 -58.2 -71.5 -59.0ZM-74.5 -57.5 -71.8 -58.0 -70.2 -57.0 -69.8 -54.0 -71.2 -52.2 -73.0 -52.0 -75.2 -53.5 -75.5 -56.0Z"/><path d="M70.8 -58.8 69.5 -57.8 68.8 -56.2 68.8 -53.8 71.0 -51.2 74.0 -51.2 76.0 -52.8 76.5 -56.2 76.0 -57.2 73.8 -59.0ZM71.8 -58.0 74.5 -57.5 75.5 -56.0 75.5 -54.0 73.8 -52.2 71.5 -52.2 69.8 -54.0 69.8 -56.0 70.2 -57.0Z"/><path d="M81.8 -106.0 64.5 -105.5 56.5 -104.5 39.0 -95.0 37.0 -93.2 28.0 -80.0 23.8 -71.5 21.5 -50.5 21.8 -44.0 30.2 -24.8 33.5 -21.8 34.0 -20.5 51.5 -7.8 72.2 -3.2 82.2 -5.5 88.8 -6.2 94.0 -7.8 111.0 -20.2 111.8 -21.8 115.0 -24.8 123.5 -44.0 123.5 -61.2 121.2 -71.8 111.8 -90.2 108.0 -92.8 106.2 -95.0 91.5 -102.5ZM70.5 -58.0 72.5 -58.2 75.8 -56.2 73.8 -52.0 71.2 -52.5 70.0 -53.5 69.8 -57.2Z"/><path d="M68.5 -110.0 55.8 -107.5 48.2 -104.5 40.8 -100.0 36.2 -96.5 28.5 -88.0 23.5 -80.0 19.5 -69.8 18.2 -64.0 17.5 -56.0 17.8 -49.8 20.0 -38.8 23.2 -30.5 29.2 -21.0 33.2 -16.5 39.2 -11.2 44.8 -7.5 56.0 -2.5 63.2 -0.8 75.2 0.0 80.5 -0.5 88.2 -2.2 96.2 -5.2 104.8 -10.2 111.8 -16.2 119.0 -25.2 124.8 -37.2 127.0 -46.5 127.5 -60.0 125.0 -72.2 121.2 -80.8 116.0 -89.0 111.5 -94.0 105.5 -99.2 98.0 -104.0 87.0 -108.2 81.0 -109.5ZM63.5 -103.2 75.2 -104.0 83.8 -102.8 94.2 -99.0 103.0 -93.5 111.5 -85.0 116.8 -76.5 120.2 -66.8 121.5 -57.5 120.8 -45.5 117.5 -35.2 112.2 -26.0 105.0 -18.2 96.5 -12.2 86.5 -8.0 77.2 -6.2 65.5 -6.5 55.0 -9.2 46.0 -13.8 36.8 -21.8 31.0 -29.0 26.5 -38.2 24.0 -48.2 23.8 -59.5 25.8 -69.5 30.0 -79.2 35.8 -87.2 44.5 -95.2 53.5 -100.2Z"/><path d="M71.2 -24.8 71.2 -9.8 78.8 -9.8 78.8 -24.8ZM-46.8 -32.8 -46.8 -28.8 -39.2 -28.8 -39.2 -32.8ZM-106.8 -32.8 -106.8 -28.8 -99.2 -28.8 -99.2 -32.8ZM21.2 -40.8 21.2 -28.8 28.8 -28.8 28.8 -40.8ZM-28.8 -40.8 -28.8 -28.8 -21.2 -28.8 -21.2 -40.8ZM-9.8 -66.5 -12.5 -65.0 -13.2 -62.5 -12.0 -60.0 -9.2 -59.0 -7.0 -60.0 -6.0 -61.2 -5.8 -63.0 -7.2 -65.8ZM-10.2 -64.2 -8.8 -64.2 -8.0 -63.5 -7.8 -62.5 -8.8 -61.2 -10.2 -61.2 -11.0 -62.0 -11.0 -63.5ZM-9.2 -106.5 -11.8 -105.8 -13.2 -103.0 -12.5 -100.5 -9.8 -99.0 -7.2 -99.8 -5.8 -102.5 -6.5 -105.0ZM-10.2 -104.2 -8.8 -104.2 -8.0 -103.5 -8.0 -102.0 -8.8 -101.2 -10.2 -101.2 -11.0 -102.0 -11.0 -103.5ZM-32.8 -124.8 -32.8 -99.0 -37.2 -98.8 -37.2 -94.8 -25.5 -94.8 -25.5 -124.8ZM-120.8 -124.8 -120.8 -94.8 -112.5 -94.8 -112.5 -98.8 -113.5 -99.0 -113.5 -124.8Z"/><path d="M-129.0 -127.8 -129.0 -70.5 -131.5 -70.0 -131.5 -41.5 -129.0 -41.0 -129.0 -25.5 -126.8 -22.8 -125.8 -24.5 -124.8 -24.8 -124.5 -21.5 -122.2 -20.8 122.2 -20.8 124.5 -21.5 125.0 -28.8 89.2 -90.2 89.2 -91.2 90.8 -93.0 89.0 -94.8 84.5 -94.8 78.2 -106.2 76.8 -107.5 74.0 -105.5 79.5 -96.2 79.5 -94.8 34.2 -94.8 33.8 -97.2 4.0 -97.0 -5.2 -103.5 -10.2 -109.8 -11.8 -109.8 -20.5 -94.8 -40.8 -94.8 -41.5 -97.2 -70.0 -97.2 -70.5 -94.8 -124.8 -94.8 -125.0 -127.8ZM-38.0 -39.8 -36.2 -40.8 -30.0 -40.8 -29.5 -35.8 -36.8 -35.5 -38.0 -37.8ZM88.8 -60.8 91.5 -57.5 93.0 -54.5 86.2 -48.0 82.2 -42.8 79.2 -41.5 74.0 -45.0 73.0 -48.2 70.5 -49.8 67.2 -53.8 68.0 -57.8 70.0 -60.2ZM-70.5 -60.8 -68.5 -58.8 -66.8 -54.8 -70.5 -50.0 -73.0 -48.0 -74.0 -46.0 -77.0 -42.5 -79.5 -41.5 -80.5 -41.8 -82.5 -43.2 -86.2 -48.2 -89.5 -50.2 -91.2 -52.0 -91.8 -53.5 -91.2 -57.5 -89.0 -60.5ZM21.8 -68.5 22.2 -65.8 25.0 -62.2 25.0 -61.5 24.0 -60.8 21.2 -61.0 21.5 -55.5 20.8 -55.2 16.2 -66.0ZM41.8 -78.2 44.5 -76.8 43.8 -45.0 34.5 -44.8 30.8 -46.8 30.8 -73.2 40.8 -78.2ZM-54.2 -78.8 -53.0 -78.8 -29.8 -68.0 -29.8 -51.0 -43.2 -44.8 -47.5 -44.8 -47.8 -42.8 -53.2 -40.2 -54.8 -41.0 -55.2 -67.0 -54.8 -78.2ZM-32.8 -82.5 -28.0 -82.2 -30.0 -78.2 -30.2 -76.0 -35.0 -78.2 -34.5 -80.2Z"/><path d="M-72.8 -102.8 -60.5 -102.8 -60.2 -100.2 -59.2 -100.0 -59.0 -94.5 -58.5 -95.0 -58.2 -100.2 -56.8 -100.0 -56.5 -94.5 -56.0 -95.0 -56.0 -100.0 -54.2 -100.0 -54.2 -95.0 -53.8 -94.5 -53.5 -100.0 -51.8 -100.2 -51.2 -94.5 -51.0 -100.0 -50.0 -100.2 -49.8 -102.8 -37.5 -102.8 -37.8 -106.0 -72.5 -106.0Z"/><path d="M-150.0 -24.8 -150.0 -20.8 -10.0 -20.8 -9.8 -16.8 9.8 -16.8 10.0 -20.8 150.0 -20.8 150.0 -24.8Z"/><path d="M34.0 -98.5 -38.5 -92.8 -39.0 -92.2 -39.0 -29.2 -38.5 -28.8 38.5 -28.8 39.0 -29.2 39.0 -92.2 37.8 -93.0Z"/><path d="M125.0 -28.8 120.0 -37.8 118.2 -38.0 111.5 -37.8 110.5 -34.0 108.0 -32.0 97.8 -30.8 101.8 -28.8ZM69.0 -90.8 69.2 -87.5 76.0 -87.2 80.0 -87.8 81.8 -87.0 84.2 -83.8 93.2 -83.8 89.2 -90.8Z"/><path d="M50.2 -49.5 47.5 -47.0 47.0 -43.8 47.8 -42.0 49.2 -40.5 51.0 -39.8 53.2 -39.8 55.2 -40.8 57.0 -43.8 57.0 -45.8 55.2 -48.8 53.0 -49.8ZM51.0 -46.0 52.5 -46.2 53.2 -45.8 53.5 -44.5 53.0 -43.5 51.5 -43.2 50.8 -43.8 50.5 -45.2ZM-87.0 -85.2 -90.0 -83.5 -91.0 -81.5 -91.0 -79.2 -89.2 -76.2 -87.2 -75.2 -85.0 -75.2 -82.0 -77.0 -81.0 -79.5 -81.5 -82.5 -83.2 -84.5 -85.0 -85.2ZM-87.0 -81.5 -85.8 -81.8 -84.8 -81.2 -84.5 -80.0 -85.0 -79.0 -86.5 -78.8 -87.2 -79.2 -87.5 -80.8Z"/><path d="M-37.5 -32.5 -23.2 -28.8 24.0 -28.8 25.8 -32.2 24.0 -36.8 -23.2 -36.8ZM58.0 -54.8 58.0 -45.2 65.2 -31.5 65.2 -28.8 94.0 -28.8 94.0 -31.5 101.0 -45.0 101.0 -54.8 93.2 -54.8 93.0 -51.5 90.8 -46.8 85.8 -42.5 80.0 -41.0 77.0 -41.2 71.8 -43.5 67.5 -48.2 66.2 -51.5 66.0 -54.8ZM-101.0 -54.8 -101.0 -45.0 -94.0 -31.5 -94.0 -28.8 -65.0 -28.8 -65.0 -32.0 -58.0 -45.2 -58.0 -54.8 -66.0 -54.8 -66.2 -51.5 -68.5 -46.8 -73.5 -42.5 -76.8 -41.2 -79.0 -41.0 -82.2 -41.2 -85.2 -42.2 -88.0 -44.0 -92.0 -48.8 -93.0 -51.5 -93.2 -54.8ZM-132.0 -91.8 -133.2 -89.8 -133.5 -67.5 -132.8 -58.8 -133.0 -44.5 -132.0 -41.8 -130.8 -42.5 -129.0 -41.8 -129.0 -91.8Z"/><path d="M-81.2 -73.5 -88.2 -71.5 -91.0 -69.8 -94.0 -66.8 -97.8 -59.2 -98.0 -53.0 -97.8 -51.0 -95.8 -46.0 -91.2 -40.5 -88.0 -38.5 -83.8 -37.0 -79.0 -36.5 -75.2 -37.0 -71.8 -38.2 -68.0 -40.5 -66.0 -42.5 -62.8 -47.2 -61.5 -51.0 -61.0 -55.2 -61.5 -59.2 -62.8 -62.8 -65.2 -66.8 -68.2 -69.8 -71.5 -71.8 -75.8 -73.2ZM81.5 -73.8 75.8 -73.2 72.0 -72.0 68.2 -69.8 65.2 -66.8 63.0 -63.2 61.5 -59.2 61.0 -55.2 61.5 -51.0 62.8 -47.2 66.2 -42.2 68.0 -40.5 71.8 -38.2 75.2 -37.0 79.2 -36.5 84.0 -37.0 88.2 -38.5 91.5 -40.5 95.0 -44.0 97.0 -47.2 98.8 -54.2 98.2 -59.8 97.0 -63.2 95.0 -66.5 91.5 -70.0 88.8 -71.8 85.0 -73.2Z"/><path d="M-106.0 -39.0 -106.0 -36.8 -40.0 -36.8 -40.0 -39.0Z"/><path d="M-125.2 -127.8 -125.2 -124.8 -21.2 -124.8 -21.2 -127.8Z"/><path d="M-119.0 -100.2 -119.0 -98.8 -30.5 -98.8 -30.5 -100.2Z"/><path d="M-10.2 -73.2 -14.5 -72.0 -17.8 -69.2 -19.8 -65.2 -19.8 -60.5 -18.5 -57.2 -16.0 -54.5 -12.0 -52.5 -9.0 -52.2 -4.5 -53.5 -1.2 -56.2 0.5 -59.5 1.0 -62.8 0.0 -67.2 -3.0 -71.0 -7.0 -73.0ZM-10.8 -63.5 -9.8 -64.2 -8.2 -63.5 -8.2 -62.0 -10.2 -61.5 -11.0 -62.5ZM-12.2 -70.8 -11.0 -70.8 -10.2 -69.8 -10.2 -69.0 -11.2 -68.0 -12.2 -68.0 -13.0 -68.8 -13.0 -70.0Z"/>
+<g data-arm="lower"><path d="M4.5 -96.2 2.5 -94.8 2.0 -91.8 3.8 -89.5 6.2 -89.0 8.8 -90.8 9.2 -93.5 7.5 -96.0ZM5.0 -94.2 6.2 -94.2 7.2 -93.2 7.0 -91.8 6.0 -91.0 4.0 -92.0 4.0 -93.2ZM20.0 -126.2 17.5 -124.5 17.2 -121.5 18.8 -119.5 21.2 -119.0 22.8 -119.5 24.0 -120.8 24.5 -123.2 22.8 -125.8ZM20.0 -124.2 21.2 -124.2 22.5 -123.0 21.5 -121.0 20.2 -121.0 19.2 -122.0 19.2 -123.2ZM35.0 -156.2 32.8 -154.5 32.2 -152.0 33.2 -150.0 35.0 -149.0 36.8 -149.0 39.2 -150.8 39.5 -153.8 37.5 -156.0ZM35.0 -154.0 36.5 -154.2 37.5 -153.2 37.5 -151.8 37.0 -151.2 35.5 -151.0 34.5 -151.8 34.2 -153.0Z"/><path d="M83.8 -183.8 81.2 -184.8 77.8 -184.5 47.5 -174.5 42.5 -172.2 38.2 -169.2 33.2 -164.0 30.2 -159.2 -10.5 -78.2 -14.5 -75.0 -22.0 -60.2 -22.0 -58.0 -20.8 -55.5 -17.0 -51.8 -14.2 -50.2 -10.8 -49.5 -5.5 -50.0 -3.8 -51.8 3.5 -66.2 3.5 -71.0 43.0 -149.0 46.0 -153.8 50.5 -158.5 55.2 -161.8 60.2 -164.0 84.2 -172.0 86.8 -175.5 87.0 -178.8 86.2 -181.0ZM-8.2 -57.2 -6.8 -57.5 -5.8 -56.5 -6.5 -54.8 -7.8 -54.8 -8.8 -55.5ZM-16.8 -62.0 -15.8 -62.0 -14.8 -61.0 -14.8 -60.0 -15.5 -59.2 -16.8 -59.2 -17.5 -60.0 -17.5 -61.2ZM-10.0 -64.2 -9.0 -64.2 -8.0 -63.2 -8.0 -62.2 -9.0 -61.2 -10.2 -61.5 -11.0 -62.5ZM-3.2 -66.5 -2.5 -66.5 -1.5 -65.5 -1.5 -64.2 -2.2 -63.5 -3.5 -63.5 -4.2 -64.5 -4.2 -65.5ZM-12.5 -70.8 -11.0 -70.8 -10.2 -70.0 -10.2 -69.0 -11.0 -68.0 -12.2 -68.0 -13.2 -69.0ZM5.2 -94.2 6.0 -94.2 7.0 -93.2 7.0 -92.0 6.0 -91.2 5.0 -91.2 4.2 -92.0 4.2 -93.2ZM20.0 -124.0 21.5 -124.0 22.0 -123.5 22.2 -122.2 21.5 -121.2 20.0 -121.2 19.5 -121.8 19.2 -123.0ZM35.0 -153.8 36.5 -154.0 37.2 -153.2 36.8 -151.2 35.2 -151.2 34.5 -152.0ZM79.8 -179.2 80.5 -179.2 81.5 -178.2 81.5 -177.2 80.5 -176.2 78.5 -177.2 78.8 -178.5Z"/></g><g data-arm="upper"><path d="M4.5 -136.2 2.5 -134.8 2.0 -131.8 3.8 -129.5 6.2 -129.0 8.8 -130.8 9.2 -133.5 7.5 -136.0ZM5.0 -134.2 6.5 -134.2 7.2 -133.0 7.2 -132.0 6.0 -131.0 4.0 -132.0 4.0 -133.2ZM20.0 -166.2 17.5 -164.5 17.2 -161.5 18.8 -159.5 21.5 -159.0 24.0 -160.8 24.5 -163.2 22.8 -165.8ZM20.0 -164.2 21.2 -164.2 22.5 -163.0 21.5 -161.0 20.2 -161.0 19.2 -162.0 19.2 -163.5ZM35.0 -196.2 32.8 -194.5 32.2 -192.0 33.2 -190.0 35.0 -189.0 36.8 -189.0 39.2 -190.8 39.5 -193.8 37.5 -196.0ZM35.0 -194.0 36.5 -194.2 37.5 -193.2 37.5 -191.8 37.0 -191.2 35.5 -191.0 34.5 -191.8 34.2 -193.0Z"/><path d="M83.8 -223.8 81.0 -224.8 78.0 -224.5 47.5 -214.5 42.5 -212.2 38.2 -209.2 33.2 -204.0 30.2 -199.2 -10.5 -118.2 -14.5 -115.0 -22.0 -100.2 -22.0 -98.2 -20.8 -95.5 -18.0 -92.5 -14.2 -90.2 -10.5 -89.5 -5.5 -90.0 -4.2 -91.0 3.5 -106.2 3.5 -111.0 45.0 -192.2 50.2 -198.2 55.2 -201.8 60.2 -204.0 84.2 -212.0 86.8 -215.5 87.0 -218.8 86.2 -221.0ZM-8.2 -97.2 -6.8 -97.5 -5.8 -96.5 -6.5 -94.8 -8.5 -95.2 -8.8 -96.5ZM-16.8 -102.0 -15.8 -102.0 -14.8 -101.2 -14.8 -100.0 -15.5 -99.2 -16.8 -99.2 -17.5 -100.0 -17.5 -101.2ZM-10.0 -104.2 -9.0 -104.2 -8.0 -103.2 -8.0 -102.2 -9.0 -101.2 -10.2 -101.5 -11.0 -102.5ZM-3.2 -106.5 -2.5 -106.5 -1.5 -105.5 -1.5 -104.2 -2.2 -103.5 -3.5 -103.5 -4.2 -104.5 -4.2 -105.5ZM-12.8 -110.5 -11.0 -110.8 -10.2 -110.0 -10.2 -109.0 -11.0 -108.0 -12.2 -108.0 -13.2 -109.0ZM5.2 -134.2 6.0 -134.2 7.0 -133.2 7.0 -132.0 6.0 -131.2 5.0 -131.2 4.2 -132.2 4.2 -133.2ZM20.0 -164.0 21.5 -164.0 22.0 -163.5 22.2 -162.2 21.5 -161.2 20.0 -161.2 19.5 -161.8 19.2 -163.0ZM35.0 -193.8 36.5 -194.0 37.2 -193.2 36.8 -191.2 35.2 -191.2 34.5 -192.0ZM79.8 -219.2 81.5 -218.2 81.5 -217.2 80.5 -216.2 78.5 -217.2 78.8 -218.5Z"/></g>
+<g data-arm="end"><path d="M90.5 -180.8 90.5 -160.8 97.8 -160.8 97.8 -180.8ZM77.8 -180.8 76.5 -178.8 76.8 -176.0 78.8 -174.2 80.5 -174.0 82.0 -174.5 83.0 -175.5 83.8 -177.5 83.0 -180.0 81.0 -181.2ZM79.2 -179.2 80.8 -179.2 81.5 -178.5 81.0 -176.2 79.8 -176.0 78.5 -177.0 78.5 -178.5ZM197.0 -185.8 197.0 -160.8 205.5 -160.8 205.5 -185.8ZM156.5 -185.8 156.5 -160.8 165.0 -160.8 165.0 -185.8ZM118.5 -190.8 118.5 -160.8 138.5 -160.8 138.5 -168.2 125.8 -168.5 125.8 -178.0 138.5 -178.2 138.5 -185.8 126.0 -185.8 125.8 -190.8ZM78.2 -221.0 76.5 -219.0 76.8 -216.0 79.5 -214.0 82.0 -214.5 83.8 -217.2 83.2 -219.8 81.2 -221.2ZM79.0 -219.0 80.8 -219.2 81.5 -218.5 81.5 -216.8 81.0 -216.2 79.8 -216.0 78.8 -216.5 78.5 -218.2Z"/><path d="M102.8 -180.8 102.5 -168.2 101.5 -168.0 101.5 -160.8 111.5 -160.8 111.5 -168.0 110.5 -168.2 110.5 -180.8Z"/><path d="M72.5 -158.8 74.5 -156.8 124.5 -156.8 124.5 -160.8 74.5 -160.8ZM79.0 -225.8 75.8 -224.5 72.8 -221.5 72.0 -218.5 72.0 -162.8 72.8 -161.8 87.2 -161.8 88.0 -162.5 88.2 -180.8 110.8 -180.8 111.8 -181.8 110.8 -183.8 99.8 -183.8 98.8 -184.2 97.5 -186.5 97.2 -190.8 126.5 -190.8 126.8 -194.8 89.2 -194.8 89.0 -190.8 91.0 -190.5 91.2 -185.0 88.2 -184.0 88.0 -219.8 86.8 -222.2 84.5 -224.5 81.2 -225.8ZM84.8 -166.2 85.8 -166.0 86.5 -165.0 85.0 -163.2 84.0 -163.5 83.5 -164.5 83.8 -165.5ZM74.5 -166.2 75.8 -166.0 76.5 -165.0 75.5 -163.2 73.8 -164.2 73.8 -165.5ZM79.8 -179.2 80.8 -179.0 81.5 -178.0 81.5 -177.0 80.8 -176.2 78.8 -176.8 78.5 -178.0Z"/><path d="M72.0 -168.8 72.0 -160.8 97.0 -160.8 97.0 -164.2 92.5 -168.8ZM84.2 -166.2 85.8 -166.2 86.8 -165.0 86.8 -164.2 85.5 -163.0 83.5 -164.0 83.5 -165.5ZM74.2 -166.2 75.8 -166.2 76.8 -165.0 76.8 -164.2 75.5 -163.0 73.5 -164.0 73.5 -165.5Z"/><path d="M89.5 -173.8 95.8 -168.2 101.5 -168.2 102.5 -167.8 106.5 -156.2 109.8 -167.0 110.5 -168.0 130.8 -168.2 136.8 -173.2 130.0 -178.2 117.0 -178.2 116.8 -180.5 111.2 -180.5 111.0 -183.8 102.2 -183.8 101.8 -180.5 96.0 -180.5 96.0 -178.2 94.0 -178.0Z"/><path d="M124.8 -156.8 205.0 -156.8 205.0 -160.8 125.0 -160.8ZM125.0 -189.8 125.0 -185.8 205.0 -185.8 205.0 -189.8Z"/><path d="M125.5 -160.8 125.5 -156.8 206.0 -156.8 206.0 -160.8ZM125.5 -189.8 125.5 -185.8 206.0 -185.8 206.0 -189.8Z"/><path d="M95.0 -172.2 101.5 -171.0 109.8 -168.2 137.2 -168.2 139.2 -173.5 137.2 -178.2 112.5 -178.2 109.5 -176.8 96.5 -176.5Z"/><rect class="core" x="128.5" y="-186.2" width="95" height="30" rx="3"/></g></g>
+<g class="dim">
+<line x1="-72.6" y1="16" x2="72.9" y2="16"/><line x1="-72.6" y1="10" x2="-72.6" y2="22"/><line x1="72.9" y1="10" x2="72.9" y2="22"/><text x="0" y="13" text-anchor="middle">145 wheelbase</text>
+<line x1="-150" y1="36" x2="150" y2="36"/><line x1="-150" y1="30" x2="-150" y2="42"/><line x1="150" y1="30" x2="150" y2="42"/><text x="0" y="33" text-anchor="middle">300 bumper frame</text>
+<line x1="-166" y1="0" x2="-166" y2="-21"/><line x1="-171" y1="-21" x2="-150" y2="-21"/><text x="-170" y="-27">21</text>
+<text x="-72.6" y="-118" text-anchor="middle">Ø110</text></g>
+</svg>
+          <figcaption>
+            <label class="arm-ctl"><span class="lab">Arm angle</span><input type="range" id="arm" min="-16.45" max="90" step="0.05" value="52.1" aria-describedby="arm-out"></label>
+            <output id="arm-out" class="arm-out" for="arm" aria-live="polite"><b data-o="deg">52.1°</b><span>claw centre <b data-o="h">171</b> mm up</span><span data-o="clear">clears the HIGH pole top</span></output>
+          </figcaption>
+        </figure>
+        <figure class="draw top rise">
+          <svg class="draw-svg" viewBox="-178 -232 420 464" role="img" aria-labelledby="top-t top-d">
+<title id="top-t">Top view of the Overdrive 009 robot</title>
+<desc id="top-d">Traced from the robot CAD, in millimetres: a 300 by 412 mm bumper frame, wheels on a 306 mm track.</desc>
+<g class="cad"><path d="M68.5 -141.8 68.5 -121.8 76.5 -121.8 76.5 -141.8Z"/><path d="M21.5 -168.5 21.8 -136.0 64.0 -136.0 64.2 -122.8 67.8 -121.8 77.5 -121.8 80.0 -122.8 80.5 -136.0 120.8 -136.0 123.8 -136.8 123.5 -170.0 87.0 -170.0 74.8 -169.2 58.5 -170.0 25.2 -170.0Z"/><path d="M17.5 -168.0 17.5 -138.0 127.5 -138.0 127.5 -168.0Z"/><path d="M69.2 121.8 69.2 141.8 77.2 141.8 77.2 121.8Z"/><path d="M18.2 138.0 18.2 168.0 128.2 168.0 128.2 138.0Z"/><path d="M22.2 136.0 22.0 170.0 59.0 170.0 65.2 169.5 124.2 170.0 124.2 136.5 121.5 136.0 82.0 136.0 81.8 130.5 82.2 122.8 78.5 121.8 68.0 121.8 64.2 122.8 64.5 136.0Z"/><path d="M-123.5 -170.0 -123.5 -136.5 -120.8 -136.0 -80.8 -136.0 -80.2 -122.8 -77.5 -121.8 -67.5 -121.8 -65.0 -122.8 -64.5 -136.0 -21.8 -136.0 -21.2 -170.0 -58.2 -170.0 -70.5 -169.2 -86.8 -170.0Z"/><path d="M-127.5 -168.0 -127.5 -138.0 -17.5 -138.0 -17.5 -168.0Z"/><path d="M-76.5 -141.8 -76.5 -121.8 -68.5 -121.8 -68.5 -141.8Z"/><path d="M-123.2 137.2 -123.5 170.0 -27.2 170.0 -25.0 169.2 -21.0 169.0 -22.5 168.5 -22.0 137.0 -23.0 136.0 -64.5 136.0 -65.0 122.8 -67.2 121.8 -77.5 121.8 -81.0 123.0 -81.2 136.0 -120.2 136.0Z"/><path d="M-127.5 138.0 -127.5 168.0 -17.5 168.0 -17.5 138.0Z"/><path d="M-76.5 121.8 -76.5 141.8 -68.5 141.8 -68.5 121.8Z"/><path d="M-31.2 96.5 -32.8 98.5 -32.2 101.8 -30.0 103.2 -27.5 103.0 -26.2 102.0 -25.5 100.0 -26.2 97.2 -28.2 96.0ZM-30.2 98.2 -28.8 98.0 -27.8 98.8 -27.5 100.0 -28.2 101.0 -29.8 101.2 -30.5 100.8 -30.8 99.0ZM-119.2 96.5 -120.8 98.5 -120.2 101.8 -118.0 103.2 -115.5 103.0 -114.2 102.0 -113.5 100.0 -114.2 97.2 -116.2 96.0ZM-118.2 98.2 -116.8 98.0 -115.8 98.8 -115.5 100.0 -116.2 101.0 -117.8 101.2 -118.5 100.8 -118.8 99.0ZM-34.2 45.5 -36.2 46.8 -37.0 47.8 -37.2 49.5 -36.8 51.0 -35.5 52.2 -32.5 52.8 -30.2 51.0 -29.8 49.2 -30.0 48.0 -31.5 46.0ZM-34.0 47.5 -33.0 47.5 -32.0 48.5 -32.0 50.0 -32.8 50.8 -34.0 50.8 -35.0 50.0 -35.0 48.5ZM-117.0 45.5 -118.2 46.0 -119.5 47.5 -119.8 50.2 -118.2 52.2 -115.0 52.8 -113.8 52.0 -112.8 50.5 -112.8 47.8 -114.5 45.8ZM-116.8 47.5 -115.2 47.8 -114.5 49.0 -115.5 50.8 -116.8 50.8 -117.8 50.0 -117.8 48.5ZM75.0 41.0 73.2 41.5 71.8 43.0 71.2 45.0 72.8 47.8 75.2 48.5 77.8 47.2 78.8 44.5 78.2 43.0 77.0 41.8ZM74.2 43.2 75.8 43.2 76.5 44.0 76.5 45.5 75.5 46.5 73.5 45.5 73.5 44.0ZM-43.0 24.2 -44.8 24.8 -46.2 26.2 -46.8 28.2 -46.2 29.8 -44.8 31.2 -42.8 31.8 -39.8 29.8 -39.2 27.8 -39.8 26.2 -41.0 25.0ZM-43.8 26.5 -42.2 26.5 -41.5 27.2 -41.5 28.8 -42.2 29.5 -43.8 29.5 -44.5 28.8 -44.5 27.2ZM-103.0 24.2 -104.8 24.8 -106.2 26.2 -106.8 28.2 -106.2 29.8 -104.8 31.2 -102.8 31.8 -99.8 29.8 -99.2 27.8 -99.8 26.2 -101.0 25.0ZM-103.8 26.5 -102.2 26.5 -101.5 27.2 -101.5 28.8 -102.2 29.5 -103.8 29.5 -104.5 28.8 -104.5 27.2ZM-13.2 12.2 -13.2 24.2 -5.8 24.2 -5.8 12.2ZM-13.2 -8.2 -13.2 7.8 -5.8 7.8 -5.8 -8.2ZM-13.2 -24.2 -13.2 -12.2 -5.8 -12.2 -5.8 -24.2ZM-43.0 -31.8 -44.8 -31.2 -46.2 -29.8 -46.8 -27.8 -46.2 -26.2 -44.8 -24.8 -42.8 -24.2 -39.8 -26.2 -39.2 -28.2 -39.8 -29.8 -41.0 -31.0ZM-43.8 -29.5 -42.2 -29.5 -41.5 -28.8 -41.5 -27.2 -42.2 -26.5 -43.8 -26.5 -44.5 -27.2 -44.5 -28.8ZM-103.0 -31.8 -104.8 -31.2 -106.2 -29.8 -106.8 -27.8 -106.2 -26.2 -104.8 -24.8 -102.8 -24.2 -99.8 -26.2 -99.2 -28.2 -99.8 -29.8 -101.0 -31.0ZM-103.8 -29.5 -102.2 -29.5 -101.5 -28.8 -101.5 -27.2 -102.2 -26.5 -103.8 -26.5 -104.5 -27.2 -104.5 -28.8ZM75.0 -48.5 73.2 -48.0 71.8 -46.5 71.2 -44.5 71.8 -43.0 73.2 -41.5 75.2 -41.0 78.2 -43.0 78.8 -45.0 78.2 -46.5 76.8 -48.0ZM74.2 -46.2 75.8 -46.2 76.5 -45.5 76.5 -44.0 75.8 -43.2 74.2 -43.2 73.5 -44.0 73.5 -45.5ZM-34.2 -52.2 -36.8 -50.5 -37.2 -48.8 -37.0 -47.2 -36.0 -45.8 -32.8 -45.0 -30.2 -46.8 -29.8 -48.8 -30.2 -50.5 -31.5 -51.8ZM-34.5 -50.0 -32.8 -50.2 -32.0 -49.5 -32.5 -47.2 -34.0 -47.0 -35.0 -48.0 -35.0 -49.5ZM-117.0 -52.2 -119.5 -50.5 -119.8 -47.5 -118.2 -45.5 -115.2 -45.0 -113.2 -46.2 -112.5 -49.2 -113.2 -51.0 -114.5 -52.0ZM-117.2 -50.0 -115.5 -50.2 -114.8 -49.5 -114.5 -48.2 -115.2 -47.2 -116.8 -47.0 -117.5 -47.5 -117.8 -49.2ZM24.8 -62.8 22.0 -61.2 21.2 -58.8 22.8 -56.0 25.2 -55.2 28.0 -56.8 28.8 -59.2 27.2 -62.0ZM24.2 -60.5 25.8 -60.5 26.5 -59.8 26.8 -58.8 25.8 -57.5 24.2 -57.5 23.5 -58.2 23.5 -59.8ZM-25.2 -62.8 -28.0 -61.2 -28.8 -58.8 -27.2 -56.0 -24.8 -55.2 -22.0 -56.8 -21.2 -59.2 -22.8 -62.0ZM-25.8 -60.5 -24.2 -60.5 -23.5 -59.8 -23.2 -58.8 -24.2 -57.5 -25.8 -57.5 -26.5 -58.2 -26.5 -59.8ZM-30.0 -102.8 -31.5 -102.0 -32.5 -100.8 -32.8 -98.0 -31.2 -96.0 -28.2 -95.5 -26.2 -96.8 -25.5 -99.5 -27.2 -102.2ZM-29.8 -100.8 -28.2 -100.5 -27.5 -99.2 -28.5 -97.5 -29.8 -97.5 -30.8 -98.2 -30.8 -99.8ZM-118.0 -102.8 -119.5 -102.0 -120.5 -100.8 -120.8 -98.0 -119.2 -96.0 -116.2 -95.5 -114.2 -96.8 -113.5 -99.5 -115.2 -102.2ZM-117.8 -100.8 -116.2 -100.5 -115.5 -99.2 -116.5 -97.5 -117.8 -97.5 -118.8 -98.2 -118.8 -99.8Z"/><path d="M-129.0 -110.2 -129.0 -106.8 -131.5 -106.5 -131.5 -103.5 -129.0 -103.2 -129.0 103.2 -131.5 103.8 -131.5 106.5 -129.0 106.8 -129.0 111.2 -77.5 111.5 -75.0 113.2 -72.5 111.5 -4.5 111.5 0.0 115.0 4.5 111.5 72.5 111.5 75.0 113.2 77.5 111.5 89.0 111.5 89.8 106.5 125.0 106.5 125.0 103.5 108.5 103.2 109.0 101.0 118.2 101.0 118.2 66.8 124.5 44.5 101.8 32.0 101.0 -26.5 125.0 -44.8 118.2 -67.5 118.2 -101.0 108.8 -101.0 108.0 -102.5 108.2 -103.5 125.0 -103.5 125.0 -106.5 90.8 -106.5 90.8 -110.5 78.2 -111.0 75.2 -113.0 71.8 -111.0 -1.0 -111.0 -1.2 -112.0 -6.8 -111.0 -71.5 -111.0 -75.0 -113.2 -78.5 -111.0 -122.8 -111.0 -124.2 -110.2ZM11.0 106.8 35.2 106.5 35.5 107.5 11.2 107.5ZM-64.8 106.8 -39.8 106.5 -39.5 107.2 -40.0 107.8 -64.5 107.5ZM-45.5 98.2 -44.5 98.2 -43.8 99.0 -45.0 102.8 -45.8 102.5 -46.2 99.0ZM104.2 37.0 105.0 37.2 110.5 46.2 109.0 48.0 107.8 47.2 104.0 38.0ZM-16.0 41.8 -15.0 29.5 -14.5 28.2 21.8 28.5 21.8 29.0 8.5 36.2 -4.0 34.2 -14.8 41.8ZM68.0 22.0 68.8 22.2 76.2 44.8 75.8 46.2 74.2 46.2 73.2 44.8 67.8 22.8ZM-14.2 24.0 -14.0 20.0 -13.2 19.5 6.8 15.0 9.2 15.2 31.8 21.8 33.0 22.5 32.8 23.2 30.8 24.2ZM67.5 12.2 101.8 32.2 101.5 45.5 101.0 46.8 100.0 46.5 67.2 13.0ZM52.5 -0.8 51.5 -4.0 51.8 -4.8 57.0 -4.5 53.2 -0.5ZM32.0 -26.2 32.0 -24.5 31.0 -23.2 6.2 -15.0 -8.5 -18.2 -10.0 -19.0 -9.2 -24.2 28.0 -24.2 30.8 -26.2ZM11.5 -29.0 30.8 -29.2 31.8 -28.8 32.0 -27.2 30.2 -27.0 21.8 -28.2 11.8 -28.2ZM48.0 -29.2 47.5 -28.2 45.2 -26.8 43.8 -27.0 43.8 -28.5 47.2 -29.5ZM63.0 -33.8 64.5 -32.8 98.0 9.5 98.0 10.8 64.8 10.2 62.8 -29.8ZM43.8 -36.0 46.2 -36.2 60.5 -35.0 60.8 -34.2 52.5 -31.0 50.0 -30.5 44.8 -34.5ZM43.5 -44.2 44.0 -45.0 48.8 -45.2 58.8 -38.0 59.2 -37.0 58.5 -36.8 43.8 -43.5ZM75.8 -45.5 75.2 -44.5 70.0 -40.5 69.2 -40.8 73.8 -45.8ZM100.5 -46.8 101.2 -46.5 101.0 -37.0 100.2 -37.2 99.8 -46.2ZM109.0 -48.0 110.5 -46.8 110.5 -45.8 104.2 -33.0 103.5 -32.8 103.2 -33.5 107.8 -47.0ZM-7.8 -54.8 2.0 -55.0 2.2 -54.2 -6.2 -51.2ZM23.8 -60.0 25.0 -60.5 26.2 -59.2 26.2 -58.2 25.0 -57.5 24.0 -57.8 23.5 -58.8ZM-10.2 -60.8 -1.5 -62.2 1.2 -62.2 10.5 -60.8 11.0 -58.2 10.8 -57.5 9.8 -57.0 -8.8 -57.0ZM-0.2 -78.2 0.5 -78.0 8.0 -64.2 7.8 -63.2 -8.2 -63.5ZM7.5 -93.8 7.8 -92.8 0.8 -80.0 -0.2 -79.5 -7.5 -93.2ZM10.8 -98.8 10.8 -97.0 10.2 -96.5 1.0 -96.5 1.2 -97.2 9.2 -99.0ZM-10.5 -96.8 -8.5 -100.0 8.0 -99.5 7.8 -98.8 -7.8 -96.5ZM6.2 -103.2 15.5 -103.5 15.8 -102.8 11.8 -102.5 11.5 -101.2 10.2 -100.8 6.5 -102.5Z"/><path d="M-72.8 -33.2 -72.8 0.2 -37.5 0.2 -37.5 -33.2 -48.0 -33.2 -48.2 -29.2 -61.8 -29.2 -62.0 -33.2ZM-40.5 -3.5 -39.2 -3.5 -38.5 -2.8 -38.5 -1.5 -39.2 -0.8 -40.5 -0.8 -41.2 -1.5 -41.2 -2.8ZM-71.0 -3.5 -69.8 -3.5 -68.8 -2.2 -69.8 -0.8 -71.0 -0.8 -71.8 -1.5 -71.8 -2.8ZM-40.5 -32.0 -39.2 -32.0 -38.5 -31.2 -38.5 -30.0 -39.2 -29.2 -40.5 -29.2 -41.2 -30.0 -41.2 -31.2ZM-71.0 -32.0 -69.5 -32.0 -68.8 -30.8 -69.8 -29.2 -71.0 -29.2 -71.8 -30.0 -71.8 -31.2Z"/><path d="M-150.0 139.8 -150.0 201.8 -149.5 202.8 -147.8 204.0 -10.0 204.0 -6.0 206.0 -3.8 206.0 -1.2 204.8 1.2 204.8 4.0 206.0 6.0 206.0 10.2 204.0 147.8 204.0 148.5 203.8 150.0 201.8 150.0 139.8 126.2 77.0 125.0 74.8 123.8 74.0 50.2 74.0 45.8 72.0 42.5 72.5 40.0 74.0 -39.8 74.0 -44.2 72.0 -47.5 72.5 -50.0 74.0 -123.5 74.0 -125.8 75.8ZM145.8 198.5 146.5 198.5 147.5 199.8 147.5 200.5 146.5 201.5 145.5 201.5 144.5 200.2 144.8 199.2ZM4.8 198.5 5.8 198.8 6.5 199.8 5.8 201.2 4.5 201.2 3.5 200.2 3.8 199.2ZM-5.2 198.5 -3.5 199.5 -3.5 200.5 -4.8 201.5 -5.8 201.2 -6.5 200.2 -6.2 199.2ZM-146.2 198.5 -145.5 198.5 -144.5 199.5 -144.5 200.5 -145.5 201.5 -146.5 201.5 -147.5 200.5 -147.2 199.2ZM4.2 111.8 5.8 111.8 6.5 112.8 6.2 113.8 5.2 114.5 4.0 114.2 3.5 113.5ZM-5.2 111.5 -4.2 111.8 -3.5 113.0 -4.8 114.5 -5.5 114.5 -6.5 113.2 -6.5 112.5ZM-142.0 141.5 -120.0 83.5 -118.0 82.0 -50.0 82.0 -46.0 84.0 -43.0 83.8 -39.8 82.0 40.0 82.0 44.0 84.0 47.0 83.8 50.2 82.0 118.0 82.0 119.0 82.5 120.5 84.5 142.0 141.5 142.0 187.0 141.5 189.2 140.0 192.0 136.0 195.2 133.0 196.0 10.2 196.0 9.8 195.5 9.8 112.2 8.8 110.0 5.8 108.2 -5.8 108.2 -8.2 109.5 -9.8 112.0 -10.0 196.0 -133.0 196.0 -136.5 195.0 -140.0 192.0 -142.0 187.0ZM44.8 76.5 45.5 76.5 46.5 77.5 46.5 78.5 45.5 79.5 43.5 78.5 43.8 77.2ZM-45.2 76.5 -44.5 76.5 -43.5 77.5 -43.5 78.5 -44.5 79.5 -46.5 78.5 -46.2 77.2ZM-150.0 -201.8 -150.0 -140.0 -125.8 -75.8 -124.8 -74.5 -123.5 -74.0 -50.0 -74.0 -46.0 -72.0 -43.0 -72.2 -39.8 -74.0 40.0 -74.0 44.0 -72.0 47.0 -72.2 50.2 -74.0 123.8 -74.0 125.2 -75.0 150.0 -139.8 150.0 -201.8 149.2 -203.0 147.8 -204.0 10.2 -204.0 6.0 -206.0 4.0 -206.0 1.5 -204.8 -1.2 -204.8 -3.8 -206.0 -6.0 -206.0 -10.0 -204.0 -147.8 -204.0 -148.8 -203.5ZM44.8 -79.5 45.5 -79.5 46.5 -78.2 46.5 -77.5 45.5 -76.5 44.2 -76.8 43.5 -77.8 43.8 -78.8ZM-45.2 -79.5 -44.5 -79.5 -43.5 -78.2 -43.5 -77.5 -44.5 -76.5 -45.8 -76.8 -46.5 -77.8 -46.2 -78.8ZM4.5 -114.5 5.8 -114.2 6.5 -113.2 6.5 -112.5 5.2 -111.5 4.2 -111.8 3.5 -112.8ZM-5.2 -114.5 -4.2 -114.2 -3.5 -113.2 -3.5 -112.5 -4.5 -111.5 -6.2 -112.2 -6.2 -113.8ZM-142.0 -187.0 -140.0 -192.0 -136.5 -195.0 -133.0 -196.0 -10.0 -196.0 -9.8 -112.2 -8.8 -110.0 -5.8 -108.2 5.8 -108.2 8.8 -110.0 9.8 -112.5 9.8 -195.5 10.2 -196.0 133.0 -196.0 136.0 -195.2 140.0 -192.0 142.0 -187.0 142.0 -141.5 120.2 -84.0 118.0 -82.0 50.2 -82.0 45.8 -84.0 42.5 -83.5 40.0 -82.0 -39.8 -82.0 -44.2 -84.0 -47.5 -83.5 -50.0 -82.0 -118.0 -82.0 -120.2 -84.0 -142.0 -141.5ZM145.8 -201.5 146.5 -201.5 147.5 -200.2 147.5 -199.5 146.5 -198.5 144.5 -199.5 144.8 -200.8ZM4.8 -201.5 6.2 -200.8 6.2 -199.2 5.2 -198.5 4.2 -198.8 3.5 -199.8 3.8 -200.8ZM-5.2 -201.5 -4.5 -201.5 -3.5 -200.2 -3.8 -199.2 -4.8 -198.5 -5.8 -198.8 -6.5 -199.8 -6.2 -200.8ZM-146.2 -201.5 -145.5 -201.5 -144.5 -200.2 -144.5 -199.5 -145.8 -198.5 -147.5 -199.5 -147.5 -200.5Z"/><path d="M-39.0 -90.0 -39.0 -66.0 -38.5 -65.5 38.5 -65.5 39.0 -66.0 39.0 -90.0 38.5 -90.5 -38.5 -90.5Z"/><path d="M98.2 51.2 98.0 103.0 101.8 104.0 124.8 104.0 125.0 54.2 103.5 50.5ZM72.2 46.5 69.2 49.0 69.5 102.2 73.0 104.0 93.0 104.0 93.2 49.5 73.8 46.2ZM74.8 91.2 76.8 92.2 76.8 93.2 76.0 94.2 74.8 94.2 73.5 93.5 73.5 92.8ZM86.5 90.8 87.2 91.0 87.0 102.0 86.2 101.8ZM74.5 61.5 75.5 61.5 76.8 62.5 76.8 63.5 76.0 64.5 73.5 63.8ZM124.8 -104.0 107.2 -104.0 101.5 -95.8 97.8 -51.5 103.5 -50.5 125.0 -54.2ZM70.0 -103.0 69.0 -99.8 69.2 -48.8 71.5 -47.0 74.0 -46.2 93.0 -49.2 93.2 -103.8 73.0 -104.0ZM73.8 -64.0 74.2 -64.5 76.2 -64.5 77.0 -62.5 74.2 -61.8ZM74.8 -94.5 75.8 -94.5 76.8 -93.8 76.8 -92.8 75.8 -91.2 74.2 -91.5 73.5 -92.5 73.5 -93.5Z"/><path d="M47.0 -103.5 47.0 103.5 57.0 103.5 57.0 -103.5ZM-91.0 -103.5 -91.0 103.5 -81.0 103.5 -81.0 -103.5Z"/><path d="M58.0 70.0 58.0 85.0 101.0 85.0 101.0 70.0 95.2 70.0 94.5 69.2 94.0 67.5 94.0 61.8 92.0 60.0 86.0 60.0 84.2 61.8 84.0 67.8 82.2 69.8 77.0 69.8 75.5 68.5 75.0 61.8 73.2 60.0 67.0 60.0 65.2 62.0 65.2 67.2 64.8 69.0 63.8 70.0ZM88.0 63.8 89.8 63.5 90.8 64.5 90.8 65.5 90.0 66.5 88.0 66.2 87.5 65.5ZM68.8 64.0 69.5 63.5 71.0 63.8 71.8 64.5 71.5 66.0 69.5 66.5 68.5 65.5ZM-101.0 70.0 -101.0 85.0 -58.0 85.0 -58.0 70.0 -63.8 70.0 -64.8 69.0 -65.2 61.8 -67.2 60.0 -73.2 60.0 -75.0 61.8 -75.2 67.8 -77.0 69.8 -82.2 69.8 -84.0 68.2 -84.0 62.5 -84.5 61.2 -86.0 60.0 -92.0 60.0 -94.0 61.8 -94.0 67.5 -94.5 69.0 -95.5 70.0ZM-70.8 63.5 -69.2 63.5 -68.8 64.0 -68.5 65.5 -69.2 66.5 -70.8 66.5 -71.8 65.5 -71.8 64.5ZM-89.8 63.5 -88.5 63.5 -87.5 64.5 -87.5 65.8 -88.2 66.5 -89.8 66.5 -90.8 65.5 -90.8 64.5ZM-23.2 -24.0 -37.5 0.2 -23.0 24.2 24.2 24.2 25.8 23.8 25.5 -23.8 24.2 -24.2ZM-14.0 -0.2 -3.8 -10.2 0.0 -11.0 4.5 -10.8 10.2 10.5 5.2 10.0 0.0 11.0 -4.0 10.2ZM-132.0 -44.5 -132.2 -36.0 -133.5 -26.0 -133.0 -16.8 -133.2 33.0 -132.0 45.0 -130.2 45.0 -129.0 44.5 -129.0 -44.5ZM58.0 -85.0 58.0 -70.0 63.8 -70.0 64.8 -69.0 65.2 -67.5 65.2 -61.8 67.0 -60.0 73.2 -60.0 75.0 -61.8 75.2 -67.8 77.0 -69.8 82.2 -69.8 83.8 -68.2 84.2 -61.8 86.0 -60.0 92.2 -60.0 94.0 -61.8 94.0 -67.2 94.8 -69.5 95.2 -70.0 101.0 -70.0 101.0 -85.0ZM88.0 -66.2 89.8 -66.5 90.8 -65.5 90.5 -64.0 88.5 -63.5 87.5 -64.5ZM69.0 -66.2 70.8 -66.5 71.8 -65.5 71.5 -64.0 69.5 -63.5 68.5 -64.5ZM-101.0 -85.0 -101.0 -70.0 -95.2 -70.0 -94.5 -69.2 -94.0 -67.8 -94.0 -62.0 -92.2 -60.0 -86.0 -60.0 -84.2 -61.8 -84.0 -67.8 -82.2 -69.8 -77.0 -69.8 -75.2 -68.0 -75.0 -62.0 -73.2 -60.0 -67.0 -60.0 -65.2 -61.8 -65.2 -66.8 -64.5 -69.5 -63.8 -70.0 -58.0 -70.0 -58.0 -85.0ZM-70.8 -66.5 -69.2 -66.5 -68.8 -66.0 -68.5 -64.5 -69.0 -63.8 -70.5 -63.5 -71.8 -64.5ZM-89.8 -66.5 -88.2 -66.5 -87.8 -66.0 -87.5 -64.5 -88.0 -63.8 -89.5 -63.5 -90.8 -64.5Z"/><path d="M92.8 38.5 67.8 38.5 67.8 40.2 66.5 40.5 66.5 78.2 61.8 78.5 61.8 103.5 67.0 103.5 67.2 110.5 70.2 110.8 70.2 140.5 76.2 140.5 76.2 110.8 79.2 110.5 79.2 103.8 98.8 103.5 98.8 78.5 94.0 78.2 94.0 40.5 92.8 40.2ZM72.8 133.0 73.8 133.0 74.8 134.2 74.0 135.8 72.8 135.8 71.8 134.8ZM-92.0 38.5 -92.0 40.2 -93.2 40.5 -93.2 78.2 -98.0 78.5 -98.0 103.5 -78.5 103.8 -78.5 110.5 -75.5 110.8 -75.5 140.5 -69.5 140.5 -69.5 110.8 -66.5 110.5 -66.2 103.5 -61.0 103.5 -61.0 78.5 -66.0 78.2 -66.0 40.5 -67.0 40.2 -67.0 38.5ZM-73.2 133.0 -72.0 133.0 -71.2 133.8 -71.2 135.0 -72.0 135.8 -73.5 135.8 -74.0 135.0 -74.0 134.0ZM69.5 -140.5 69.5 -110.8 66.5 -110.5 66.2 -103.5 61.0 -103.5 61.0 -78.5 66.0 -78.2 66.0 -40.5 67.0 -40.2 67.0 -38.5 92.0 -38.5 92.0 -40.2 93.2 -40.5 93.2 -78.2 98.0 -78.5 98.0 -103.5 78.5 -103.8 78.5 -110.5 75.5 -110.8 75.5 -140.5ZM72.0 -135.8 73.2 -135.8 74.0 -135.0 74.0 -133.8 73.2 -133.0 72.0 -133.0 71.2 -133.8 71.2 -135.0ZM-69.5 -140.5 -75.5 -140.5 -75.5 -110.8 -78.5 -110.5 -78.5 -103.8 -98.0 -103.5 -98.0 -78.5 -93.2 -78.2 -93.2 -40.5 -92.0 -40.2 -92.0 -38.5 -67.0 -38.5 -67.0 -40.2 -66.0 -40.5 -66.0 -78.2 -61.0 -78.5 -61.0 -103.5 -66.2 -103.5 -66.5 -110.5 -69.5 -110.8ZM-73.8 -135.5 -71.8 -135.8 -71.2 -133.8 -72.0 -133.0 -73.2 -133.0 -74.0 -133.8Z"/><path d="M-106.0 -31.0 -106.0 31.0 -40.0 31.0 -40.0 -31.0Z"/><path d="M-123.2 -109.0 -125.2 -106.8 -125.0 108.0 -123.2 109.5 -23.2 109.5 -22.2 109.0 -21.2 107.5 -21.2 -61.0 -21.8 -62.0 -23.2 -63.0 -37.2 -63.0 -38.8 -63.5 -40.0 -64.8 -40.2 -90.5 -39.8 -91.8 -38.2 -93.0 -24.2 -93.0 -22.2 -93.8 -21.2 -95.2 -21.2 -107.0 -21.8 -108.0 -23.2 -109.0ZM-30.8 99.2 -30.0 98.2 -28.5 98.2 -27.8 99.2 -27.8 100.2 -28.5 101.0 -30.0 101.0ZM-118.8 99.2 -118.0 98.2 -116.5 98.2 -115.8 99.2 -115.8 100.2 -116.5 101.0 -118.0 101.0ZM-29.8 -100.5 -28.5 -100.5 -27.8 -99.5 -27.8 -98.5 -28.5 -97.8 -30.0 -97.8 -30.8 -98.8 -30.8 -99.5ZM-118.8 -99.5 -118.0 -100.5 -116.5 -100.5 -115.8 -99.5 -115.8 -98.5 -116.5 -97.8 -118.0 -97.8Z"/><path d="M-119.0 -51.2 -119.0 52.0 -30.5 52.0 -30.5 -51.2Z"/><path d="M-19.8 14.0 -14.2 14.0 -14.0 17.2 -5.0 17.2 -4.8 14.0 0.8 14.0 1.0 11.8 -19.8 11.8Z"/><path d="M32.2 -8.2 32.2 7.8 39.5 7.8 39.5 -8.2ZM17.2 -8.2 17.2 7.8 24.5 7.8 24.5 -8.2ZM2.0 -8.2 2.0 7.8 9.2 7.8 9.2 -8.2Z"/><path d="M-22.0 7.8 -22.0 11.8 87.0 11.8 87.0 7.8ZM-22.0 -12.2 -22.0 -8.2 87.0 -8.2 87.0 -12.2Z"/><path d="M32.2 -8.2 32.2 7.8 39.5 7.8 39.5 -8.2ZM17.2 -8.2 17.2 7.8 24.5 7.8 24.5 -8.2ZM2.0 -8.2 2.0 7.8 9.2 7.8 9.2 -8.2Z"/><path d="M-22.0 7.8 -22.0 11.8 87.0 11.8 87.0 7.8ZM-22.0 -12.2 -22.0 -8.2 87.0 -8.2 87.0 -12.2Z"/><path d="M160.8 56.5 158.5 57.8 157.8 60.8 159.0 63.0 162.2 63.8 164.5 62.2 165.0 59.0 163.5 57.0ZM160.5 58.8 162.0 58.5 162.8 59.0 163.0 60.8 162.5 61.5 161.0 61.8 160.0 61.0 159.8 60.0ZM200.8 47.2 198.8 48.8 198.2 51.5 199.5 53.8 202.5 54.5 204.2 53.8 205.2 52.5 205.5 50.0 204.0 47.8ZM201.0 49.2 202.5 49.2 203.5 50.2 203.5 51.5 202.2 52.5 201.0 52.2 200.2 51.2 200.2 50.2ZM126.5 31.5 126.0 33.2 126.5 35.2 132.8 40.5 135.8 41.0 137.8 39.8 138.5 38.0 137.8 35.2 131.5 30.0 128.8 29.8ZM134.5 35.8 135.5 36.0 136.5 37.2 135.5 39.0 134.2 39.0 133.2 38.2 133.2 36.8ZM128.8 32.0 130.2 31.8 131.0 32.2 131.2 34.0 130.8 34.8 129.5 35.0 128.2 34.0ZM93.8 26.5 91.0 28.0 90.5 29.0 90.5 31.5 91.8 33.2 94.2 34.0 97.0 32.5 97.8 30.0 96.2 27.2ZM93.2 28.8 94.8 28.8 95.5 29.5 95.8 30.5 94.8 31.8 93.2 31.8 92.5 31.0 92.5 29.5ZM120.8 -3.2 119.0 -2.0 118.5 -0.8 118.8 2.0 120.8 3.8 123.2 3.8 124.2 3.2 125.5 1.5 125.5 -1.0 123.5 -3.2ZM120.5 -0.5 121.2 -1.2 122.8 -1.2 123.8 0.0 123.5 1.2 121.2 1.8 120.5 1.0ZM76.5 -8.2 76.5 7.8 83.8 7.8 83.8 -8.2ZM94.0 -33.5 91.2 -32.2 90.5 -31.0 90.5 -28.5 91.5 -27.0 94.2 -26.0 97.0 -27.5 97.8 -30.0 96.2 -32.8ZM93.2 -31.2 94.8 -31.2 95.5 -30.5 95.8 -29.2 94.8 -28.2 93.2 -28.2 92.5 -29.0 92.5 -30.5ZM137.2 -39.8 134.8 -41.5 131.5 -40.5 126.0 -35.5 125.5 -32.8 126.2 -31.2 128.0 -30.0 131.0 -30.2 137.2 -35.8 137.8 -37.0ZM128.2 -35.0 129.5 -35.2 130.5 -34.5 130.8 -32.8 130.0 -32.0 128.5 -32.0 127.8 -32.8 127.5 -34.0ZM133.2 -39.2 134.8 -39.2 135.5 -38.5 135.8 -37.5 134.8 -36.2 133.2 -36.2 132.8 -36.8 132.5 -38.2ZM200.0 -56.8 197.5 -55.0 197.0 -53.2 197.2 -51.8 198.2 -50.2 201.5 -49.5 204.0 -51.2 204.5 -53.2 204.0 -55.0 202.8 -56.2ZM199.8 -54.5 201.5 -54.8 202.2 -54.0 201.8 -51.8 200.2 -51.5 199.5 -52.0 199.2 -54.0ZM160.0 -65.0 158.2 -64.5 156.8 -63.0 156.5 -60.2 158.2 -58.0 160.2 -57.5 161.5 -57.8 163.0 -59.0 163.8 -60.5 163.8 -62.0 162.2 -64.2ZM159.2 -62.8 160.8 -62.8 161.8 -61.5 161.8 -60.8 160.5 -59.5 158.5 -60.5 158.5 -62.0Z"/><path d="M105.0 9.5 103.5 10.2 102.0 12.0 101.5 15.2 102.5 17.5 105.0 19.2 108.0 19.2 109.5 18.5 111.0 16.8 111.5 13.2 110.5 11.2 108.8 9.8ZM105.8 12.8 107.2 12.8 108.2 14.0 108.2 15.0 107.2 16.0 105.8 16.0 104.8 14.8Z"/><path d="M74.5 -32.2 74.0 -16.5 72.0 -16.2 72.0 -12.2 73.8 -12.0 73.0 11.5 72.0 11.8 72.0 15.8 72.8 16.0 72.8 27.8 78.5 34.5 89.2 34.2 90.8 35.5 93.0 36.2 96.0 36.0 98.0 34.8 119.8 34.8 121.2 33.0 124.5 32.8 124.5 30.0 126.5 28.0 126.8 -26.2 126.2 -28.5 124.5 -30.2 124.5 -32.2 122.5 -32.2 117.0 -34.8 97.0 -34.8 93.0 -36.8 89.8 -35.0 88.5 -32.2ZM78.8 5.2 79.8 4.8 81.0 5.0 81.5 7.0 79.5 7.8 78.8 6.5ZM79.0 -7.0 81.0 -6.8 81.5 -5.0 80.2 -4.2 79.0 -4.5ZM103.5 -15.5 106.0 -16.8 108.8 -14.8 109.0 -12.0 107.5 -11.2 105.8 -11.5 103.5 -13.2Z"/><path d="M72.0 -12.2 72.0 12.8 97.0 12.8 97.0 -12.2Z"/><path d="M136.8 -34.8 132.5 -37.5 107.2 -25.8 99.8 -25.0 89.5 -12.8 95.2 -7.8 98.8 -3.2 104.8 -0.8 106.5 -1.0 113.2 1.5 114.0 -3.2 119.8 -4.2 118.0 -18.8Z"/><path d="M204.8 -55.0 202.5 -57.8 169.5 -66.5 164.5 -67.2 160.8 -67.0 157.0 -66.0 153.5 -64.2 150.2 -61.8 125.5 -36.8 124.8 -34.5 125.0 -32.2 126.8 -30.0 129.0 -29.0 130.8 -29.0 134.2 -30.2 138.5 -32.8 148.0 -42.0 154.5 -46.2 163.5 -49.8 170.5 -51.0 181.2 -50.8 192.8 -47.8 198.0 -47.8 201.8 -48.5 203.8 -49.8 205.0 -52.8ZM128.8 -35.0 130.0 -34.8 130.5 -34.0 130.0 -32.2 128.8 -32.2 127.8 -33.0 127.8 -34.0ZM133.5 -39.2 134.5 -39.2 135.5 -38.2 134.8 -36.5 132.8 -37.0 132.8 -38.5ZM193.0 -55.0 194.8 -55.8 195.5 -55.2 195.8 -54.0 195.2 -53.2 193.8 -53.0 193.0 -53.5ZM160.0 -62.8 161.5 -61.5 161.2 -60.5 160.2 -59.8 158.8 -60.5 159.0 -62.2Z"/><path d="M125.5 32.8 125.5 35.2 126.2 36.8 151.0 60.5 154.2 63.0 158.0 64.8 161.8 65.8 166.5 66.0 170.5 65.2 201.0 56.2 204.5 54.8 206.0 52.2 206.0 49.8 204.8 47.2 202.2 46.0 199.0 45.5 193.2 45.8 180.5 49.2 171.2 49.5 164.2 48.5 156.2 45.8 149.2 41.5 140.5 33.5 135.8 30.2 131.2 28.8 129.8 28.8 127.8 29.5 126.0 31.2ZM160.5 59.0 162.0 58.8 162.8 59.5 162.8 60.8 161.8 61.5 160.5 61.2 160.0 60.5ZM201.2 49.5 202.5 49.5 203.2 50.5 203.2 51.5 202.2 52.2 201.0 52.0 200.5 51.2 200.5 50.2ZM134.5 36.0 136.2 37.0 135.5 38.8 133.5 38.2 133.5 36.8Z"/><path d="M96.2 6.5 95.0 17.5 99.8 23.8 101.8 24.8 109.8 26.5 111.8 26.0 131.0 39.8 135.0 41.8 135.8 41.5 139.2 37.2 136.5 33.5 121.0 21.0 118.2 15.0 118.5 13.8 119.5 14.0 117.0 9.5 111.8 4.5 107.2 1.8 102.2 2.8ZM134.2 35.8 135.8 36.0 136.5 37.0 136.2 38.5 135.2 39.2 134.0 39.0 133.0 37.8 133.2 36.5ZM129.0 31.8 130.5 31.8 131.5 32.8 131.5 33.8 130.5 35.0 129.2 35.0 128.0 33.8Z"/></g>
+<g class="dim">
+<line x1="-166" y1="-206" x2="-166" y2="206"/><line x1="-172" y1="-206" x2="-160" y2="-206"/><line x1="-172" y1="206" x2="-160" y2="206"/><text x="-170" y="4" text-anchor="middle" transform="rotate(-90 -170 0)">412 bumper frame</text>
+<line x1="228" y1="-153" x2="228" y2="153"/><line x1="222" y1="-153" x2="234" y2="-153"/><line x1="222" y1="153" x2="234" y2="153"/><text x="226" y="4" text-anchor="middle" transform="rotate(90 226 0)">306 track</text>
+<line x1="-150" y1="222" x2="150" y2="222"/><line x1="-150" y1="216" x2="-150" y2="228"/><line x1="150" y1="216" x2="150" y2="228"/><text x="0" y="219" text-anchor="middle">300</text></g>
+</svg>
+          <figcaption>Top view. Front is to the right.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ the season (3D over the field) -->
+  <section class="sec stage" id="season" data-key="2" aria-labelledby="season-h">
+    <picture class="still" aria-hidden="true">
+      <source type="image/webp" media="(max-width: 767px), (orientation: portrait)" srcset="assets/site/venue-tall-450.webp 450w, assets/site/venue-tall-900.webp 900w" sizes="100vw">
+      <img src="assets/site/venue-wide-1920.webp" srcset="assets/site/venue-wide-1280.webp 1280w, assets/site/venue-wide-1920.webp 1920w" sizes="100vw" width="1920" height="1080" alt="" loading="lazy" decoding="async">
+    </picture>
+    <div class="copy">
+      <p class="eyebrow reveal">02 · The season</p>
+      <h2 id="season-h" class="reveal lines"><span class="ln"><span>HYPERDRIVE,</span></span><span class="ln"><span><em>two and a half minutes.</em></span></span></h2>
+      <p class="lede reveal">Two squads, Red and Blue, two robots each. They play on a 12 by 12 foot field of 36 foam tiles. The last 30 seconds are LEVEL UP.</p>
+      <dl class="figures reveal">
+        <div><dt>Match</dt><dd>2:30</dd></div>
+        <div><dt>LEVEL UP</dt><dd>30 s</dd></div>
+        <div><dt>Field</dt><dd>144 in</dd></div>
+        <div><dt>Robots</dt><dd>2 v 2</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ============================================================ how a match is scored -->
+  <section class="sec solid field" id="field" aria-labelledby="field-h">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow">How a match is scored</p>
+        <h2 id="field-h" class="rise">Rings on poles, <em>a deck to balance.</em></h2>
+        <p class="lede rise">Robots carry COREs, 95 mm rings, and thread them onto poles or drop them in a zone. Pick a row to find it on the field. Points are from the 2026 game manual.</p>
+      </header>
+      <div class="field-grid">
+        <figure class="field-fig rise">
+          <svg class="field-svg" viewBox="-6 -14 156 172" role="img" aria-labelledby="field-t field-d">
+<title id="field-t">The HYPERDRIVE field from above</title>
+<desc id="field-d">A 144 inch square of 36 tiles. Red drives from the top, Blue from the bottom, and the layout is the same for both turned half a circle. Each squad has a start zone, three HIGH poles, two STAR poles, a Space Station with two APEX poles on its wall, a DROP zone, a Source Zone and a vault.</desc>
+<rect class="fl" x="0" y="0" width="144" height="144"/><line class="seam" x1="24" y1="0" x2="24" y2="144"/><line class="seam" x1="0" y1="24" x2="144" y2="24"/><line class="seam" x1="48" y1="0" x2="48" y2="144"/><line class="seam" x1="0" y1="48" x2="144" y2="48"/><line class="seam" x1="72" y1="0" x2="72" y2="144"/><line class="seam" x1="0" y1="72" x2="144" y2="72"/><line class="seam" x1="96" y1="0" x2="96" y2="144"/><line class="seam" x1="0" y1="96" x2="144" y2="96"/><line class="seam" x1="120" y1="0" x2="120" y2="144"/><line class="seam" x1="0" y1="120" x2="144" y2="120"/><g class="sq red"><rect class="zone" data-k="start" x="48" y="0" width="48" height="24"/><polygon class="zone" data-k="drop payload" points="0 0 24 0 0 24"/><polygon class="zone src" data-k="payload" points="0 144 0 120 24 144"/><g class="tape"><line  x1="48" y1="24" x2="96" y2="24"/><line  x1="48" y1="48" x2="96" y2="48"/><line  x1="0" y1="48" x2="24" y2="48"/><line  x1="0" y1="96" x2="24" y2="96"/><line  x1="24" y1="48" x2="24" y2="96"/></g><g data-k="station"><rect class="ramp" x="3" y="45.6" width="20.3" height="13.4"/><rect class="ramp" x="3" y="85" width="20.3" height="13.4"/><rect class="deck" x="3" y="59" width="20.3" height="26"/><line class="pivot" x1="13.16" y1="59" x2="13.16" y2="85"/></g><g data-k="golden"><circle class="vault" cx="24.1" cy="141.4" r="2"/></g><circle class="spike" cx="72" cy="76.5" r="1.87"/><circle class="spike" cx="48" cy="88.2" r="1.87"/><circle class="spike" cx="96" cy="88.2" r="1.87"/><g data-k="high"><circle class="pole" cx="48" cy="48" r="2"/><circle class="pole" cx="72" cy="48" r="2"/><circle class="pole" cx="96" cy="48" r="2"/></g><g data-k="star"><circle class="pole star" cx="48" cy="12" r="2"/><circle class="pole star" cx="96" cy="12" r="2"/></g><g data-k="apex"><circle class="pole apex" cx="0.5" cy="65.9" r="1.4"/><circle class="pole apex" cx="0.5" cy="78.1" r="1.4"/></g></g><g class="sq blue"><rect class="zone" data-k="start" x="48" y="120" width="48" height="24"/><polygon class="zone" data-k="drop payload" points="144 144 120 144 144 120"/><polygon class="zone src" data-k="payload" points="144 0 144 24 120 0"/><g class="tape"><line  x1="96" y1="120" x2="48" y2="120"/><line  x1="96" y1="96" x2="48" y2="96"/><line  x1="144" y1="96" x2="120" y2="96"/><line  x1="144" y1="48" x2="120" y2="48"/><line  x1="120" y1="96" x2="120" y2="48"/></g><g data-k="station"><rect class="ramp" x="120.7" y="85" width="20.3" height="13.4"/><rect class="ramp" x="120.7" y="45.6" width="20.3" height="13.4"/><rect class="deck" x="120.7" y="59" width="20.3" height="26"/><line class="pivot" x1="130.84" y1="85" x2="130.84" y2="59"/></g><g data-k="golden"><circle class="vault" cx="119.9" cy="2.6" r="2"/></g><circle class="spike" cx="72" cy="67.5" r="1.87"/><circle class="spike" cx="96" cy="55.8" r="1.87"/><circle class="spike" cx="48" cy="55.8" r="1.87"/><g data-k="high"><circle class="pole" cx="96" cy="96" r="2"/><circle class="pole" cx="72" cy="96" r="2"/><circle class="pole" cx="48" cy="96" r="2"/></g><g data-k="star"><circle class="pole star" cx="96" cy="132" r="2"/><circle class="pole star" cx="48" cy="132" r="2"/></g><g data-k="apex"><circle class="pole apex" cx="143.5" cy="78.1" r="1.4"/><circle class="pole apex" cx="143.5" cy="65.9" r="1.4"/></g></g><rect class="wall" x="0" y="0" width="144" height="144"/><text class="side red" x="72" y="-6" text-anchor="middle">RED DRIVER STATION</text><text class="side blue" x="72" y="154" text-anchor="middle">BLUE DRIVER STATION</text>
+</svg>
+          <figcaption>Drawn from the field coordinates in our simulator. Blue's half is Red's turned half a circle.</figcaption>
+        </figure>
+        <ol class="score-list" aria-label="Scoring">
+          <li><button type="button" data-k="high" aria-pressed="false"><span class="sl-name">HIGH pole</span><span class="sl-pts"><b>3</b> per CORE</span><span class="sl-note">Three per squad, on the line in front of the start zone.</span></button></li>
+          <li><button type="button" data-k="star" aria-pressed="false"><span class="sl-name">STAR pole</span><span class="sl-pts"><b>5</b> per CORE · <b>7</b> golden</span><span class="sl-note">A full pole in the STAR MAP pattern on the TRIFRON adds 10.</span></button></li>
+          <li><button type="button" data-k="apex" aria-pressed="false"><span class="sl-name">APEX pole</span><span class="sl-pts"><b>9</b> per CORE</span><span class="sl-note">On the wall beside your station. Only in LEVEL UP, from your own station.</span></button></li>
+          <li><button type="button" data-k="drop" aria-pressed="false"><span class="sl-name">DROP zone</span><span class="sl-pts"><b>1</b> per CORE · <b>3</b> golden</span><span class="sl-note">The corner triangle. A CORE counts only fully inside.</span></button></li>
+          <li><button type="button" data-k="golden" aria-pressed="false"><span class="sl-name">Vault</span><span class="sl-pts"><b>6</b> GOLDEN COREs</span><span class="sl-note">Opens only during STARBURST, which starts at 10 COREs, or at 4 with the button once a Payload is in.</span></button></li>
+          <li><button type="button" data-k="station" aria-pressed="false"><span class="sl-name">Space Station</span><span class="sl-pts"><b>3</b> engage · <b>8</b> dock · <b>15</b> balance</span><span class="sl-note">A tilting deck on a pivot. Balanced means level within 2.5°. Counts in LEVEL UP.</span></button></li>
+          <li><button type="button" data-k="payload" aria-pressed="false"><span class="sl-name">Team Payload</span><span class="sl-pts"><b>10</b> bonus</span><span class="sl-note">The Human Player loads it in the Source Zone; the robot tips it into the DROP zone.</span></button></li>
+        </ol>
+      </div>
+      <figure class="venue rise">
+        <picture>
+          <source type="image/webp" media="(max-width: 767px)" srcset="assets/site/venue-tall-450.webp 450w, assets/site/venue-tall-900.webp 900w" sizes="calc(100vw - 40px)">
+          <img src="assets/site/venue-wide-1280.webp" srcset="assets/site/venue-wide-960.webp 960w, assets/site/venue-wide-1280.webp 1280w, assets/site/venue-wide-1920.webp 1920w" sizes="(min-width: 1280px) 1180px, calc(100vw - 64px)" width="1920" height="1080" loading="lazy" decoding="async" alt="Our simulator's model of the competition venue: two fields, ALPHA and BRAVO, with terraces of spectators and a stage screen.">
+        </picture>
+        <figcaption>The venue as modelled in the simulator: two divisions, ALPHA and BRAVO.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================================ what we built -->
+  <section class="sec solid built" id="built" aria-labelledby="built-h">
+    <div class="wrap">
+      <header class="sec-head wide">
+        <p class="eyebrow">03 · What we built</p>
+        <h2 id="built-h" class="big rise">Software for <em>every team</em> in the league.</h2>
+      </header>
+
+      <article class="feature">
+        <figure class="shot rise">
+          <img src="assets/site/sim-home-1600.webp" srcset="assets/site/sim-home-960.webp 960w, assets/site/sim-home-1600.webp 1600w" sizes="(min-width: 1024px) 700px, calc(100vw - 40px)" width="1600" height="1000" loading="lazy" decoding="async" alt="The simulator's home screen: our robot on its plinth beside the field, with Play, Online, Practice, Robot code and the four team tools.">
+        </figure>
+        <div class="feature-copy">
+          <p class="kicker">Simulator</p>
+          <h3 class="rise">Drive the match before the event.</h3>
+          <p class="rise">The official field CAD and our robot's CAD, rigid-body physics and live scoring by the 2026 manual. Play alone, with up to four drivers on one computer, or online with each driver on their own laptop.</p>
+          <ul class="ticks rise">
+            <li>Motors with a torque curve, one battery that sags under load, tyres that grip and slide</li>
+            <li>A Space Station deck that tilts on its pivot</li>
+            <li>Fouls called automatically: pinning, the opponent's zones, de-scoring</li>
+          </ul>
+          <a class="b b-primary rise" href="/sim" data-go="sim">Open the simulator <svg class="i arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </article>
+
+      <article class="feature flip scout">
+        <div class="phones rise">
+          <img src="assets/site/scout-form-640.webp" srcset="assets/site/scout-form-400.webp 400w, assets/site/scout-form-640.webp 640w" sizes="(min-width: 1024px) 300px, 42vw" width="640" height="1421" loading="lazy" decoding="async" alt="Overdrive Scout's match form on a phone: a 23 point running total and large counters for HIGH and STAR poles.">
+          <img src="assets/site/scout-data-640.webp" srcset="assets/site/scout-data-400.webp 400w, assets/site/scout-data-640.webp 640w" sizes="(min-width: 1024px) 300px, 42vw" width="640" height="1421" loading="lazy" decoding="async" alt="Overdrive Scout's team rankings for a demo event, sorted by average points.">
+        </div>
+        <div class="feature-copy">
+          <p class="kicker">Overdrive Scout</p>
+          <h3 class="rise">Scouting one thumb can do.</h3>
+          <p class="rise">One scout watches one robot. Tap a big counter for each scoring action and the points add up as you go. Reports wait on the phone when the Wi-Fi drops and upload when it is back. Your team sees every scout's reports, ranked.</p>
+          <ul class="ticks rise">
+            <li>Match and pit reports</li>
+            <li>Team rankings, pick lists, CSV export</li>
+            <li>One account for Scout and the simulator</li>
+          </ul>
+          <a class="b b-primary rise" href="/scout" data-go="scout">Start scouting <svg class="i arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <p class="cap rise">Screens from Scout's demo event.</p>
+        </div>
+      </article>
+
+      <div class="pair">
+        <article class="half">
+          <figure class="shot rise"><img src="assets/site/ai-match-960.webp" srcset="assets/site/ai-match-960.webp 960w, assets/site/ai-match-1600.webp 1600w" sizes="(min-width: 1024px) 560px, calc(100vw - 40px)" width="1600" height="1000" loading="lazy" decoding="async" alt="A simulated match with the Champion AI driving all four robots, 58 to 63 with 52 seconds left."></figure>
+          <p class="kicker">AI drivers</p>
+          <h3 class="rise">Rookie, Pro and Champion.</h3>
+          <p class="rise">They drive with the same controls a person has and keep the same rules. Each plans its path with A* on a 74 by 74 cost grid of the field. In AI-only matches Rookie scores about 45 to 60, Pro about 67 to 69, Champion 100 to 110.</p>
+          <p class="cap">Champion on all four robots, 0:52 left.</p>
+        </article>
+        <article class="half">
+          <figure class="shot rise"><img src="assets/site/robot-code-1000.webp" srcset="assets/site/robot-code-560.webp 560w, assets/site/robot-code-1000.webp 1000w" sizes="(min-width: 1024px) 560px, calc(100vw - 40px)" width="1000" height="1021" loading="lazy" decoding="async" alt="The Robot code dialog: drop .cpp and .h files, choose the robot and its start position."></figure>
+          <p class="kicker">Robot code</p>
+          <h3 class="rise">Run your real OpMode.</h3>
+          <p class="rise">Drop in your HexaNRL .cpp and the headers it includes. It compiles in the browser and runs on a simulated control hub: the 100 Hz loop, actions, servos, motors, the IMU and telemetry. The files stay in your browser.</p>
+        </article>
+      </div>
+
+      <div class="tools-block">
+        <header class="tools-head">
+          <p class="kicker">Team tools</p>
+          <h3 class="rise">Four more, inside the simulator.</h3>
+        </header>
+        <ol class="tools-list">
+          <li class="tool on">
+            <button type="button" class="tool-tab" aria-expanded="true" aria-controls="tool-1"><span class="tn">01</span><span class="tt">Auto planner</span></button>
+            <div class="tool-body" id="tool-1">
+              <p>Draw an AUTO route on the field. It writes the HexaNRL OpMode, runs it, tunes the drives on a perfect robot and tests the route on a batch of imperfect ones.</p>
+              <figure class="shot"><img src="assets/site/tool-planner-1200.webp" srcset="assets/site/tool-planner-640.webp 640w, assets/site/tool-planner-1200.webp 1200w" sizes="(min-width: 1024px) 640px, calc(100vw - 40px)" width="1200" height="752" loading="lazy" decoding="async" alt="The Auto planner: a numbered route on the top-down field and the list of drive, turn and claw steps."></figure>
+            </div>
+          </li>
+          <li class="tool">
+            <button type="button" class="tool-tab" aria-expanded="false" aria-controls="tool-2"><span class="tn">02</span><span class="tt">Driver trainer</span></button>
+            <div class="tool-body" id="tool-2">
+              <p>Timed drills on Red 1: cycle sprint, precision, payload run, balance and a full match against the AI. Personal bests, split times and a ghost of your best run.</p>
+              <figure class="shot tall"><img src="assets/site/tool-trainer-1000.webp" srcset="assets/site/tool-trainer-560.webp 560w, assets/site/tool-trainer-1000.webp 1000w" sizes="(min-width: 1024px) 560px, calc(100vw - 40px)" width="1000" height="1145" loading="lazy" decoding="async" alt="The Driver trainer: five drills to pick from, CORE count and ghost settings."></figure>
+            </div>
+          </li>
+          <li class="tool">
+            <button type="button" class="tool-tab" aria-expanded="false" aria-controls="tool-3"><span class="tn">03</span><span class="tt">Alliance strategy</span></button>
+            <div class="tool-body" id="tool-3">
+              <p>Profiles of what each team can do, from presets or Scout data, and a Monte Carlo match model that scores like the simulator. Head-to-head odds and partner rankings.</p>
+              <figure class="shot"><img src="assets/site/tool-strategy-1200.webp" srcset="assets/site/tool-strategy-640.webp 640w, assets/site/tool-strategy-1200.webp 1200w" sizes="(min-width: 1024px) 640px, calc(100vw - 40px)" width="1200" height="943" loading="lazy" decoding="async" alt="Alliance strategy with sample teams: win odds, expected scores, a score distribution and points by category."></figure>
+            </div>
+          </li>
+          <li class="tool">
+            <button type="button" class="tool-tab" aria-expanded="false" aria-controls="tool-4"><span class="tn">04</span><span class="tt">Robot designer</span></button>
+            <div class="tool-body" id="tool-4">
+              <p>Change the gearing, battery, tyres, mass or arm, put the design on the robots in the simulator, and measure it against the stock robot with a headless test battery.</p>
+              <figure class="shot"><img src="assets/site/tool-designer-1200.webp" srcset="assets/site/tool-designer-640.webp 640w, assets/site/tool-designer-1200.webp 1200w" sizes="(min-width: 1024px) 640px, calc(100vw - 40px)" width="1200" height="905" loading="lazy" decoding="async" alt="The Robot designer: drivetrain and battery settings beside a side view of the arm and its reach."></figure>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ Changemakers: Viora -->
+  <section class="sec solid viora" id="viora" aria-labelledby="viora-h">
+    <div class="wrap viora-grid">
+      <div class="viora-copy">
+        <p class="eyebrow">04 · Changemakers Award project</p>
+        <h2 id="viora-h" class="viora-name rise">Viora</h2>
+        <p class="viora-lede rise">A saliva test strip made from purple cabbage and filter paper, read by any phone camera. It tells you if you are dehydrated in thirty seconds, for less than a rupee.</p>
+        <dl class="facts light rise">
+          <div><dt>Indicator</dt><dd>Anthocyanin from the cabbage changes colour with pH</dd></div>
+          <div><dt>Reading</dt><dd>Analysed on the phone. No photos are uploaded.</dd></div>
+          <div><dt>Evidence</dt><dd>Our first trial was small, one person, and the project site says so.</dd></div>
+        </dl>
+        <a class="b b-ink rise" href="https://viora.overdrive009.in">Visit Viora <svg class="i arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <!-- TODO: real photo of the Viora strip (replace this placeholder figure with a <picture>, WebP/AVIF, width and height set) -->
+      <figure class="photo-slot rise" aria-hidden="true"><span>Photo of the strip</span></figure>
+    </div>
+  </section>
+
+  <!-- ============================================================ sponsors and contact -->
+  <section class="sec solid support" id="support" aria-labelledby="support-h">
+    <div class="wrap support-grid">
+      <p class="eyebrow">05 · Sponsor us</p>
+      <h2 id="support-h" class="rise">Help us build the next robot.</h2>
+      <!-- TODO: confirm what sponsorship funds for this team -->
+      <p class="lede rise">We are looking for sponsors. Support pays for robot parts, competition fees and travel to events. Write to us and we will tell you what we need.</p>
+      <!-- TODO: team email (team@overdrive009.in is a placeholder) -->
+      <a class="mail rise" href="mailto:team@overdrive009.in">team@overdrive009.in</a>
     </div>
   </section>
 </main>
 
-<footer class="foot">
-  <span>© 2026 Overdrive 009. Not affiliated with the National Robotics League.</span>
-  <nav aria-label="Legal"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/sim">Simulator</a><a href="/scout">Scout</a></nav>
+<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <a class="brand" href="#main" aria-label="Overdrive 009, top of page">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="#ede6da" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#e4483f" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Overdrive</span><span class="num">009</span>
+    </a>
+    <nav aria-label="Apps"><a href="/sim">Simulator</a><a href="/scout">Scout</a><a href="https://viora.overdrive009.in">Viora</a></nav>
+    <nav aria-label="Account and legal"><a href="/signin">Sign in</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></nav>
+    <p class="fine">© 2026 Overdrive 009. Not affiliated with the National Robotics League.</p>
+  </div>
 </footer>
 
-<div class="loader" id="loader" aria-hidden="true"><i id="loader-bar"></i></div>
-<noscript><style>.reveal,.lines .ln>span,.specs div>*{opacity:1!important;transform:none!important}.specs div::before,.specs div:last-child::after{transform:none!important}</style></noscript>
+<noscript><style>.reveal,.rise,.lines .ln>span{opacity:1!important;transform:none!important}</style></noscript>
 <script type="module" src="js/landing.js"></script>
 </body>
 </html>

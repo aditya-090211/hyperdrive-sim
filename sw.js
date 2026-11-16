@@ -1,5 +1,5 @@
 // Overdrive Scout offline support.
-//  * Install: every file Scout needs (fonts included) is copied onto the phone, so after one visit it opens and works
+//  * Install: every file Scout needs (its self-hosted fonts included) is copied onto the phone, so after one visit it opens and works
 //    with no signal, cold start included. Only Scout's own files are kept, never the simulator's 3D models.
 //  * Fetch: Scout's files come from the network when it answers within 2.5 s (you always get the latest, and the copy
 //    is refreshed); with no connection, or venue Wi-Fi that is connected but dead, the copy answers instead.
@@ -8,47 +8,35 @@
 //    outbox with js/scout/outbox.js, the same code the app runs, and tells any open Scout tab to re-read its data.
 importScripts('/js/scout/outbox.js');
 
-const CACHE = 'od-scout-v5';
+const CACHE = 'od-scout-v6';
 const SHELL = ['/scout', '/js/scout/app.js', '/js/scout/store.js', '/js/scout/game.js', '/js/scout/insights.js', '/js/scout/outbox.js',
   '/js/auth-client.js', '/js/handoff.js', '/js/supabase-config.js', '/css/od.css', '/css/scout.css', '/lib/supabase.umd.js',
   '/manifest.webmanifest', '/assets/scout-icon.svg', '/assets/scout-192.png', '/assets/scout-512.png',
-  '/assets/stadium-wide.jpg', '/assets/stadium-tall.jpg', '/privacy', '/terms', '/css/legal.css'];
-const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=Martian+Mono:wght@400..600&display=swap';
+  '/assets/stadium-wide.jpg', '/assets/stadium-tall.jpg', '/privacy', '/terms', '/css/legal.css',
+  '/assets/fonts/big-shoulders-display.woff2', '/assets/fonts/schibsted-grotesk.woff2', '/assets/fonts/schibsted-grotesk-italic.woff2'];
 const KEEP = [/^\/scout$/, /^\/js\/scout\//, /^\/js\/(auth-client|handoff|supabase-config)\.js$/, /^\/css\/(od|scout|legal)\.css$/, /^\/lib\/supabase\.umd\.js$/,
-  /^\/assets\/stadium-(wide|tall)\.jpg$/, /^\/manifest\.webmanifest$/, /^\/assets\/scout-(icon\.svg|192\.png|512\.png)$/, /^\/(privacy|terms)$/];
-const FONTS = /^https:\/\/fonts\.(googleapis|gstatic)\.com\//;
+  /^\/assets\/stadium-(wide|tall)\.jpg$/, /^\/assets\/fonts\/[a-z-]+\.woff2$/, /^\/manifest\.webmanifest$/, /^\/assets\/scout-(icon\.svg|192\.png|512\.png)$/, /^\/(privacy|terms)$/];
 const WAIT = 2500;
 // on scout.overdrive009.in the app is the site root
 const SCOUT_HOST = /^scout\./.test(self.location.hostname);
 
 // a response worth keeping: never a captive-portal page or a redirect in place of Scout's own files
-function keepable(res, key, same) {
-  if (res.type === 'opaque') return true;
+function keepable(res, key) {
   if (!res.ok || res.redirected) return false;
   const type = res.headers.get('content-type') || '';
-  if (!same || /\.js$/.test(key)) return /javascript|css|font|octet|^$/.test(type);
+  if (/\.js$/.test(key)) return /javascript|octet|^$/.test(type);
+  if (/\.woff2$/.test(key)) return /font|octet|^$/.test(type);
   if (/\.css$/.test(key)) return /css/.test(type);
   if (key === '/scout' || key === '/privacy' || key === '/terms') return /html/.test(type);
   return true;
-}
-
-async function precacheFonts(cache) {
-  // the stylesheet names the font files; keep both, so the type looks the same offline
-  const res = await fetch(FONT_CSS, { mode: 'cors', credentials: 'omit' });
-  if (!res.ok) return;
-  const css = await res.clone().text();
-  await cache.put(FONT_CSS, res);
-  const files = [...new Set(css.match(/https:\/\/fonts\.gstatic\.com\/[^)'"\s]+/g) || [])];
-  await Promise.all(files.map((u) => fetch(u, { mode: 'cors', credentials: 'omit' }).then((r) => (r.ok ? cache.put(u, r) : null)).catch(() => {})));
 }
 
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     await Promise.all(SHELL.map(async (u) => {
-      try { const res = await fetch(u, { cache: 'reload' }); if (keepable(res, u, true)) await cache.put(u, res); } catch { /* offline install: kept on the next visit */ }
+      try { const res = await fetch(u, { cache: 'reload' }); if (keepable(res, u)) await cache.put(u, res); } catch { /* offline install: kept on the next visit */ }
     }));
-    await precacheFonts(cache).catch(() => {});
   })());
   self.skipWaiting();
 });
@@ -61,16 +49,14 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   const same = url.origin === self.location.origin;
   const path = same && (url.pathname === '/scout.html' || (SCOUT_HOST && url.pathname === '/')) ? '/scout' : url.pathname;
-  if (!(same && KEEP.some((r) => r.test(path))) && !FONTS.test(req.url)) return;   // everything else: untouched
-  const key = same ? path : req.url;                                                  // ?v=… and ?demo=… share one copy
+  if (!same || !KEEP.some((r) => r.test(path))) return;                              // everything else: untouched
+  const key = path;                                                                   // ?v=… and ?demo=… share one copy
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const hit = await cache.match(key, { ignoreVary: true, ignoreSearch: same });
-    // fonts never change at the same address: the copy is always right
-    if (hit && !same) return hit;
+    const hit = await cache.match(key, { ignoreVary: true, ignoreSearch: true });
     if (hit && self.navigator && self.navigator.onLine === false) return hit;
     const net = fetch(req).then((res) => {
-      if (keepable(res, key, same)) cache.put(key, res.clone()).catch(() => {});
+      if (keepable(res, key)) cache.put(key, res.clone()).catch(() => {});
       return res;
     });
     if (!hit) return net;

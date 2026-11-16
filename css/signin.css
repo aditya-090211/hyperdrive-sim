@@ -7,7 +7,7 @@ body.live #stage { opacity: 1; }
   background: linear-gradient(90deg, rgba(13, 14, 16, 0.94) 0%, rgba(13, 14, 16, 0.84) 34%, rgba(13, 14, 16, 0.2) 60%, rgba(13, 14, 16, 0) 74%); }
 .panel { position: relative; z-index: 3; width: min(500px, 100%); min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center;
   padding: calc(var(--s-10) + var(--safe-t)) 0 calc(var(--s-7) + var(--safe-b)) max(var(--gutter), calc((100vw - var(--wrap)) / 2)); }
-.panel h1 { margin: var(--s-4) 0; font: 400 clamp(44px, 5.2vw, 76px)/0.98 var(--serif); letter-spacing: -0.022em; }
+.panel h1 { margin: var(--s-4) 0; font: 600 clamp(44px, 5.2vw, 76px)/0.98 var(--serif); letter-spacing: 0; }
 .panel h1 em { color: var(--cream-2); }
 .panel .lede { margin: 0 0 var(--s-6); color: #d6d0c5; font-size: 17px; line-height: 1.7; max-width: 440px; }
 .panel section { display: grid; gap: 12px; }
@@ -21,9 +21,9 @@ body.live #stage { opacity: 1; }
 .email form { display: grid; gap: 14px; margin-top: 16px; }
 .row-2 { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .who { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.who b { display: block; font: 400 26px/1.1 var(--serif); }
+.who b { display: block; font: 600 26px/1.1 var(--serif); }
 .who small { color: var(--muted); }
-.avatar { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 50%; border: 1px solid var(--line-2); font: 400 20px/1 var(--serif); }
+.avatar { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 50%; border: 1px solid var(--line-2); font: 600 20px/1 var(--serif); }
 .team { margin: 4px 0 6px; color: var(--muted); font-size: 14.5px; }
 .ctas { display: flex; flex-wrap: wrap; gap: 10px; }
 #signout { justify-self: start; margin-top: 6px; }
