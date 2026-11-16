@@ -6,7 +6,21 @@ and the rules from `NRL/NRL_2026_HYPERDRIVE_GAME_MANUAL.pdf`.
 It has four independently controlled robots (2 Red + 2 Blue), the full 12 × 12 ft field with every
 game element, Human Player actions, the 2:30 match flow, live scoring, automatic fouls and Ranking Points.
 
-**Live:** <https://hyperdrive-sim.vercel.app>
+**Live:** <https://overdrive009.in> · Scout: <https://scout.overdrive009.in> · Viora (our Changemakers project, its own repo): <https://viora.overdrive009.in>
+
+### Domains
+
+`vercel.json` sends every old address to the new ones:
+
+* `scout.overdrive009.in/` serves `/scout`, with its own manifest so the installed app's home is the subdomain root.
+* `overdrive009.in/scout` and `/viora` redirect to their subdomains, and `www.` redirects to the bare domain.
+* `hyperdrive-sim.vercel.app` redirects every page to `overdrive009.in`, except Scout and the files it needs. Phones that
+  installed Scout there keep their unsynced entries in that origin's storage, so Scout keeps running there with a
+  "Scout has moved" note until those entries have synced.
+* Accounts are stored per origin, so Scout on its subdomain asks for one sign-in there.
+
+Add `overdrive009.in`, `www.overdrive009.in` and `scout.overdrive009.in` to this Vercel project. Add `viora.overdrive009.in`
+to the Viora project, and point its old `viora-lemon.vercel.app` address at it from that repo.
 
 ## The site
 
@@ -24,25 +38,54 @@ lighting truss, LED boards, score screens, plinth). Old links to `/?room=…` or
 ### Overdrive Scout setup (once per Supabase project)
 
 1. Apply `supabase/scouting.sql` (after `schema.sql` and `hardening.sql`), then `supabase/scouting-review.sql`, then `supabase/scouting-009.sql`
-   (every member of team 009 can read, never change, every team's scouting data). All are safe to re-run.
+   (every member of team 009 can read, never change, every team's scouting data), then `supabase/scouting-offline.sql` (offline sync
+   and shared pick lists). All are safe to re-run.
 2. Make Overdrive staff admins (they can read every team's scouting data):
    `insert into public.scout_admins (user_id) select id from auth.users where email = 'someone@example.com' on conflict do nothing;`
 3. Accounts are email and password (Supabase → Authentication → Sign In / Providers → Email: enabled, with "Confirm email" on).
    Set the minimum password length to 8 to match the sign-up form.
-4. Supabase → Authentication → URL Configuration: Site URL `https://hyperdrive-sim.vercel.app`, and add the redirect URLs
-   `https://hyperdrive-sim.vercel.app/signin` and `https://hyperdrive-sim.vercel.app/sim` (password resets), plus `http://localhost:8766/**` for local testing.
+4. Supabase → Authentication → URL Configuration: Site URL `https://overdrive009.in`, and add the redirect URLs
+   `https://overdrive009.in/signin`, `https://overdrive009.in/sim`, `https://scout.overdrive009.in/signin` and `https://scout.overdrive009.in/scout`
+   (password resets), plus `http://localhost:8766/**` for local testing. Keep the old `hyperdrive-sim.vercel.app` entries until
+   phones there have synced.
    Every sign-in goes through `/signin`; `js/auth-client.js` is the one Supabase client all pages share.
 
 Background stills of the venue (`assets/stadium-wide.jpg`, `assets/stadium-tall.jpg`) are rendered by `node tools/render-stadium.cjs` with the dev server running.
 
-Local demo without an account: `http://127.0.0.1:8766/scout?demo=1&fresh=1` (in-memory backend, only on localhost; add `&admin=1` for the
-staff view, `&offline=1` to simulate a dropped connection, `&sw=1` to run the service worker in the demo). Register the demo team as `009`
-to see the Overview tab. Database rules are tested by `tools/scouting-regression.cjs` (PGlite).
+Local demo without an account: `http://127.0.0.1:8766/scout?demo=1&fresh=1` (in-memory backend kept in localStorage, only on localhost;
+add `&admin=1` for the staff view, `&offline=1` to simulate a dropped connection, `&sw=1` to run the service worker in the demo).
+Register the demo team as `009` to see the Overview tab.
 
-**Offline.** After one visit, `sw.js` keeps every file Scout needs (fonts included) on the phone, so it opens with no signal. The app
-opens from the data it last synced and checks the server behind it. Match and pit reports, deletions of synced reports and new events
-wait in a queue on the device (`js/scout/store.js`) and upload when the connection is back. Reports filed to an event made offline
-follow it to its server id. Bump `CACHE` in `sw.js` when Scout's file list changes.
+**Offline.** Scout is built to be used with no connection at all.
+
+* **App.** After one visit, `sw.js` keeps every file Scout needs (fonts included) on the phone, so it opens cold with
+  airplane mode on. Files come from the network when it answers within 2.5 s, otherwise from the copy. The cache is
+  versioned (`CACHE` in `sw.js`): bump it when Scout's file list changes, and activation deletes the old one. It installs
+  as an app from `manifest.webmanifest`.
+* **Data.** Everything the account may see is kept in IndexedDB (`js/scout/outbox.js`, table `kv`): events, match and pit
+  reports, the team's pick lists, and for team 009 other teams' reports at the same competition. Reads and writes go there
+  first, so rankings, the overview and pick lists work offline and redraw when synced data arrives. Signing out deletes it.
+* **Outbox.** Every create, edit and delete is a row in the `outbox` table. It survives closing the tab and restarting the
+  phone. Ids are made on the phone, and each attempt carries a revision id. The `scout_push_*` functions in
+  `scouting-offline.sql` recognise a retry of a write they already applied (a lost reply) and do not apply it twice.
+* **When it syncs.** On the `online` event, on returning to the app, on a timer that backs off from 5 s to 5 min, and through
+  Background Sync where the browser supports it (the service worker runs the same upload code with the app closed).
+  Entries upload only for the signed-in account and the team it is on now. Row-level security still decides what is allowed.
+* **Sign-in.** A dropped network never signs anyone out. When the token has expired, the upload refreshes it and goes again.
+  If the server refuses the saved sign-in, the status reads Needs attention and asks the scout to sign in once more; nothing
+  waiting is lost.
+* **Status.** The top bar always shows one of Offline, Syncing, Synced or Needs attention, with the number of entries not yet
+  on the server. Tapping it lists every waiting entry and why, with Retry and Discard.
+* **Conflicts.** Each edit remembers the copy it was made from. If the server copy has changed since, the two are merged field
+  by field: fields only one side changed are both kept. A field both sides changed to different values is never overwritten.
+  The entry waits, marked Needs attention, with both values shown until someone picks **Keep mine** (their value wins on that
+  field) or **Keep theirs**. Deleting a report someone else has changed since is held the same way. A second pit report for a
+  robot that already has one merges into it rather than replacing it.
+
+Tests: `tools/scouting-regression.cjs` (PGlite) covers the database rules and the push functions. `tools/scout-offline.cjs`
+drives Scout in Chrome with the network switched off and covers going offline, creating and editing entries, closing and
+reopening the app, reconnecting, an expired token, duplicate prevention, both kinds of conflict, offline deletes, the team
+check and sign-out. Run it with the dev server on port 8766.
 
 **Overview (team 009 only).** `js/scout/insights.js` ranks every robot by a pick score (qualification average shrunk toward the event
 mean for small samples, less foul points, variance and breakdown rate). It lists strengths and drawbacks against the rest of the event
