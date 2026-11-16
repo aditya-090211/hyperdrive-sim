@@ -11,7 +11,9 @@ export const DEFAULTS = {
   sound: true,
   tank: false,
   touchRobot: 0,
-  drivers: 1,                                // local match: drivers sharing this computer (1-4)
+  drivers: 1,                                // local match: drivers sharing this computer (0-4; 0 = watch the AI)
+  bots: true,                                // AI drivers take the robots nobody at this computer drives
+  botLevel: 'normal',                        // 'easy' | 'normal' | 'hard' (js/ai.js LEVELS)
   keys: {},                                  // keyboard rebinds: { '0'..'3' | 'solo': { action: KeyboardEvent.code } }
 };
 
@@ -20,12 +22,13 @@ function clean(s) {
   if (!s || typeof s !== 'object') return out;
   if (Array.isArray(s.teams) && s.teams.length === 4) out.teams = s.teams.map((t, i) => (/^\d{1,6}$/.test(String(t)) ? String(t) : DEFAULTS.teams[i]));
   if (Array.isArray(s.pads) && s.pads.length === 4) out.pads = s.pads.map((p) => (Number.isInteger(p) && p >= -1 && p <= 3 ? p : -1));
-  for (const k of ['labels', 'guides', 'sound', 'tank']) if (typeof s[k] === 'boolean') out[k] = s[k];
+  for (const k of ['labels', 'guides', 'sound', 'tank', 'bots']) if (typeof s[k] === 'boolean') out[k] = s[k];
   // before 'auto' existed every save stored 'high'; only a choice made in Settings (qualitySet) is kept
   if (s.quality === 'auto' || ((s.quality === 'high' || s.quality === 'low') && s.qualitySet === true)) out.quality = s.quality;
   if (s.qualitySet === true) out.qualitySet = true;
   if (Number.isInteger(s.touchRobot) && s.touchRobot >= 0 && s.touchRobot <= 3) out.touchRobot = s.touchRobot;
-  if (Number.isInteger(s.drivers) && s.drivers >= 1 && s.drivers <= 4) out.drivers = s.drivers;
+  if (['easy', 'normal', 'hard'].includes(s.botLevel)) out.botLevel = s.botLevel;
+  if (Number.isInteger(s.drivers) && s.drivers >= 0 && s.drivers <= 4) out.drivers = s.drivers;   // 0: watch the AI
   if (s.keys && typeof s.keys === 'object') {
     out.keys = {};
     for (const [slot, map] of Object.entries(s.keys)) {

@@ -17,6 +17,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=Martian+Mono:wght@400..600&display=swap" rel="stylesheet">
 <script src="js/early-handoff.js"></script>
 <link rel="stylesheet" href="css/app.css?v=16">
+<link rel="stylesheet" href="css/tools.css">
+<link rel="stylesheet" href="css/tools-planner.css">
+<link rel="stylesheet" href="css/tools-trainer.css">
+<link rel="stylesheet" href="css/tools-strategy.css">
+<link rel="stylesheet" href="css/tools-designer.css">
 <script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script>
 <!-- the simulator's module graph and both models in parallel, so the loading bar is not a waterfall -->
 <link rel="preload" as="image" href="assets/poster-sim-wide.jpg" media="(min-width: 861px)" fetchpriority="high">
@@ -80,6 +85,13 @@
         <button class="mode" data-act="online" title="Every driver on their own laptop"><span class="mi"><span data-icon="globe"></span></span><span class="mt"><b>Online</b></span></button>
         <button class="mode" data-act="practice" title="No clock, learn the controls"><span class="mi"><span data-icon="target"></span></span><span class="mt"><b>Practice</b></span></button>
         <button class="mode" data-act="robotcode" title="Import your OpMode (.cpp) and run it on the field"><span class="mi"><span data-icon="cpu"></span></span><span class="mt"><b>Robot code</b></span></button>
+      </div>
+      <div class="tools" aria-label="Team tools">
+        <span class="tools-h">Team tools</span>
+        <button class="tool" data-act="planner" title="Plan an auto route on the field, export the OpMode, test it on imperfect robots"><span data-icon="flag"></span><b>Auto planner</b></button>
+        <button class="tool" data-act="trainer" title="Timed drills against the AI, with ghost replays of your best runs"><span data-icon="target"></span><b>Driver trainer</b></button>
+        <button class="tool" data-act="strategy" title="Predict scores and win odds for alliance pairings"><span data-icon="users"></span><b>Alliance strategy</b></button>
+        <button class="tool" data-act="designer" title="Change the robot's design and measure what it does"><span data-icon="sliders"></span><b>Robot designer</b></button>
       </div>
       <button class="lnk learn" data-act="learn">Learn to play</button>
       <div id="menu-account" class="acct-line"></div>

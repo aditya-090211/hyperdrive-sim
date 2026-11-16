@@ -6,6 +6,7 @@ import { Settings, isTouch } from './settings.js';
 import { Account } from './account.js';
 import { signInUrl } from './auth-client.js';
 import { warmUpRTC } from './net.js';
+import { LEVELS } from './ai.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -83,6 +84,7 @@ export class UI {
       else if (a === 'signup') this.openAuth('signup');
       else if (a === 'profile') this.openProfile();
       else if (a === 'privacy') this.openPrivacy();
+      else if (this.sim.tools && this.sim.tools[a]) this.sim.tools[a].open();   // Team tools (js/tools/*)
     });
     this.renderAccount();
   }
@@ -783,31 +785,45 @@ export class UI {
 
   // ================================================================ LOCAL SETUP
   openLocalSetup(mode) {
-    const SEATS = { 1: [0], 2: [0, 2], 3: [0, 1, 2], 4: [0, 1, 2, 3] };
+    const SEATS = { 0: [], 1: [0], 2: [0, 2], 3: [0, 1, 2], 4: [0, 1, 2, 3] };
     const robots = this.sim.robots;
+    // robots nobody at this computer drives: parked, or an AI driver at one of three levels (js/ai.js)
+    const BOTS = [['off', 'Parked'], ['easy', LEVELS.easy.label], ['normal', LEVELS.normal.label], ['hard', LEVELS.hard.label]];
+    let bot = Settings.get('bots') ? Settings.get('botLevel') : 'off';
     const view = (n) => {
       const seats = SEATS[n];
       const rows = seats.map((i) => `<div class="lseat ${robots[i].squad}"><i></i><b>${esc(robots[i].name)}</b><span>${n === 1 ? `${kb('KeyW')}${kb('KeyA')}${kb('KeyS')}${kb('KeyD')} <span class="kgrp">or</span> ${driveLabel(2)}` : driveLabel(i)}</span></div>`).join('');
       const idle = robots.filter((r) => !seats.includes(r.id)).map((r) => r.name).join(', ');
-      return `<div class="lseats">${rows}</div>
-        ${idle ? `<p class="note">${esc(idle)} stay parked (no computer players).</p>` : ''}
+      const level = BOTS.find((b) => b[0] === bot)[1];
+      return `${rows ? `<div class="lseats">${rows}</div>` : ''}
+        ${idle ? `<p class="note">${n === 0 ? `All four robots are driven by the AI (${esc(level)}).` : bot === 'off' ? `${esc(idle)} stay parked.` : `${esc(idle)} ${seats.length === 3 ? 'is' : 'are'} driven by the AI (${esc(level)}). It also works the Human Player for any squad it drives in.`}</p>` : ''}
         ${n >= 3 ? `<div class="warn-note">${icon('gamepad')}<span>${n} drivers on one keyboard will hit key-rollover limits: some key combinations stop registering. Plug in gamepads (Settings, Controls) for a full match.</span></div>` : ''}`;
     };
     let n = Settings.get('drivers');
+    const segBtns = (attr, list, cur) => list.map(([k, l]) => `<button data-${attr}="${k}" aria-pressed="${k === cur}" class="${k === cur ? 'on' : ''}">${l}</button>`).join('');
     const m = this.modal({
       title: mode === 'practice' ? 'Practice' : 'Local match', width: 480,
       body: `<p>How many drivers are at this computer?</p>
-        <div class="seg seg-lg" role="group" aria-label="Drivers">${[1, 2, 3, 4].map((k) => `<button data-n="${k}" aria-pressed="${k === n}" class="${k === n ? 'on' : ''}">${k}</button>`).join('')}</div>
+        <div class="seg seg-lg" role="group" aria-label="Drivers">${segBtns('n', [[0, 'Watch'], [1, '1'], [2, '2'], [3, '3'], [4, '4']], n)}</div>
+        <p style="margin-top:14px">Robots without a driver</p>
+        <div class="seg seg-lg" role="group" aria-label="Robots without a driver">${segBtns('bot', BOTS, bot)}</div>
         <div class="lsetup-body">${view(n)}</div>`,
       footer: `<button class="btn ghost" data-cancel>Cancel</button><button class="btn primary" data-go>${icon('play')}${mode === 'practice' ? 'Start practice' : 'Start match'}</button>`,
     });
-    $$('[data-n]', m.el).forEach((b) => b.addEventListener('click', () => {
-      n = Number(b.dataset.n);
-      $$('[data-n]', m.el).forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+    const sync = () => {
+      // watching needs someone to watch: with the AI off, Watch turns it on at the middle level
+      if (n === 0 && bot === 'off') bot = 'normal';
+      $$('[data-n]', m.el).forEach((x) => { const on = Number(x.dataset.n) === n; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+      $$('[data-bot]', m.el).forEach((x) => { const on = x.dataset.bot === bot; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
       $('.lsetup-body', m.el).innerHTML = view(n);
-    }));
+    };
+    $$('[data-n]', m.el).forEach((b) => b.addEventListener('click', () => { n = Number(b.dataset.n); sync(); }));
+    $$('[data-bot]', m.el).forEach((b) => b.addEventListener('click', () => { bot = b.dataset.bot; if (bot === 'off' && n === 0) n = 1; sync(); }));
     $('[data-cancel]', m.el).addEventListener('click', () => m.close());
-    $('[data-go]', m.el).addEventListener('click', () => { Settings.set('drivers', n); this.ctx.startGame(mode, { autoStart: true }); });
+    $('[data-go]', m.el).addEventListener('click', () => {
+      Settings.replace({ drivers: n, bots: bot !== 'off', ...(bot !== 'off' ? { botLevel: bot } : {}) }, { sync: true });
+      this.ctx.startGame(mode, { autoStart: true });
+    });
   }
 
   // ================================================================ ONLINE
