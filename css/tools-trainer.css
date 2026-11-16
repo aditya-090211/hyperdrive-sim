@@ -1,0 +1,71 @@
+/* trainer tool styles (prefix per css/tools.css) */
+
+/* ---------- drill picker */
+.tr-drills { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 16px; }
+.tr-drill { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--stroke); background: rgba(255, 255, 255, 0.03); color: var(--text); text-align: left; transition: border-color 0.15s, background 0.15s; }
+.tr-drill:hover { border-color: var(--stroke-2); background: rgba(255, 255, 255, 0.055); }
+.tr-drill.on { border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.tr-drill:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.tr-dn { font: 700 14.5px/1.2 var(--display); }
+.tr-db { color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+.tr-dpb { margin-top: auto; padding-top: 3px; font: 600 11px/1 var(--mono); color: #cfd6e2; letter-spacing: 0.02em; }
+.tr-opts { display: grid; gap: 8px; margin-bottom: 16px; }
+.tr-opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13px; color: #c9d0da; }
+.tr-recs { padding-top: 14px; border-top: 1px solid var(--stroke); }
+.tr-recs-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.tr-recs-h h4 { margin: 0 !important; }
+.tr-recs-h .lnk { font-size: 12px; color: var(--muted); }
+.tr-best { display: flex; align-items: baseline; gap: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.035); border: 1px solid var(--stroke); margin-bottom: 8px; }
+.tr-best span { color: var(--muted); font-size: 12.5px; }
+.tr-best b { font: 600 20px/1 var(--mono); }
+.tr-best small { margin-left: auto; color: var(--faint); font-size: 12px; }
+.modal p.tr-empty { color: var(--muted); font-size: 13px; margin: 0; }
+.tr-gain { color: var(--green); }
+.tr-loss { color: var(--red-2); }
+
+/* ---------- in-drill overlay (sits where the tutorial coach does, below the HUD buttons) */
+.tr-ov { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
+.tr-card { position: absolute; left: 16px; top: 66px; width: min(290px, calc(100vw - 32px)); padding: 13px 15px 14px; border-radius: 14px; background: var(--glass-strong); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45); animation: popIn 0.3s var(--ease); }
+.tr-top { display: flex; justify-content: space-between; gap: 10px; font: 700 10px/1 var(--font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.tr-top .tr-pb { color: #cfd6e2; letter-spacing: 0.06em; }
+.tr-title { margin: 9px 0 2px; font: 700 16px/1.25 var(--display); }
+.tr-clock { font: 600 34px/1.1 var(--mono); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.tr-clock.done { color: var(--gold); }
+.tr-prog { margin-top: 4px; font-size: 13.5px; font-weight: 600; }
+.tr-hint { margin-top: 3px; color: #b9c1cd; font-size: 12.5px; line-height: 1.4; }
+.tr-hint:empty { display: none; }
+.tr-meter { height: 4px; margin-top: 9px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.tr-meter i { display: block; height: 100%; width: 0; background: var(--green); }
+.tr-splits { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 3px; }
+.tr-splits:empty { display: none; }
+.tr-splits li { display: grid; grid-template-columns: 1fr auto 58px; gap: 8px; align-items: baseline; padding-top: 4px; border-top: 1px solid var(--stroke); font-size: 12.5px; color: #c9d0da; }
+.tr-splits b { font: 600 12px var(--mono); color: var(--text); }
+.tr-splits em { font: 600 11.5px var(--mono); font-style: normal; text-align: right; color: var(--muted); }
+.tr-acts { display: flex; gap: 6px; margin-top: 12px; pointer-events: auto; }
+.tr-acts .btn svg.i { width: 14px; height: 14px; }
+.tr-count { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); }
+.tr-count span { display: block; font: 700 clamp(64px, 11vw, 120px)/1 var(--display); letter-spacing: 0.04em; color: var(--text); text-shadow: 0 8px 48px rgba(0, 0, 0, 0.6); animation: popIn 0.3s var(--ease); }
+body.modal-open .tr-count { display: none; }
+
+/* ---------- result */
+.tr-res-hero { text-align: center; padding: 6px 0 16px; }
+.tr-res-hero small { display: block; color: var(--muted); font: 700 10.5px/1 var(--font); letter-spacing: 0.14em; text-transform: uppercase; }
+.tr-res-l { display: block; margin-top: 14px; color: #c9d0da; font-size: 13px; }
+.tr-res-hero > b { display: block; margin-top: 2px; font: 600 52px/1.05 var(--mono); letter-spacing: -0.02em; }
+.tr-res-hero > b.tr-pbv { color: var(--gold); }
+.tr-res-sc { display: inline-flex; gap: 14px; margin-top: 6px; font: 600 12px var(--mono); }
+.tr-res-sc i { font-style: normal; } .tr-res-sc .red { color: var(--red-2); } .tr-res-sc .blue { color: var(--blue-2); }
+.modal .tr-res-hero p { margin: 10px 0 0; }
+.tr-spark { display: flex; flex-wrap: wrap; gap: 6px; }
+.tr-spark span { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; min-width: 76px; border-radius: 10px; border: 1px solid var(--stroke); background: rgba(255, 255, 255, 0.03); }
+.tr-spark span.now { border-color: rgba(255, 255, 255, 0.35); }
+.tr-spark span.best b { color: var(--gold); }
+.tr-spark b { font: 600 13px/1 var(--mono); }
+.tr-spark small { color: var(--faint); font-size: 11px; }
+.modal p.tr-note { margin: 14px 0 0; color: var(--muted); font-size: 12.5px; }
+
+@media (max-width: 560px) {
+  .tr-drills { grid-template-columns: 1fr; }
+  .tr-card { top: 58px; left: 10px; padding: 11px 13px 12px; }
+  .tr-clock { font-size: 28px; }
+}

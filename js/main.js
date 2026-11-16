@@ -9,6 +9,11 @@ import { Input, HP_KEYS, applyKeyBindings } from './input.js';
 import { Online, hostRoomFor } from './online.js';
 import { UI } from './ui.js';
 import { RobotCode } from './auto.js';
+import { AI } from './ai.js';
+import { Planner } from './tools/planner.js';
+import { Trainer } from './tools/trainer.js';
+import { Strategy } from './tools/strategy.js';
+import { Designer } from './tools/designer.js';
 import { Account } from './account.js';
 import { Settings, isTouch } from './settings.js';
 import { TEAMS, HALF, WALL, COLORS } from './config.js';
@@ -142,6 +147,7 @@ async function boot() {
   setLoad(85, 'Staging the match…');
   sim.game = new Game(sim);
   const game = sim.game, input = sim.input;
+  sim.ai = new AI(sim);
   // the second division's field (BRAVO): a still copy of this one with its own robots and COREs
   for (const s of ['red', 'blue']) sim.field.stations[s].sync();
   for (const c of game.cores) c.sync?.();
@@ -164,11 +170,18 @@ async function boot() {
     { name: 'Top-down', pos: [0, 6.6, 0.001], target: [0, -0.3, 0] },
   ];
   // local match: which robots the drivers at this computer control (the rest stay parked)
-  const LOCAL_SEATS = { 1: [0], 2: [0, 2], 3: [0, 1, 2], 4: [0, 1, 2, 3] };
+  const LOCAL_SEATS = { 0: [], 1: [0], 2: [0, 2], 3: [0, 1, 2], 4: [0, 1, 2, 3] };
   // a robot-code run: the program drives, nobody at the keyboard does
   const inTutorial = () => { try { return !!ui.tutorial; } catch { return false; } };   // ui is created further down
   // who this computer drives: the tutorial is always Red 1; on a phone, the robot picked with the switch button
   const localSeats = () => (sim.game && sim.game.mode === 'robotcode' ? [] : inTutorial() ? [0] : isTouch ? [Settings.get('touchRobot') || 0] : LOCAL_SEATS[Settings.get('drivers')] || [0, 1, 2, 3]);
+  // robots the AI drives: off in robot-code runs and the tutorial; online only seats nobody has taken
+  const botSeats = (mine, isOnline) => {
+    if (sim.game.mode === 'robotcode' || inTutorial()) return [];
+    if (sim.ai.spectate && !isOnline) return sim.ai.only || sim.robots.map((r) => r.id);      // AI vs AI: every robot
+    if (!Settings.get('bots')) return [];
+    return sim.robots.map((r) => r.id).filter((i) => !mine.includes(i) && (!isOnline || (net.lobby && !net.lobby.seats[i])));
+  };
   // default view: your squad's driver station (Red for a local match, the audience view for spectators)
   const defaultCam = () => {
     if (isTouch) { const mine = net.active ? net.mySeats() : []; return CAMS.length + (mine.length ? mine[0] : Settings.get('touchRobot')); }
@@ -292,6 +305,7 @@ async function boot() {
     const s = Settings.data;
     applyKeyBindings(s.keys);
     sim.showLabels = s.labels; sim.showGuides = s.guides; sim.audio.enabled = s.sound;
+    if (sim.ai) sim.ai.level = s.botLevel;
     input.tank = s.tank; input.padAssign = [...s.pads];
     if (s.quality !== quality) {
       if (quality !== null) gov.reset();                  // a new graphics choice starts from full resolution
@@ -406,6 +420,9 @@ async function boot() {
   sim.robotCode = robotCode;
   game.onSignal((type) => robotCode.onSignal(type));
   sim.ui = ui;
+  // Team tools: each owns its module under js/tools/ and gets the per-frame hook below
+  sim.frameHooks = [];
+  sim.tools = { planner: new Planner(sim, ui), trainer: new Trainer(sim, ui), strategy: new Strategy(sim, ui), designer: new Designer(sim, ui) };
   input.active = () => view === 'game' && ui.modals.length === 0 && !trans;
   net.hooks = {
     begin(mode) {
@@ -502,11 +519,14 @@ async function boot() {
         k.payload.forEach((code, j) => { if (input.hit(code) && ids[j] !== undefined) ctx.hp('pl', s, ids[j]); });
       }
     }
+    // AI drivers take every robot nobody drives (locally; online, the host runs them for empty seats)
+    const aiSeats = inGame && !guest && !trans ? botSeats(mine, isOnline) : [];
     const wantDetails = inGame && !modalOpen && input.down.has('Tab');
     if (wantDetails !== detailsOn) { detailsOn = wantDetails; ui.showDetails(wantDetails || ui.detailsPinned); }
     // robot controls
     sim.robots.forEach((r, i) => {
       if (!inGame) { r.cmd = { throttle: 0, turn: 0, arm: 0 }; return; }
+      if (aiSeats.includes(i)) return;                           // driven by sim.ai below
       if (!mine.includes(i)) {                                   // someone else's seat, or a robot nobody drives
         if (isOnline && !guest) net.applyRemote(r); else if (!isOnline) r.cmd = { throttle: 0, turn: 0, arm: 0 };
         return;
@@ -523,6 +543,7 @@ async function boot() {
       } else r.cmd = { throttle: 0, turn: 0, arm: 0 };
     });
     if (guest) net.sendInputs();
+    if (!guest) sim.ai.update(aiSeats);
     input.endFrame();
 
     // physics
@@ -560,6 +581,7 @@ async function boot() {
     if (guest) net.guestFrame(); else game.update(game.state === 'paused' || game.state === 'final' ? 0 : isOnline ? elapsed : Math.min(elapsed, MAX_STEPS * STEP));
     if (isOnline && net.isHost) net.hostFrame();
 
+    for (const f of sim.frameHooks) f(dtReal, inGame);
     // visuals
     for (const r of sim.robots) { r.sync(); r.label.visible = inGame && sim.showLabels && camMode !== CAMS.length + r.id; }
     for (const c of game.cores) c.sync();

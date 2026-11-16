@@ -139,6 +139,34 @@ placed on the physics events the renderer logs (gripper servo, launch, grip, lif
   RT/LT or RB/LB move the arm, A toggles the gripper, B works the cargo bay, X places a CORE, Y handles the Payload, Start starts or pauses.
   Assign pads on each robot card. Four drivers sharing one keyboard will hit key-rollover limits, so gamepads are recommended.
 
+## AI drivers
+
+`js/ai.js` drives every robot nobody at the computer is driving. The Local match / Practice dialog sets it:
+**Robots without a driver**: Parked, Rookie, Pro or Champion. **Watch** (0 drivers) runs an all-AI match.
+Online, the host's AI takes any seat nobody has joined.
+
+* **Same controls as a person.** A bot only sets `robot.cmd` (throttle, turn, arm), works the gripper and the cargo bay,
+  and its squad's Human Player uses the same `Game` calls as the HP keys. It cannot do anything a driver cannot, and
+  it closes the claws only on its own colour (G4.6).
+* **Navigation.** A 74 x 74 cost grid of the field (walls, poles, stations, vaults, forbidden zones) with A* and
+  line-of-sight smoothing; other robots, loose rings and Payloads are added at query time.
+* **Match plan.** Ring cycles from the spike marks and the Source Zone onto Star and High poles. Pro and Champion
+  also deliver the Payload: it is loaded in the Source Zone and tipped into the Drop Zone, with teammates taking turns
+  in the corner and using separate spots. The Human Player presses STARBURST early once a Payload is in. Champion
+  then pulls golden rings from the vault and builds the STAR MAP pattern bottom-up. In the End Game one robot per
+  squad climbs and balances the station; the other keeps scoring.
+* **Rules it keeps:** G4.17 (opponent Source Zone is off limits), G4.18 (opponent Vault Zone avoided), G4.12 (never
+  the opponent station), G4.19 / R9.4 (Payloads), G4.9 (it backs off after 1.2 s against an opponent), G4.10 / G4.3
+  (the HP places rings only when allowed).
+* **Measured AI vs AI scores** (one full match each): Rookie about 45-60, Pro about 67-69, Champion 100-110,
+  usually with no fouls.
+* **Limits.** A ring that ends up under a robot's chassis lifts all four wheels off the tiles, and no drive command
+  frees it (this is the physics, so human drivers hit it too). The bots avoid loose rings hard for that reason, but
+  in a busy match one can still get beached. Two robots docking on one station together was not reliable (the second
+  stalls at the ramp crest or tips the first off level), so only one robot per squad climbs.
+
+Console hook for testing: `__sim.ai.spectate = true; __sim.ai.only = [1]` lets the AI drive just the listed robots.
+
 ## Robot code (run your real OpMode)
 
 **Robot code** on the main menu runs a team's actual HexaNRL firmware on a simulated robot. Import the OpMode `.cpp` and the headers it includes (for example `OverdriveAuto.cpp` + `OverdriveConfig.h`) by dropping them in, choosing files, or pasting code. The files stay in your browser.
