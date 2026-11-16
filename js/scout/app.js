@@ -95,7 +95,7 @@ function countTo(el, to, { ms = 500, fmtFn = (v) => String(Math.round(v)), from 
 // a value that rolls in from below (up) or above (down), like an odometer
 function roll(el, dir) {
   if (calm() || !el.animate) return;
-  el.animate([{ transform: `translateY(${dir > 0 ? 55 : -55}%)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 240, easing: EASE_OUT });
+  el.animate([{ transform: `translateY(${dir > 0 ? 18 : -18}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 240, easing: EASE_OUT });
 }
 // a small "+5" that floats off the tally
 function floatChip(anchor, text) {
