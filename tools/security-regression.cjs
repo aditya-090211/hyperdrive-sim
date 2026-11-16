@@ -6,7 +6,7 @@ const fs = require('fs');
  const page = await browser.newPage();
  await page.route('**/*', r => r.request().url().startsWith('http://127.0.0.1:8766') ? r.continue() : r.abort());
  const errors=[];page.on('pageerror', e=>errors.push(e.message));
- await page.goto('http://127.0.0.1:8766');await page.waitForFunction(()=>window.__sim);
+ await page.goto('http://127.0.0.1:8766/sim');await page.waitForFunction(()=>window.__sim);
  const results=await page.evaluate(async()=>{
   const {Online}=await import('/js/online.js');const {SignedRoom}=await import('/js/signed-room.js');
   const assert=(ok,name)=>{if(!ok)throw new Error(name);checks.push(name)};const checks=[];

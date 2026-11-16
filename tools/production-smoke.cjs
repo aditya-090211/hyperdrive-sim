@@ -2,7 +2,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_PATH||'C:/Users/adity/AppData/Lo
 (async()=>{const browser=await chromium.launch({headless:true,channel:'chrome'});const results={checks:[],errors:[]};let host,guest;try{
  const hc=await browser.newContext({viewport:{width:1366,height:768}}),gc=await browser.newContext();host=await hc.newPage();guest=await gc.newPage();
  for(const p of [host,guest])p.on('pageerror',e=>results.errors.push(e.message));
- await Promise.all([host.goto('https://hyperdrive-sim.vercel.app/sim'),guest.goto('https://hyperdrive-sim.vercel.app/sim')]);
+ await Promise.all([host.goto('https://overdrive009.in/sim'),guest.goto('https://overdrive009.in/sim')]);
  await Promise.all([host.waitForFunction(()=>window.__sim,{},{timeout:60000}),guest.waitForFunction(()=>window.__sim,{},{timeout:60000})]);results.checks.push('Public production site boots in two independent browsers');
  await host.evaluate(()=>__sim.ctx.startGame('match'));await host.locator('#btn-go').click();await host.waitForFunction(()=>__sim.game.state==='running');await host.locator('#scorebar').focus();await host.keyboard.press('Space');await host.waitForTimeout(100);if(await host.evaluate(()=>__sim.game.state)!=='running')throw Error('Scoreboard shortcut paused game');results.checks.push('Live Start match button and scoreboard shortcut work');
  await host.evaluate(()=>__sim.ctx.toMenu());

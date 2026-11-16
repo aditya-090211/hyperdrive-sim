@@ -1,6 +1,6 @@
 const {chromium}=require(process.env.PLAYWRIGHT_PATH||'C:/Users/adity/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/node_modules/playwright');
 (async()=>{const browser=await chromium.launch({headless:true,channel:'chrome'});try{
- const page=await browser.newPage();await page.route('**/*',r=>r.request().url().startsWith('http://127.0.0.1:8766')?r.continue():r.abort());await page.goto('http://127.0.0.1:8766');await page.waitForFunction(()=>window.__sim);
+ const page=await browser.newPage();await page.route('**/*',r=>r.request().url().startsWith('http://127.0.0.1:8766')?r.continue():r.abort());await page.goto('http://127.0.0.1:8766/sim');await page.waitForFunction(()=>window.__sim);
  console.log(await page.evaluate(async()=>{
  const {Account}=await import('/js/account.js'),{Room}=await import('/js/net.js'),{Online}=await import('/js/online.js');const saved=Account.client;const channels=[],state={},checks=[];
  const assert=(x,s)=>{if(!x)throw Error(s);checks.push(s)};
