@@ -57,14 +57,15 @@
     return out;
   }
   const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
-  // three-way merge of an edited row against the server's newer copy: { row } when nothing collides, else { fields }
-  function merge(kind, mine, snap, server) {
+  // three-way merge of an edited row against the server's newer copy: { row } when nothing collides, else { fields }.
+  // prefer 'mine' settles every collision in this phone's favour (the scout chose "Keep mine").
+  function merge(kind, mine, snap, server, prefer) {
     const m = fieldsOf(kind, mine), b = fieldsOf(kind, snap), s = fieldsOf(kind, server);
     const row = { ...server, data: kind === 'picks' ? server.data : { ...(server.data || {}) } }, clash = [];
     for (const k of new Set([...Object.keys(m), ...Object.keys(b), ...Object.keys(s)])) {
       const mineChanged = !same(m[k], b[k]), theirsChanged = !same(s[k], b[k]);
       if (!mineChanged) continue;
-      if (theirsChanged && !same(m[k], s[k])) { clash.push(k); continue; }
+      if (theirsChanged && !same(m[k], s[k]) && prefer !== 'mine') { clash.push(k); continue; }
       if (k === 'data') row.data = m[k];
       else if (k.startsWith('data.')) { if (m[k] === undefined) delete row.data[k.slice(5)]; else row.data[k.slice(5)] = m[k]; }
       else row[k] = m[k];
@@ -134,5 +135,5 @@
     return out;
   }
 
-  self.OdOutbox = { get, all, keys, put, del, clear, uuid, rpcOf, applyRow, push };
+  self.OdOutbox = { get, all, keys, put, del, clear, uuid, rpcOf, merge, applyRow, push };
 })();

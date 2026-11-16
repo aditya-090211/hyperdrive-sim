@@ -9,6 +9,7 @@ const db = self.OdOutbox;
 // what can wait on the device: match reports, pit reports, pick lists, events made offline and deletions of reports
 const KINDS = ['report', 'pit', 'picks', 'event', 'del'];
 const SYNC_TAG = 'od-scout-sync';
+const DEMO_SERVER = 'od-demo-server';
 const LOCAL_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
 export const DEMO = LOCAL_HOSTS.includes(location.hostname) && new URLSearchParams(location.search).get('demo') === '1';
 
@@ -125,17 +126,30 @@ class Demo {
   constructor() {
     const me = { id: 'demo-user', email: 'scout@example.test', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: { full_name: 'Demo Scout' } };
     const qp = new URLSearchParams(location.search);
-    let saved = null; try { saved = JSON.parse(sessionStorage.getItem('od.scout.demo') || 'null'); } catch { /* fresh demo */ }
+    // the demo "server" outlives the tab (localStorage), so closing and reopening Scout behaves like a real backend
+    let saved = null; try { saved = JSON.parse(localStorage.getItem(DEMO_SERVER) || 'null'); } catch { /* fresh demo */ }
     this.db = saved && qp.get('fresh') !== '1' ? saved : { me, signedIn: qp.get('signedin') !== '0', consent: null, team: null, role: null, members: [], events: [], reports: [], pits: [], code: 'DEMO2345' };
-    this.db.admin = qp.get('admin') === '1';
+    if (qp.has('admin')) this.db.admin = qp.get('admin') === '1';
     this.cb = null;
+    window.__scoutDemo = this;           // localhost test hook: tools/scout-offline.cjs edits "the server" through it
   }
-  // the demo keeps its state for this tab, so a reload carries on where you were. ?offline=1 (or the
+  // ?offline=1 (or the
   // od.scout.demo.offline session flag) makes every request fail the way a dead connection does
   offline() { try { return new URLSearchParams(location.search).get('offline') === '1' || navigator.onLine === false || sessionStorage.getItem('od.scout.demo.offline') === '1'; } catch { return false; } }
   wait(v) {
-    try { sessionStorage.setItem('od.scout.demo', JSON.stringify(this.db)); } catch { /* ignore */ }
-    return new Promise((r, no) => setTimeout(() => { if (this.offline()) { this.onNet?.(false); no(new Error('No connection. Try again when you are back online.')); } else { this.onNet?.(true); r(v); } }, 120));
+    this.persist();
+    return new Promise((r, no) => setTimeout(() => {
+      if (this.offline()) { this.onNet?.(false); no(new Error('No connection. Try again when you are back online.')); return; }
+      // db.expired: the access token ran out; every request is refused until refresh() gets a new one
+      if (this.db.expired) { no(new Error('Your session ended. Sign in again.')); return; }
+      this.onNet?.(true); r(v);
+    }, 120));
+  }
+  persist() { try { localStorage.setItem(DEMO_SERVER, JSON.stringify(this.db)); } catch { /* ignore */ } }
+  async refresh() {
+    if (this.offline()) return null;
+    if (this.db.expired === 'revoked') return false;
+    this.db.expired = false; this.persist(); return true;
   }
   async session() { return this.db.signedIn ? { user: this.db.me } : null; }
   onAuth(fn) { this.cb = fn; }
@@ -391,7 +405,9 @@ export class Store {
       this.queue = this.queue.filter((q) => q.key !== item.key); this.emit();
       return;
     }
-    const next = { ...item, row: server && item.kind === 'pit' ? { ...item.row, id: server.id } : item.row, base: server ? server.updated_at : null, snap: server,
+    // keep mine: this phone's value wins where both changed a field; what only the other scout changed stays
+    const row = server && item.kind !== 'del' ? db.merge(item.kind, item.row, item.snap, server, 'mine').row : item.row;
+    const next = { ...item, row, base: server ? server.updated_at : null, snap: server,
       revs: [...item.revs, item.mid], mid: uuid(), conflict: null, error: null };
     await db.put('outbox', next);
     this.queue = this.queue.map((q) => (q.key === item.key ? next : q));

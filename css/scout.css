@@ -556,3 +556,27 @@ body:has(#tb-sync[data-state="waiting"]) .stamp .dot { background: var(--gold); 
   .ov-lead .row .b { flex: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .stamp.busy svg { animation: none; } }
+
+/* ---- offline sync: one status, always labelled */
+.sync[data-state="synced"] { color: var(--green); }
+.sync[data-state="syncing"] { color: var(--gold); }
+.sync[data-state="syncing"] svg { animation: odSpin 1.2s linear infinite; }
+.sync[data-state="attention"] { color: #f0a39c; border-color: rgba(224, 88, 79, 0.55); background: rgba(224, 88, 79, 0.1); }
+.sync[data-state="attention"] .sync-n { background: var(--danger); color: #fff; }
+.sync { min-height: 44px; }
+body:has(#tb-sync[data-state="syncing"]) .stamp .dot { background: var(--gold); }
+body:has(#tb-sync[data-state="attention"]) .stamp .dot { background: var(--danger); }
+.sync-item { gap: var(--s-2); }
+.sync-item.bad { border-color: rgba(224, 88, 79, 0.4); }
+.sync-item .rrow { display: flex; align-items: center; gap: var(--s-3); }
+.sync-item .rmain { flex: 1; min-width: 0; }
+.conflict { display: grid; gap: var(--s-2); padding-top: var(--s-2); }
+.conflict .sub { margin: 0; }
+.kv.clash > div { display: grid; grid-template-columns: minmax(5.5rem, max-content) 1fr; gap: var(--s-3); padding: var(--s-2) 0; border-top: 1px solid var(--line); }
+.kv.clash dt { color: var(--muted); font: 500 10.5px/1.6 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.kv.clash dd { margin: 0; display: grid; gap: 2px; overflow-wrap: anywhere; }
+.kv.clash .mine { color: #f6b08c; }
+.kv.clash .theirs { color: var(--muted); }
+.moved { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); margin-bottom: var(--s-4); }
+.moved p { margin: 0; flex: 1 1 16rem; }
+@media (max-width: 380px) { .sync .sync-l { display: inline; font-size: 9.5px; letter-spacing: 0.04em; } }

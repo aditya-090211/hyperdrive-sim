@@ -23,7 +23,7 @@ const A = U(1), B = U(2), C = U(3), D = U(4), E = U(5);
       grant usage on schema auth to authenticated, anon; grant execute on function auth.uid(), auth.jwt() to authenticated, anon;
       grant usage on schema public to authenticated, anon;`);
     const sql = (f) => fs.readFileSync(path.join(__dirname, '../supabase', f), 'utf8');
-    for (let i = 0; i < 2; i++) { await db.exec(sql('schema.sql')); await db.exec(sql('hardening.sql')); await db.exec(sql('scouting.sql')); await db.exec(sql('scouting-review.sql')); await db.exec(sql('scouting-009.sql')); }
+    for (let i = 0; i < 2; i++) { await db.exec(sql('schema.sql')); await db.exec(sql('hardening.sql')); await db.exec(sql('scouting.sql')); await db.exec(sql('scouting-review.sql')); await db.exec(sql('scouting-009.sql')); await db.exec(sql('scouting-offline.sql')); }
     passed.push('Schema applies twice (idempotent)');
     await db.exec(`insert into auth.users(id, email) values ('${A}','a@x'),('${B}','b@x'),('${C}','c@x'),('${D}','admin@x'),('${E}','e@x');
       insert into public.scout_admins(user_id) values ('${D}');`);
@@ -70,6 +70,26 @@ const A = U(1), B = U(2), C = U(3), D = U(4), E = U(5);
     await fails('Bad robot number rejected', `insert into public.scout_reports(id, team_id, event_id, match_number, robot_number, alliance, station, data)
       values (gen_random_uuid(),'${teamA}','${evA}',14,'45a','red',1,'{}')`);
 
+    // offline sync (scouting-offline.sql): idempotent retries, conflicts instead of overwrites
+    const r5 = '55555555-5555-5555-5555-555555555555', rev1 = 'a1000000-0000-0000-0000-000000000000', rev2 = 'a2000000-0000-0000-0000-000000000000';
+    const push = (rid, data, base, rev, num = 20) => `select public.scout_push_report('${JSON.stringify({ id: rid, team_id: teamA, event_id: evA, match_type: 'qm', match_number: num, robot_number: '456', alliance: 'blue', station: 2, data })}'::jsonb, ${base ? `'${base}'` : 'null'}, '${rev}') as r`;
+    const [{ r: first }] = await ok('Offline report pushed', push(r5, { v: 1, m_high: 2 }, null, rev1), (r) => r[0].r.status === 'ok' && r[0].r.row.points === 6);
+    await ok('Retry of the same push is answered ok, not applied twice', push(r5, { v: 1, m_high: 2 }, null, rev1), (r) => r[0].r.status === 'ok' && r[0].r.row.updated_at === first.row.updated_at);
+    await ok('Still one row after the retry', `select count(*)::int as n from public.scout_reports where id='${r5}'`, (r) => r[0].n === 1);
+    await ok('A new device without the base copy gets a conflict, not an overwrite', push(r5, { v: 1, m_high: 7 }, null, rev2), (r) => r[0].r.status === 'conflict' && r[0].r.server.data.m_high === 2);
+    await ok('Edit from a stale copy is a conflict', push(r5, { v: 1, m_high: 7 }, '2000-01-01T00:00:00Z', rev2), (r) => r[0].r.status === 'conflict');
+    await ok('Edit from the current copy is applied', push(r5, { v: 1, m_high: 7 }, first.row.updated_at, rev2), (r) => r[0].r.status === 'ok' && r[0].r.row.points === 21);
+    await ok('Delete from a stale copy is a conflict', `select public.scout_push_delete('${r5}', '${first.row.updated_at}') as r`, (r) => r[0].r.status === 'conflict');
+    const [{ u: cur5 }] = await ok('Read current copy', `select updated_at::text as u from public.scout_reports where id='${r5}'`);
+    await ok('Delete from the current copy is applied', `select public.scout_push_delete('${r5}', (select updated_at from public.scout_reports where id='${r5}')) as r`, (r) => r[0].r.status === 'ok');
+    await ok('Repeating that delete is a no-op ok', `select public.scout_push_delete('${r5}', '${cur5}') as r`, (r) => r[0].r.status === 'ok');
+    const ev6 = '66666666-6666-6666-6666-666666666666';
+    await ok('Event made offline keeps its id', `select public.scout_push_event('{"id":"${ev6}","team_id":"${teamA}","name":"Offline Regional"}'::jsonb) as r`, (r) => r[0].r.row.id === ev6);
+    await ok('Retrying the event push makes no second event', `select public.scout_push_event('{"id":"${ev6}","team_id":"${teamA}","name":"Offline Regional"}'::jsonb) as r`, (r) => r[0].r.status === 'ok');
+    await ok('One event with that id', `select count(*)::int as n from public.scout_events where team_id='${teamA}'`, (r) => r[0].n === 2);
+    await ok('Pick list pushed', `select public.scout_push_picks('{"event_id":"${evA}","team_id":"${teamA}","data":[{"robot":"456","dnp":false}]}'::jsonb, null, '${rev1}') as r`, (r) => r[0].r.status === 'ok');
+    await fails('Malformed pick list rejected', `select public.scout_push_picks('{"event_id":"${evA}","team_id":"${teamA}","data":[{"robot":"<b>"}]}'::jsonb, (select updated_at from public.scout_picklists where event_id='${evA}'), '${rev2}')`);
+
     await as(C);
     await db.query(`select public.scout_accept_terms('2026-11-01')`);
     const [{ t: teamC }] = await ok('Second team created', `select public.scout_create_team('456','Gamma','Cy') as t`);
@@ -84,6 +104,11 @@ const A = U(1), B = U(2), C = U(3), D = U(4), E = U(5);
       values (gen_random_uuid(),'${teamA}','${evA}',1,'1','red',1,'{}')`, /row-level security/);
     await fails("Cannot file into own team using another team's event", `insert into public.scout_reports(id, team_id, event_id, match_number, robot_number, alliance, station, data)
       values (gen_random_uuid(),'${teamC}','${evA}',1,'1','red',1,'{}')`, /row-level security/);
+    await fails('Offline push cannot file into another team', `select public.scout_push_report('{"id":"77777777-7777-7777-7777-777777777777","team_id":"${teamA}","event_id":"${evA}","match_number":1,"robot_number":"1","alliance":"red","station":1,"data":{"v":1}}'::jsonb, null, '${rev1}')`, /row-level security/);
+    await fails('Offline push cannot take over another team event id', `select public.scout_push_event('{"id":"${ev6}","team_id":"${teamC}","name":"Hijack"}'::jsonb)`, /another team/);
+    await ok('Other team cannot see the pick list', `select * from public.scout_picklists`, empty);
+    await fails('Offline push cannot overwrite another team pick list', `select public.scout_push_picks('{"event_id":"${evA}","team_id":"${teamC}","data":[]}'::jsonb, null, '${rev2}')`);
+    await db.exec(`reset role; delete from public.scout_events where id='${ev6}';`); await as(C);
     await fails('Upsert cannot hijack another team report id', `insert into public.scout_reports(id, team_id, event_id, match_number, robot_number, alliance, station, data)
       values ('${r1}','${teamC}','${evA}',1,'1','red',1,'{}') on conflict (id) do update set data = excluded.data`);
     await ok('Other team update of report affects nothing', `update public.scout_reports set data='{}' where id='${r1}' returning id`, empty);
