@@ -6,6 +6,7 @@ import {
   PHASES, ACTIONS, STATION, PAYLOAD, START, MATCH_TYPES, DEFENSE, TAGS, DRIVE, MAX_COUNT, TERMS_VERSION,
   pointsOf, coresOf, cleanReport, cleanPit, summarize, matchLabel, robotKey, matchOrder,
 } from './game.js';
+import { analyse, ROLES } from './insights.js';
 
 import { takeHandoff } from '../handoff.js';
 
@@ -36,6 +37,8 @@ const ICON = {
   logout: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/>', trash: '<path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/>', home: '<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>', play: '<path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5z"/>',
   star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>', flag: '<path d="M5 21V4M5 4h12l-2 4 2 4H5"/>',
+  target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.9"/>',
+  off: '<path d="M7 18a5 5 0 0 1-1.3-9.8M9.7 6.3A6 6 0 0 1 18 9a4.5 4.5 0 0 1 2.3 8.1M17 18H7M3.5 3.5l17 17"/>',
 };
 const MARK = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="#f2ede3" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#e2531b" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -57,6 +60,15 @@ const raw = (svg) => { const t = document.createElement('template'); t.innerHTML
 const $ = (s, r = document) => r.querySelector(s);
 const fmt = (x, d = 1) => (x == null || Number.isNaN(x) ? '—' : (Math.round(x * 10 ** d) / 10 ** d).toFixed(d));
 const pct = (x) => (x == null ? '—' : `${Math.round(x * 100)}%`);
+// "just now", "4 min ago", "2 h ago", or a time of day for anything older than today
+function ago(t) {
+  if (!t) return null;
+  const s = (Date.now() - t) / 1000;
+  if (s < 45) return 'just now';
+  if (s < 3600) return `${Math.round(s / 60)} min ago`;
+  if (s < 6 * 3600) return `${Math.round(s / 3600)} h ago`;
+  return `at ${new Date(t).toLocaleString(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' })}`;
+}
 const vibrate = (ms = 8) => { try { navigator.vibrate?.(ms); } catch { /* not supported */ } };
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
@@ -180,6 +192,10 @@ const store = new Store();
 const S = {
   session: null, user: null, consent: null, mem: null, events: [], eventId: null, reports: [], pits: [], admin: false,
   view: ls.get('od.scout.view', 'scout'), sort: 'avg', search: '', loading: true, adminTeam: null,
+  syncedAt: null,          // when this event's reports last came from the server (not the phone's copy)
+  ovGated: false, ovPreview: false,
+  ovSource: ls.get('od.scout.ovsource', 'all') === 'ours' ? 'ours' : 'all',   // 009: our scouts only, or every team's
+  pool: null,              // every team's reports at this competition (team 009 / staff only)
 };
 const DRAFT_KEY = 'od.scout.draft';
 const blankForm = (keep = {}) => ({ id: null, event_id: null, match_type: keep.match_type || 'qm', match_number: keep.match_number || 1, robot_number: '', alliance: keep.alliance || 'red', station: keep.station || 1, phase: 'm', data: { tags: [] } });
@@ -203,6 +219,10 @@ const savePit = () => ls.set(PIT_KEY, pitForm);
 
 const app = $('#app');
 const isLead = () => ['owner', 'lead'].includes(S.mem?.role);
+// the event overview and pick advice are Overdrive's own: only shown to members of team 009
+const is009 = () => robotKey(S.mem?.team?.number) === '9';
+const lsDel = (k) => { try { localStorage.removeItem(k); } catch { /* storage blocked */ } };
+const isConn = (e) => /connection|offline|fetch|timed out/i.test(e?.message || '');
 const memberName = (uid, list = S.mem?.members) => list?.find((m) => m.user_id === uid)?.display_name || (uid ? 'Teammate' : 'Former member');
 const currentEvent = () => S.events.find((e) => e.id === S.eventId) || null;
 
@@ -212,9 +232,17 @@ async function boot() {
   store.on(renderSync);
   // a report that has left the queue is on the server: drop its "waiting to sync" mark
   store.on(() => {
-    const q = new Set(store.pending().filter((x) => x.kind === 'report').map((x) => x.row.id));
-    for (const r of S.reports) if (r.pending && !q.has(r.id)) r.pending = false;
+    const q = new Set(store.pending().filter((x) => x.kind === 'report' || x.kind === 'pit').map((x) => x.row.id));
+    for (const r of S.reports) if (r.pending && !q.has(r.id)) { r.pending = false; r.created_on_server = true; }
+    for (const p of S.pits) if (p.pending && !q.has(p.id)) p.pending = false;
+    for (const e of S.events) if (e.local && !store.pendingOf('event').some((x) => x.row.id === e.id)) delete e.local;
+    // the overview waits for this phone's reports to reach the server: open it the moment they have
+    if (S.view === 'overview' && S.ovGated && !store.syncing && S.mem && !store.pending(S.mem.team.id).length && !document.querySelector('.scrim')) {
+      S.ovGated = false; lastPull = Date.now();
+      loadEventData().catch(() => {}).finally(() => { if (S.view === 'overview' && !document.querySelector('.scrim')) renderView(); });
+    }
   });
+  store.onRemap = remapEvent;
   store.api.onAuth((s) => { if ((s?.user?.id || null) !== (S.user?.id || null)) { S.session = s; S.user = s?.user || null; route(); } });
   try { S.session = await store.api.session(); } catch { S.session = null; }
   S.user = S.session?.user || null;
@@ -235,23 +263,37 @@ async function route() {
   S.loading = true;
   document.body.dataset.stage = 'loading';
   store.setUser(S.user?.id);
-  if (!S.user) { if (DEMO) return renderSignIn(); location.replace(signInUrl('/scout')); return; }
+  if (!S.user) {
+    if (DEMO) return renderSignIn();
+    if (!store.online) return renderOffline();          // the sign-in page needs a connection; say so instead of a browser error
+    location.replace(signInUrl('/scout')); return;
+  }
+  const uid = S.user.id;
+  // offline first: a phone that has opened Scout before opens straight from its own copy, then checks the server
+  const known = store.cacheGet(`mem.${uid}`);
+  if (known && store.cacheGet(`consent.${uid}`) === TERMS_VERSION) {
+    S.mem = known; S.consent = { terms_version: TERMS_VERSION }; S.admin = !!store.cacheGet(`admin.${uid}`);
+    loadEventsCached();
+    S.loading = false;
+    renderShell();
+    revalidate(seq).catch(() => {});
+    return;
+  }
   try {
-    const uid = S.user.id;
     S.consent = await store.api.consent(uid);
     if (stale()) return;
     if (!S.consent || S.consent.terms_version !== TERMS_VERSION) return renderConsent();
+    store.cacheSet(`consent.${uid}`, S.consent.terms_version);
     S.mem = await store.api.membership(uid);
     if (stale()) return;
     store.cacheSet(`mem.${uid}`, S.mem);
   } catch (e) {
     if (stale()) return;
-    const cached = store.cacheGet(`mem.${S.user.id}`);
-    if (cached && /connection/i.test(friendly(e))) { S.mem = cached; S.consent = { cached: true }; toast('Offline: showing your last synced data'); }
-    else return renderFatal(friendly(e), true);
+    if (known && isConn(e)) { S.mem = known; S.consent = { cached: true }; }
+    else return isConn(e) ? renderOffline(true) : renderFatal(friendly(e), true);
   }
   if (!S.mem) return renderTeamSetup();
-  try { S.admin = !!(await store.api.isAdmin()); } catch { S.admin = false; }
+  try { S.admin = !!(await store.api.isAdmin()); store.cacheSet(`admin.${uid}`, S.admin); } catch { S.admin = !!store.cacheGet(`admin.${uid}`); }
   if (stale()) return;
   await loadEvents();
   if (stale()) return;
@@ -259,31 +301,105 @@ async function route() {
   renderShell();
   store.flush().catch(() => {});
 }
+// behind an offline-first open: confirm the account, team and events with the server and quietly bring them up to date
+async function revalidate(seq) {
+  const uid = S.user.id, stale = () => seq !== routeSeq;
+  let consent, mem;
+  try { consent = await store.api.consent(uid); } catch { return; }               // no connection: the phone's copy stands
+  if (stale()) return;
+  if (!consent || consent.terms_version !== TERMS_VERSION) { store.cacheSet(`consent.${uid}`, null); route(); return; }
+  try { mem = await store.api.membership(uid); } catch { return; }
+  if (stale()) return;
+  if (!mem) { forgetTeam(); route(); return; }
+  S.mem = mem; store.cacheSet(`mem.${uid}`, mem);
+  try { S.admin = !!(await store.api.isAdmin()); store.cacheSet(`admin.${uid}`, S.admin); } catch { /* keep the last answer */ }
+  if (stale()) return;
+  const before = S.eventId;
+  const fresh = await loadEvents();
+  if (stale()) return;
+  lastPull = Date.now();
+  afterPull(fresh, S.eventId !== before);
+  store.flush().catch(() => {});
+}
+function forgetTeam() { if (S.user) store.cacheSet(`mem.${S.user.id}`, null); S.mem = null; }
 
-async function loadEvents() {
-  const tid = S.mem.team.id;
-  try { S.events = await store.api.events(tid); store.cacheSet(`events.${tid}`, S.events); }
-  catch { S.events = store.cacheGet(`events.${tid}`) || []; }
+// events made on this phone with no signal wait in the queue; they are listed (and filed to) like any other
+const localEvents = (tid) => store.pendingOf('event', tid).map((q) => ({ ...q.row, created_at: new Date(q.at).toISOString(), local: true }));
+function chooseEvent(tid) {
   const saved = ls.get(`od.scout.event.${tid}`, null);
   S.eventId = S.events.some((e) => e.id === saved) ? saved : S.events[0]?.id || null;
-  await loadEventData();
+}
+function loadEventsCached() {
+  const tid = S.mem.team.id;
+  S.events = [...localEvents(tid), ...(store.cacheGet(`events.${tid}`) || [])];
+  chooseEvent(tid);
+  loadEventDataCached();
+}
+async function loadEvents() {
+  const tid = S.mem.team.id;
+  try { const server = await store.api.events(tid); store.cacheSet(`events.${tid}`, server); S.events = [...localEvents(tid), ...server]; }
+  catch { S.events = [...localEvents(tid), ...(store.cacheGet(`events.${tid}`) || [])]; }
+  chooseEvent(tid);
+  return loadEventData();
+}
+function loadEventDataCached() {
+  S.reports = []; S.pits = []; S.syncedAt = null;
+  if (!S.eventId) return;
+  const c = store.cacheGet(`ev.${S.eventId}`);
+  if (c) { S.reports = c.reports || []; S.pits = c.pits || []; S.syncedAt = c.at || null; }
+  mergePending();
 }
 async function loadEventData() {
-  let fresh = false;
-  S.reports = []; S.pits = [];
-  if (!S.eventId) return false;
-  try {
-    [S.reports, S.pits] = await Promise.all([store.api.reports(S.eventId), store.api.pits(S.eventId)]);
-    store.cacheSet(`ev.${S.eventId}`, { reports: S.reports, pits: S.pits });
-    fresh = true;
-  } catch {
-    const c = store.cacheGet(`ev.${S.eventId}`); if (c) { S.reports = c.reports || []; S.pits = c.pits || []; }
+  if (!S.eventId) { S.reports = []; S.pits = []; S.syncedAt = null; return false; }
+  const id = S.eventId;
+  if (!S.events.find((e) => e.id === id)?.local) {
+    try {
+      const [reports, pits] = await Promise.all([store.api.reports(id), store.api.pits(id)]);
+      if (S.eventId !== id) return false;                 // they switched events while this loaded
+      S.reports = reports; S.pits = pits; S.syncedAt = Date.now();
+      store.cacheSet(`ev.${id}`, { reports, pits, at: S.syncedAt });
+      mergePending();
+      return true;
+    } catch { /* no connection: the phone's copy below */ }
   }
-  // reports still waiting to sync count too
-  for (const q of store.pending(S.mem.team.id)) {
-    if (q.kind === 'report' && q.row.event_id === S.eventId && !S.reports.some((r) => r.id === q.row.id)) S.reports.push({ ...q.row, scout_id: S.user.id, points: pointsOf(q.row.data), pending: true });
+  if (S.eventId === id) loadEventDataCached();
+  return false;
+}
+// what is still waiting on this phone counts too: new and edited reports, pit reports, and deletions
+function mergePending() {
+  const tid = S.mem.team.id;
+  const gone = new Set(store.pendingOf('del', tid).map((q) => q.row.id));
+  if (gone.size) S.reports = S.reports.filter((r) => !gone.has(r.id));
+  for (const q of store.pending(tid)) {
+    if (q.row.event_id !== S.eventId) continue;
+    if (q.kind === 'report') {
+      const i = S.reports.findIndex((r) => r.id === q.row.id);
+      const row = { ...q.row, scout_id: i >= 0 ? S.reports[i].scout_id : S.user.id, points: pointsOf(q.row.data), pending: true, created_on_server: i >= 0, created_at: i >= 0 ? S.reports[i].created_at : new Date(q.at).toISOString() };
+      if (i >= 0) S.reports[i] = row; else S.reports.push(row);
+    } else if (q.kind === 'pit') {
+      const i = S.pits.findIndex((p) => robotKey(p.robot_number) === robotKey(q.row.robot_number));
+      if (i >= 0) S.pits[i] = { ...S.pits[i], data: q.row.data, pending: true }; else S.pits.push({ ...q.row, scout_id: S.user.id, pending: true });
+    }
   }
-  return fresh;
+}
+// an event made offline has reached the server under a new id: move everything that pointed at the old one
+function remapEvent(oldId, ev) {
+  const tid = ev.team_id;
+  const i = S.events.findIndex((e) => e.id === oldId);
+  const row = { id: ev.id, team_id: ev.team_id, name: ev.name, starts_on: ev.starts_on, created_at: ev.created_at };
+  if (i >= 0) S.events[i] = row; else if (S.mem?.team?.id === tid) S.events.unshift(row);
+  const picks = ls.get(`od.scout.picks.${oldId}`, null);
+  if (picks) { ls.set(`od.scout.picks.${ev.id}`, picks); lsDel(`od.scout.picks.${oldId}`); }
+  if (ls.get(`od.scout.event.${tid}`, null) === oldId) ls.set(`od.scout.event.${tid}`, ev.id);
+  if (S.eventId === oldId) S.eventId = ev.id;
+  for (const r of S.reports) if (r.event_id === oldId) r.event_id = ev.id;
+  for (const p of S.pits) if (p.event_id === oldId) p.event_id = ev.id;
+  if (form.event_id === oldId) form.event_id = ev.id;
+  if (form.resume?.event_id === oldId) form.resume.event_id = ev.id;
+  ls.set(DRAFT_KEY, form);
+  const cached = store.cacheGet(`events.${tid}`) || [];
+  store.cacheSet(`events.${tid}`, [row, ...cached.filter((e) => e.id !== ev.id)]);
+  if (S.mem && document.body.dataset.stage === 'app') renderTopbar();
 }
 
 function stage(name, ...kids) {
@@ -299,6 +415,17 @@ function renderFatal(msg, canRetry) {
     h('div', { class: 'row' }, canRetry ? h('button', { class: 'b b-primary', type: 'button', text: 'Try again', onclick: () => route() }) : null,
       S.user ? h('button', { class: 'b b-glass', type: 'button', text: 'Sign out', onclick: () => signOut() }) : null))));
 }
+
+function renderOffline(signedIn) {
+  stage('gate', h('section', { class: 'gate' }, h('div', { class: 'gate-card card strong' },
+    h('div', { class: 'gate-mark' }, raw(MARK)), h('p', { class: 'eyebrow', text: 'No connection' }),
+    h('h1', { text: 'You’re offline' }),
+    h('p', { class: 'sub', text: signedIn
+      ? 'Scout needs a connection once on this phone to load your team. After that it opens and works with no signal at all.'
+      : 'Signing in needs a connection. Once you have signed in on this phone, Scout opens and works with no signal at all.' }),
+    h('div', { class: 'row start' }, h('button', { class: 'b b-primary', type: 'button', onclick: () => route() }, icon('refresh'), h('span', { text: 'Try again' }))))));
+}
+window.addEventListener('online', () => { if (document.body.dataset.stage === 'gate' && !S.mem) route(); });
 
 function renderSignIn(note) {
   const btn = h('button', { class: 'b b-primary lg block', type: 'button' }, h('span', { text: 'Sign in with email' }));
@@ -381,7 +508,7 @@ async function signOut() {
   const waiting = store.pending().length;
   try { await store.api.signOut(); } catch { /* signed out locally anyway */ }
   store.clearCache(); form = blankForm(); pitForm = { robot_number: '', data: {} };
-  S.user = null; S.session = null; S.mem = null; S.reports = []; S.pits = []; S.events = []; S.adminTeam = null;
+  S.user = null; S.session = null; S.mem = null; S.reports = []; S.pits = []; S.events = []; S.adminTeam = null; S.pool = null;
   if (waiting) toast(`${waiting} report${waiting === 1 ? '' : 's'} not synced yet. They stay on this device and upload next time you sign in.`, 5000);
   route();
 }
@@ -391,8 +518,23 @@ const TABS = [
   { id: 'scout', label: 'Scout', icon: 'clip' }, { id: 'pit', label: 'Pit', icon: 'wrench' }, { id: 'data', label: 'Data', icon: 'chart' },
   { id: 'picks', label: 'Picks', icon: 'list' }, { id: 'team', label: 'Team', icon: 'users' },
 ];
+const OVERVIEW_TAB = { id: 'overview', label: 'Overview', icon: 'target' };
+function currentTabs() {
+  const tabs = [...TABS];
+  if (is009()) tabs.splice(3, 0, OVERVIEW_TAB);
+  if (S.admin) tabs.push({ id: 'admin', label: is009() ? 'League' : 'Admin', icon: 'shield' });
+  return tabs;
+}
+function renderTopbar() {
+  const ev = currentEvent();
+  $('#tb-team').textContent = `${S.mem.team.number}`;
+  $('#tb-team-name').textContent = S.mem.team.name;
+  $('#tb-event').textContent = ev ? ev.name : 'No event';
+  $('#tb-avatar').textContent = initials(S.mem.displayName || S.user.email || '?');
+  renderSync();
+}
 function renderShell() {
-  const tabs = S.admin ? [...TABS, { id: 'admin', label: 'Admin', icon: 'shield' }] : TABS;
+  const tabs = currentTabs();
   if (!tabs.some((t) => t.id === S.view)) S.view = 'scout';
   const bar = $('#tabbar');
   if (bar.dataset.tabs !== tabs.map((t) => t.id).join()) {
@@ -402,12 +544,7 @@ function renderShell() {
   const idx = tabs.findIndex((t) => t.id === S.view);
   for (const b of bar.querySelectorAll('.tab')) { if (b.dataset.tab === S.view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
   bar.style.setProperty('--n', String(tabs.length)); bar.style.setProperty('--i', String(idx));
-  const ev = currentEvent();
-  $('#tb-team').textContent = `${S.mem.team.number}`;
-  $('#tb-team-name').textContent = S.mem.team.name;
-  $('#tb-event').textContent = ev ? ev.name : 'No event';
-  $('#tb-avatar').textContent = initials(S.mem.displayName || S.user.email || '?');
-  renderSync();
+  renderTopbar();
   const arriving = document.body.dataset.stage !== 'app';
   renderView();
   if (arriving) window.scrollTo(0, 0);
@@ -418,20 +555,45 @@ const graphemes = (w) => (typeof Intl !== 'undefined' && Intl.Segmenter ? [...ne
 const initials = (n) => String(n).trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => { const g = graphemes(w)[0] || ''; return g.length === 1 ? g.toUpperCase() : g; }).join('') || '?';
 let lastTab = 0;
 function go(view) {
-  const order = [...TABS.map((t) => t.id), 'admin'], next = order.indexOf(view);
+  const order = currentTabs().map((t) => t.id), next = order.indexOf(view);
   app.dataset.dir = next >= lastTab ? 'fwd' : 'back'; lastTab = next;
+  if (view === 'overview' && S.view !== 'overview') { S.ovPreview = false; lastPull = 0; pull().catch(() => {}); }   // fetch teammates' latest first
   S.view = view; ls.set('od.scout.view', view); renderShell(); window.scrollTo(0, 0);
 }
 function renderSync() {
   const el = $('#tb-sync'); if (!el || !S.mem) return;
   const q = store.pending(S.mem.team.id), bad = q.filter((x) => x.error).length;
-  el.dataset.state = store.syncing ? 'busy' : bad ? 'error' : q.length ? 'waiting' : 'ok';
+  const off = !store.online;
+  el.dataset.state = store.syncing ? 'busy' : bad ? 'error' : off ? 'offline' : q.length ? 'waiting' : 'ok';
+  el.querySelector('svg').innerHTML = ICON[off && !store.syncing ? 'off' : 'cloud'];
   $('#tb-sync-n').textContent = q.length ? String(q.length) : '';
-  el.title = store.syncing ? 'Syncing…' : bad ? `${bad} report(s) could not be saved` : q.length ? `${q.length} waiting to sync` : 'All reports synced';
+  $('#tb-sync-l').textContent = off ? 'Offline' : '';
+  el.title = store.syncing ? 'Syncing…' : bad ? `${bad} item(s) could not be saved` : off ? (q.length ? `Offline · ${q.length} saved on this phone, will sync` : 'Offline · everything you filed is saved') : q.length ? `${q.length} waiting to sync` : 'All reports synced';
   el.setAttribute('aria-label', el.title);
+  for (const s of document.querySelectorAll('[data-stamp]')) s.textContent = stampText();
 }
+// how fresh the numbers on screen are
+function stampText() {
+  const when = ago(S.syncedAt);
+  if (!store.online) return when ? `Offline · last synced ${when}` : 'Offline · not synced on this phone yet';
+  if (S.events.find((e) => e.id === S.eventId)?.local) return 'New event · syncs when the connection is back';
+  return when ? `Synced ${when}` : 'Syncing…';
+}
+function syncStamp() {
+  const b = h('button', { class: 'stamp', type: 'button', 'aria-label': 'Refresh from the server' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), h('span', { 'data-stamp': '', text: stampText() }), icon('refresh'));
+  b.addEventListener('click', async () => {
+    b.classList.add('busy');
+    await store.flush().catch(() => {});
+    const fresh = await loadEventData();
+    b.classList.remove('busy');
+    if (!['scout', 'pit'].includes(S.view)) renderView(); else renderSync();
+    toast(fresh ? 'Up to date' : 'Offline: showing the last data you synced');
+  });
+  return b;
+}
+setInterval(() => { for (const s of document.querySelectorAll('[data-stamp]')) s.textContent = stampText(); }, 30000);
 function renderView() {
-  const v = { scout: viewScout, pit: viewPit, data: viewData, picks: viewPicks, team: viewTeam, admin: viewAdmin }[S.view] || viewScout;
+  const v = { scout: viewScout, pit: viewPit, data: viewData, picks: viewPicks, team: viewTeam, admin: viewAdmin, overview: viewOverview }[S.view] || viewScout;
   app.replaceChildren(v());
 }
 
@@ -572,6 +734,11 @@ function viewScout() {
   return view;
 }
 
+// a form nothing has been typed into follows the event you switch to (a half-filled one stays where it started)
+function retargetBlankForm() {
+  const touched = form.id || form.robot_number || Object.entries(form.data || {}).some(([k, v]) => k !== 'tags' && v) || form.data?.tags?.length;
+  if (!touched && S.eventId && form.event_id !== S.eventId) { form.event_id = S.eventId; ls.set(DRAFT_KEY, form); }
+}
 function formEventNote() {
   const ev = S.events.find((e) => e.id === form.event_id), cur = currentEvent();
   if (ev && cur && ev.id !== cur.id) return `Filing to ${ev.name} (started there)`;
@@ -619,7 +786,7 @@ function submitReport(robotInput, btn, force = false) {
   if (row.event_id !== S.eventId) { if (existing >= 0) S.reports.splice(existing, 1); }
   else if (existing >= 0) S.reports[existing] = { ...S.reports[existing], ...local, scout_id: S.reports[existing].scout_id || local.scout_id, created_on_server: !S.reports[existing].pending || S.reports[existing].created_on_server }; else S.reports.push(local);
   store.enqueue('report', row).then((res) => { const r = S.reports.find((x) => x.id === row.id); if (r && res.synced) r.pending = false; }).catch((e) => toast(`Not saved: ${friendly(e)} Open Sync to review it.`, 5000));
-  toast(`${form.id && !form.replaced ? 'Updated' : navigator.onLine === false ? 'Saved on this phone, will sync' : 'Saved'} · ${matchLabel(row.match_type, row.match_number)} · ${row.robot_number}`);
+  toast(`${form.id && !form.replaced ? 'Updated' : !store.online ? 'Saved on this phone, will sync' : 'Saved'} · ${matchLabel(row.match_type, row.match_number)} · ${row.robot_number}`);
   vibrate([12, 40, 12]);
   const was = form;
   if (was.resume) form = was.resume;                     // back to the match the scout was on before editing
@@ -644,9 +811,14 @@ function myReportsSheet() {
         h('button', { class: 'b b-ghost sm icon', type: 'button', 'aria-label': 'Edit report', onclick: () => { close(); editReport(r); } }, icon('edit')),
         h('button', { class: 'b b-ghost sm icon', type: 'button', 'aria-label': 'Delete report', onclick: () => confirmSheet('Delete this report?', `${matchLabel(r.match_type, r.match_number)}, robot ${r.robot_number}. This cannot be undone.`, 'Delete', true, async () => {
           const onlyLocal = !!r.pending && !r.created_on_server;
-          if (!onlyLocal) await store.api.deleteReport(r.id);
-          store.dropWhere((x) => x.row.id === r.id);
-          S.reports = S.reports.filter((x) => x.id !== r.id); close(); toast('Report deleted'); renderView();
+          let later = false;
+          if (!onlyLocal) {
+            // no signal: the deletion waits on the phone like a report would, and the report leaves the lists now
+            try { if (!store.online) throw new Error('No connection'); await store.api.deleteReport(r.id); } catch (e) { if (!isConn(e)) throw e; later = true; }
+          }
+          store.dropWhere((x) => x.kind === 'report' && x.row.id === r.id);
+          if (later) store.enqueue('del', { id: r.id, team_id: S.mem.team.id }).catch(() => {});
+          S.reports = S.reports.filter((x) => x.id !== r.id); close(); toast(later ? 'Deleted on this phone · syncs when you are back online' : 'Report deleted'); renderView();
         }) }, icon('trash'))));
     }
     body.append(list);
@@ -688,9 +860,9 @@ function viewPit() {
     const fresh = Object.fromEntries(Object.entries(pitForm.data).filter(([, v]) => v !== undefined && v !== ''));
     const data = existing && !pitForm.loaded ? cleanPit({ ...(existing.data || {}), ...fresh }) : cleanPit(pitForm.data);
     const row = { id: existing?.id || uuid(), team_id: S.mem.team.id, event_id: S.eventId, robot_number: existing?.robot_number || pitForm.robot_number, data };
-    if (existing) existing.data = row.data; else S.pits.push({ ...row, scout_id: S.user.id });
+    if (existing) { existing.data = row.data; existing.pending = true; } else S.pits.push({ ...row, scout_id: S.user.id, pending: true });
     store.enqueue('pit', row).catch((e) => toast(`Not saved: ${friendly(e)}`, 5000));
-    toast(`Pit report saved · ${row.robot_number}`); vibrate([12, 40, 12]);
+    toast(`Pit report saved${store.online ? "" : " on this phone, will sync"} · ${row.robot_number}`); vibrate([12, 40, 12]);
     pitForm = { robot_number: '', data: {} }; savePit(); renderView();
   });
   const sw = (k, label) => toggle(label, d[k], (v) => { pitForm.data[k] = v; savePit(); });
@@ -801,7 +973,7 @@ function robotSheet(robot, reports, pits, members = S.mem.members) {
           h('span', { class: 'muted', text: d.noshow ? 'No show' : `${coresOf(d)} cores · ${STATION.find((s) => s.v === (d.station || 'none')).label}${d.died ? ' · broke down' : ''}` }),
           h('span', { class: 'rpts', text: d.noshow ? '0' : `${pointsOf(d)} pts` })),
         d.note ? h('p', { class: 'quote', text: d.note }) : null,
-        h('small', { class: 'muted', text: `Scouted by ${memberName(r.scout_id, members)}` })));
+        h('small', { class: 'muted', text: `Scouted by ${scoutLabel(r, members)}` })));
     }
     body.append(h('h3', { class: 'card-t', text: 'Matches' }), list);
     if (S.view !== 'admin') body.append(h('div', { class: 'row' }, h('button', { class: 'b b-glass', type: 'button', onclick: () => { addPick(robot); toast(`${robot} added to your pick list`); } }, icon('star'), h('span', { text: 'Add to pick list' }))));
@@ -829,9 +1001,227 @@ function teamDetail(list, sum) {
 function viewData() {
   if (!S.eventId) return h('section', { class: 'view' }, noEvent());
   const ev = currentEvent();
-  const wrap = h('section', { class: 'view' }, rankingsBlock(S.reports, S.pits, { title: 'Team rankings', sub: ev?.name, exportName: `${S.mem.team.number}-${ev?.name || 'event'}` }));
-  wrap.append(h('div', { class: 'row end' }, h('button', { class: 'b b-ghost sm', type: 'button', onclick: async () => { const fresh = await loadEventData(); renderView(); toast(fresh ? 'Up to date' : 'Offline: showing the last data you synced'); } }, icon('refresh'), h('span', { text: 'Refresh' }))));
+  const block = rankingsBlock(S.reports, S.pits, { title: 'Team rankings', sub: ev?.name, exportName: `${S.mem.team.number}-${ev?.name || 'event'}` });
+  block.querySelector('.view-head')?.after(syncStamp());
+  return h('section', { class: 'view' }, block);
+}
+
+// ------------------------------------------------------------------ event overview (Overdrive 009 only)
+function viewOverview() {
+  if (!is009()) { S.view = 'scout'; return viewScout(); }           // never drawn for any other team
+  if (!S.eventId) return h('section', { class: 'view' }, noEvent());
+  const ev = currentEvent(), tid = S.mem.team.id;
+  const head = h('div', { class: 'view-head' }, h('div', {}, h('p', { class: 'eyebrow', text: `Overdrive 009 only · ${ev?.name || ''}` }), h('h1', { text: 'Event overview' })));
+  const wrap = h('section', { class: 'view ov' }, head, syncStamp());
+  // team 009 reads every team's scouting: pool the reports every team filed at this same competition
+  const pooled = S.admin && S.ovSource === 'all';
+  if (S.admin) {
+    const nTeams = poolTeamsAt().length;
+    wrap.append(h('div', { class: 'ov-src' },
+      seg([{ v: 'ours', label: 'Our scouts' }, { v: 'all', label: nTeams > 1 ? `All teams (${nTeams})` : 'All teams' }], S.ovSource, (v) => { S.ovSource = v; ls.set('od.scout.ovsource', v); renderView(); }, { label: 'Whose scouting' }),
+      pooled ? h('button', { class: 'b b-ghost sm', type: 'button', onclick: () => poolSheet() }, icon('cal'), h('span', { text: 'Choose events' })) : null));
+  }
+
+  // the overview is built from everything on the server, so it waits for this phone's reports to get there
+  const waiting = store.pending(tid);
+  S.ovGated = waiting.length > 0 && !S.ovPreview;
+  if (S.ovGated) { wrap.append(ovSyncGate(waiting)); return wrap; }
+
+  if (pooled) {
+    const fresh = S.pool && S.pool.eventId === S.eventId;
+    if (!fresh || (store.online && Date.now() - (S.pool.at || 0) > 60000)) refreshPool();
+    if (!fresh) { wrap.append(h('p', { class: 'muted pad', text: store.online ? 'Gathering every team\u2019s scouting for this competition\u2026' : 'Offline, and all teams\u2019 scouting has not been loaded on this phone yet. Switch to Our scouts above.' })); return wrap; }
+  }
+  const src = pooled ? poolData() : { reports: S.reports, pits: S.pits };
+  const reports = src.reports.filter((r) => r.match_type !== 'pr');
+  if (!reports.length) {
+    wrap.append(h('div', { class: 'empty card' }, h('div', { class: 'empty-ico' }, icon('target')), h('h2', { text: 'Nothing to weigh up yet' }),
+      h('p', { class: 'sub', text: 'Once your scouts file qualification reports, this page ranks every team, lists what each does well and badly, and tells you who to pick.' })));
+    return wrap;
+  }
+  const A = analyse(reports, src.pits, { own: '9' });
+  const sheetFor = (r) => robotSheet(r.robot, src.reports, src.pits);
+  if (pooled) {
+    const by = new Map(); for (const r of reports) by.set(r.team_id, (by.get(r.team_id) || 0) + 1);
+    wrap.append(h('p', { class: 'ov-pool' }, h('b', { text: `Pooled from ${by.size} team${by.size === 1 ? '' : 's'}: ` }),
+      [...by].sort((a, b) => b[1] - a[1]).map(([tid, n]) => `${teamNumber(tid)} (${n})`).join(' \u00b7 '),
+      h('span', { class: 'muted', text: `${S.pool.at ? ` \u00b7 fetched ${ago(S.pool.at)}` : ''}. When two teams scouted the same robot in the same match, their numbers are averaged.` })));
+  }
+  if (S.ovPreview && waiting.length) wrap.append(h('p', { class: 'ov-warn', text: `Preview: ${waiting.length} item${waiting.length === 1 ? '' : 's'} on this phone not synced yet, so this may change.` }));
+
+  wrap.append(h('div', { class: 'stat-row' },
+    [[reports.length, 'reports'], [A.field.length, 'robots'], [new Set(reports.map((r) => `${r.match_type}${r.match_number}`)).size, 'matches'], [A.thin, 'thin samples']].map(([n, l]) => h('div', { class: 'tile' }, h('b', { text: String(n) }), h('span', { text: l })))));
+
+  // ---- who to pick
+  const [first, ...rest] = A.recs;
+  wrap.append(h('h2', { class: 'ov-h' }, h('span', { class: 'ov-n', text: '01' }), 'Who to pick'));
+  if (!first) wrap.append(h('p', { class: 'muted', text: 'No other robot has been scouted yet.' }));
+  else {
+    const picks = getPicks();
+    const onList = (r) => picks.some((p) => robotKey(p.robot) === r.key);
+    const lead = h('div', { class: 'card strong ov-lead' },
+      h('div', { class: 'ov-lead-top' },
+        h('div', {}, h('p', { class: 'eyebrow', text: 'First pick' }), h('button', { type: 'button', class: 'ov-big lnk-row', onclick: () => sheetFor(first.row) }, h('b', { text: first.row.robot }), h('small', { text: ROLES[first.row.role] }))),
+        h('div', { class: 'ov-val' }, h('b', { text: fmt(first.score) }), h('small', { text: 'pick score' }))),
+      h('ul', { class: 'ov-why' }, first.why.map((w) => h('li', { class: 'pro', text: w }))),
+      first.risk.length ? h('ul', { class: 'ov-why' }, first.risk.map((w) => h('li', { class: 'con', text: w }))) : null,
+      A.safer ? h('p', { class: 'ov-safer' }, 'Highest ceiling, but a gamble. ', h('button', { type: 'button', class: 'lnk', onclick: () => sheetFor(A.safer.row), text: `Safer choice: ${A.safer.row.robot}` }),
+        ` (score ${fmt(A.safer.score)}${A.safer.why[0] ? `, ${A.safer.why[0].charAt(0).toLowerCase()}${A.safer.why[0].slice(1)}` : ''}). Check ${first.row.robot}’s repairs in the pit before choosing.`) : null,
+      h('div', { class: 'row start' },
+        h('button', { class: 'b b-od sm', type: 'button', onclick: () => sheetFor(first.row) }, h('span', { text: 'Team details' })),
+        h('button', { class: 'b b-glass sm', type: 'button', disabled: onList(first.row), onclick: (e) => { addPick(first.row.robot); e.currentTarget.disabled = true; toast(`${first.row.robot} added to your pick list`); } }, icon('star'), h('span', { text: onList(first.row) ? 'On your pick list' : 'Add to pick list' }))));
+    const then = h('div', { class: 'ov-list' }, rest.slice(0, 5).map((x) => h('button', { type: 'button', class: 'ov-row', onclick: () => sheetFor(x.row) },
+      h('span', { class: 'rk', text: String(x.order) }),
+      h('span', { class: 'rt' }, h('b', { text: x.row.robot }), h('small', { text: ROLES[x.row.role] })),
+      h('span', { class: 'ov-line', text: x.why[0] || '' }),
+      h('span', { class: 'rs' }, h('b', { text: fmt(x.score) }), h('small', { text: 'score' })))));
+    const useOrder = h('button', { class: 'b b-glass sm', type: 'button', onclick: () => {
+      const apply = () => {
+        const keep = getPicks(), dnp = new Set(keep.filter((p) => p.dnp).map((p) => robotKey(p.robot)));
+        const order = A.recs.map((x) => x.row.robot).filter((r) => !dnp.has(robotKey(r)));
+        setPicks([...order.map((robot) => ({ robot, dnp: false })), ...keep.filter((p) => p.dnp)]);
+        toast('Pick list set to the recommended order');
+      };
+      if (getPicks().length) confirmSheet('Replace your pick list?', 'Your list is reordered to match these recommendations. Teams you marked DNP stay DNP.', 'Replace', false, async () => apply()); else apply();
+    } }, icon('list'), h('span', { text: 'Use this order for my pick list' }));
+    wrap.append(h('div', { class: 'ov-pick' }, lead, h('div', { class: 'ov-then' }, h('p', { class: 'eyebrow', text: 'Then' }), then, h('div', { class: 'row start' }, useOrder))));
+  }
+  // what 009 itself brings, and so what a partner should cover
+  const needs = A.own
+    ? (A.needs.length ? A.needs.map((n) => h('li', { class: 'need', text: n.text })) : [h('li', { class: 'pro', text: 'No clear gap: picks are ranked on pick score alone.' })])
+    : [h('li', { class: 'need', text: '009 has not been scouted at this event, so picks are ranked on pick score alone. File 009’s matches to get advice that fits our robot.' })];
+  wrap.append(h('div', { class: 'card ov-needs' }, h('h3', { class: 'card-t', text: 'What 009 needs from a partner' }), h('ul', { class: 'ov-why' }, needs)));
+
+  // sleepers and trap picks side by side
+  const mini = (title, sub, items, cls, empty) => h('div', { class: `card ov-mini ${cls}` }, h('h3', { class: 'card-t', text: title }), h('p', { class: 'sub', text: sub }),
+    items.length ? h('div', { class: 'ov-list' }, items.map((x) => h('button', { type: 'button', class: 'ov-row two', onclick: () => sheetFor(x.row) },
+      h('span', { class: 'rt' }, h('b', { text: x.row.robot }), h('small', { text: `${fmt(x.row.avg)} avg` })), h('span', { class: 'ov-line', text: x.why })))) : h('p', { class: 'muted', text: empty }));
+  wrap.append(h('div', { class: 'ov-two' },
+    mini('Sleepers', 'Outside the top six, but worth a second look.', A.sleepers, 'sleep', 'None stand out yet.'),
+    mini('Risky picks', 'Strong on paper, but stop or foul too often to trust blind.', A.avoid, 'trap', 'No risky high scorers. Good.')));
+
+  // ---- the best teams, side by side
+  wrap.append(h('h2', { class: 'ov-h' }, h('span', { class: 'ov-n', text: '02' }), 'The best teams'));
+  const top = A.rows.filter((r) => r.played).slice(0, 6);
+  wrap.append(h('div', { class: 'ov-table', role: 'table', 'aria-label': 'Best teams' },
+    h('div', { class: 'ov-tr head', role: 'row' }, ['#', 'Team', 'Pick score', 'Avg pts', 'Level Up', 'End game', 'Reliable'].map((t) => h('span', { role: 'columnheader', text: t }))),
+    top.map((r) => h('button', { type: 'button', class: `ov-tr${r.key === A.ownKey ? ' own' : ''}`, role: 'row', onclick: () => sheetFor(r) },
+      h('span', { class: 'rk', text: String(r.rank) }),
+      h('span', { class: 'rt' }, h('b', { text: r.robot }), h('small', { text: ROLES[r.role] })),
+      h('span', { class: 'num strong', text: fmt(r.value) }), h('span', { class: 'num', text: fmt(r.avg) }), h('span', { class: 'num', text: fmt(r.lvl) }),
+      h('span', { class: 'num', text: `${fmt(r.station)}` }), h('span', { class: 'num', text: pct(1 - r.died) })))));
+
+  // ---- every team: strengths and drawbacks
+  wrap.append(h('h2', { class: 'ov-h' }, h('span', { class: 'ov-n', text: '03' }), 'Every team, strengths and drawbacks'));
+  const q = h('input', { type: 'search', inputmode: 'numeric', placeholder: 'Find a team #', 'aria-label': 'Find a team number' });
+  const grid = h('div', { class: 'tr-grid' });
+  const cards = A.rows.map((r) => {
+    const c = h('article', { class: `tr-card${r.key === A.ownKey ? ' own' : ''}`, 'data-k': r.robot },
+      h('button', { type: 'button', class: 'tr-head', onclick: () => sheetFor(r) },
+        h('span', { class: 'rk', text: String(r.rank) }),
+        h('span', { class: 'rt' }, h('b', { text: r.robot }), h('small', { text: `${ROLES[r.role]} · ${r.n} match${r.n === 1 ? '' : 'es'}${r.conf === 'low' ? ' · low confidence' : ''}` })),
+        h('span', { class: 'rs' }, h('b', { text: fmt(r.value) }), h('small', { text: 'pick score' }))),
+      h('ul', { class: 'ov-why' }, r.strengths.length ? r.strengths.map((s) => h('li', { class: 'pro', text: s.text })) : h('li', { class: 'none', text: 'No standout strengths yet' })),
+      h('ul', { class: 'ov-why' }, r.drawbacks.length ? r.drawbacks.map((s) => h('li', { class: 'con', text: s.text })) : h('li', { class: 'none', text: 'No clear weaknesses' })));
+    grid.append(c);
+    return c;
+  });
+  q.addEventListener('input', () => { q.value = q.value.replace(/\D/g, ''); for (const c of cards) c.hidden = !!q.value && !c.dataset.k.includes(q.value); });
+  wrap.append(h('div', { class: 'tools' }, h('div', { class: 'field grow' }, icon('search'), q)), grid);
+
+  wrap.append(h('details', { class: 'ov-method' }, h('summary', { text: 'How the pick score works' }),
+    h('p', { text: `Pick score is the points a robot is expected to add each match. It starts from its qualification average, pulled towards the event average (${fmt(A.mean)}) when it has been seen only a few times, then takes off the points its fouls hand the other alliance, a little for swinging from match to match, and more for breaking down or not showing. Recommendations add a bonus when a robot covers what 009 is weakest at. Practice matches are left out. Strengths and drawbacks compare each team with the rest of this event.` })));
   return wrap;
+}
+function ovSyncGate(waiting) {
+  const off = !store.online, bad = waiting.filter((x) => x.error).length;
+  const go = h('button', { class: 'b b-od', type: 'button', disabled: off || store.syncing }, icon('refresh'), h('span', { text: store.syncing ? 'Syncing…' : 'Sync now' }));
+  go.addEventListener('click', async () => {
+    go.disabled = true; go.querySelector('span').textContent = 'Syncing…';
+    await store.flush({ retry: true }).catch(() => {});
+    const left = store.pending(S.mem.team.id);
+    if (left.length) { toast(left.some((x) => x.error) ? 'Some items were refused. Open Sync (the cloud at the top) to review them.' : 'Still offline. Will retry.'); renderView(); }
+  });
+  return h('div', { class: 'card strong ov-gate' },
+    h('div', { class: 'ov-gate-n' }, h('b', { text: String(waiting.length) }), h('span', { text: `item${waiting.length === 1 ? '' : 's'} on this phone` })),
+    h('div', {},
+      h('h2', { text: off ? 'Waiting for a connection' : 'Sync first' }),
+      h('p', { class: 'sub', text: bad ? `${bad} could not be saved. Review them from the cloud at the top, then sync again.`
+        : off ? 'The overview is built from every report on the server, so it opens once what you filed here has synced. It will open by itself when the connection is back.'
+          : 'The overview is built from every report on the server. Sync what you filed here first, so the picks use all of it.' }),
+      h('div', { class: 'row start' }, go,
+        h('button', { class: 'b b-ghost', type: 'button', text: 'Preview with what is here', onclick: () => { S.ovPreview = true; S.ovGated = false; renderView(); } }))));
+}
+
+// ------------------------------------------------------------------ every team's scouting (team 009 and staff, read only)
+// Every team makes its own event, so "the same competition" is matched by name (ignoring case, punctuation and the
+// year) or by the same start date. 009 can add or drop events by hand in Choose events.
+const evKey = (name) => String(name || '').toLowerCase().replace(/\b20\d\d\b/g, '').replace(/[^a-z0-9]+/g, '');
+function sameCompetition(a, b) {
+  if (a.starts_on && b.starts_on && Math.abs(Date.parse(a.starts_on) - Date.parse(b.starts_on)) > 7 * 864e5) return false;
+  if (evKey(a.name) && evKey(a.name) === evKey(b.name)) return true;
+  return !!(a.starts_on && b.starts_on && a.starts_on === b.starts_on);
+}
+const poolPrefKey = () => `od.scout.pool.${S.eventId}`;
+const poolPref = () => { const v = ls.get(poolPrefKey(), {}) || {}; return { add: Array.isArray(v.add) ? v.add : [], drop: Array.isArray(v.drop) ? v.drop : [] }; };
+function poolPicked(events = S.pool?.events || []) {
+  const ev = currentEvent(); if (!ev || !S.mem) return [];
+  const pref = poolPref();
+  return events.filter((e) => e.team_id !== S.mem.team.id && !pref.drop.includes(e.id) && (pref.add.includes(e.id) || sameCompetition(ev, e)));
+}
+const poolTeamsAt = () => (S.pool && S.pool.eventId === S.eventId ? [S.mem.team.id, ...new Set(poolPicked().map((e) => e.team_id))] : []);
+const teamNumber = (tid) => (tid === S.mem?.team?.id ? S.mem.team.number : (S.pool?.teams || []).find((t) => t.id === tid)?.number || (S.adminTeam?.id === tid ? S.adminTeam.number : '?'));
+function scoutLabel(r, members) {
+  if (r.team_id && S.mem && r.team_id !== S.mem.team.id && S.view !== 'admin') return `team ${teamNumber(r.team_id)}`;
+  return memberName(r.scout_id, members);
+}
+// our own reports come from this phone (so unsynced edits count); everyone else's from the server copy
+function poolData() {
+  const own = S.mem.team.id, ids = new Set(poolPicked().map((e) => e.id));
+  const theirs = (x) => x.team_id !== own && ids.has(x.event_id);
+  return { reports: [...S.reports, ...S.pool.reports.filter(theirs)], pits: [...S.pits, ...S.pool.pits.filter(theirs)] };
+}
+let poolBusy = false;
+async function refreshPool() {
+  if (poolBusy || !S.admin || !S.eventId) return;
+  poolBusy = true;
+  const id = S.eventId;
+  let changed = false;
+  try {
+    const [teams, events] = await Promise.all([store.api.allTeams(), store.api.allEvents()]);
+    const ids = poolPicked(events).map((e) => e.id);
+    const [reports, pits] = await Promise.all([store.api.reportsAt(ids), store.api.pitsAt(ids)]);
+    if (S.eventId === id) { S.pool = { eventId: id, teams, events, reports, pits, at: Date.now() }; store.cacheSet(`pool.${id}`, S.pool); changed = true; }
+  } catch {
+    const c = store.cacheGet(`pool.${id}`);
+    if (S.eventId === id && c && (!S.pool || S.pool.eventId !== id || !S.pool.at)) { S.pool = c; changed = true; }
+    else if (S.eventId === id && (!S.pool || S.pool.eventId !== id)) { S.pool = { eventId: id, teams: [], events: [], reports: [], pits: [], at: null }; changed = true; }
+  } finally { poolBusy = false; }
+  if (changed && S.view === 'overview' && !document.querySelector('.scrim')) renderView();
+}
+function poolSheet() {
+  const ev = currentEvent();
+  sheet('Events to pool', `Other teams\u2019 events counted as ${ev?.name || 'this event'}. Matched by name or date; change it here.`, (body, close) => {
+    const others = (S.pool?.events || []).filter((e) => e.team_id !== S.mem.team.id);
+    if (!others.length) { body.append(h('p', { class: 'muted', text: S.pool?.at ? 'No other team has made an event yet.' : 'Connect once to load the other teams\u2019 events.' })); return; }
+    const on = new Set(poolPicked().map((e) => e.id));
+    const list = h('div', { class: 'rlist' });
+    const sorted = [...others].sort((a, b) => on.has(b.id) - on.has(a.id) || String(teamNumber(a.team_id)).localeCompare(teamNumber(b.team_id)));
+    for (const e of sorted) {
+      const auto = sameCompetition(ev, e);
+      list.append(h('div', { class: 'ritem pool-item' },
+        h('div', { class: 'rmain' }, h('b', { text: `${teamNumber(e.team_id)} \u00b7 ${e.name}` }),
+          h('small', { text: `${e.starts_on ? new Date(`${e.starts_on}T00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'No date'}${auto ? ' \u00b7 matched automatically' : ''}` })),
+        toggle('Include', on.has(e.id), (v) => {
+          const p2 = poolPref();
+          p2.add = p2.add.filter((x) => x !== e.id); p2.drop = p2.drop.filter((x) => x !== e.id);
+          if (v && !auto) p2.add.push(e.id);
+          if (!v && auto) p2.drop.push(e.id);
+          ls.set(poolPrefKey(), p2);
+        })));
+    }
+    body.append(list, h('div', { class: 'row' }, h('button', { class: 'b b-primary', type: 'button', text: 'Done', onclick: () => { close(); if (S.pool) S.pool.at = 0; refreshPool(); renderView(); } })));
+  }, { wide: true });
 }
 
 // ------------------------------------------------------------------ pick list (kept on this device)
@@ -886,9 +1276,23 @@ function eventSheet(ev) {
       e.preventDefault(); const n = name.value.trim(); if (!n) { err.textContent = 'Give the event a name.'; return; }
       ok.disabled = true; err.textContent = '';
       try {
-        if (ev) { await store.api.renameEvent(ev.id, n, date.value); ev.name = n; ev.starts_on = date.value || null; }
-        else { const created = await store.api.createEvent(S.mem.team.id, n, date.value); S.events.unshift(created); S.eventId = created.id; ls.set(`od.scout.event.${S.mem.team.id}`, created.id); await loadEventData(); }
-        close(); renderShell(); toast(ev ? 'Event updated' : 'Event created');
+        let offline = false;
+        if (ev?.local) {                                   // still on this phone: change the copy that will be sent
+          ev.name = n; ev.starts_on = date.value || null;
+          store.enqueue('event', { id: ev.id, team_id: ev.team_id, name: n, starts_on: ev.starts_on }).catch(() => {});
+        } else if (ev) { await store.api.renameEvent(ev.id, n, date.value); ev.name = n; ev.starts_on = date.value || null; }
+        else {
+          let created = null;
+          try { if (store.online) created = await store.api.createEvent(S.mem.team.id, n, date.value); } catch (x) { if (!isConn(x)) throw x; }
+          if (!created) {
+            // no signal: make it here and send it later; reports filed to it follow it to the server
+            offline = true;
+            created = { id: uuid(), team_id: S.mem.team.id, name: n, starts_on: date.value || null, created_at: new Date().toISOString(), local: true };
+            store.enqueue('event', created).catch(() => {});
+          }
+          S.events.unshift(created); S.eventId = created.id; ls.set(`od.scout.event.${S.mem.team.id}`, created.id); retargetBlankForm(); await loadEventData();
+        }
+        close(); renderShell(); toast(offline ? 'Event made on this phone · syncs when you are back online' : ev ? 'Event updated' : 'Event created', offline ? 3600 : 2200);
       } catch (x) { err.textContent = friendly(x); ok.disabled = false; }
     });
     body.append(f);
@@ -899,11 +1303,12 @@ function pickEventSheet() {
     const list = h('div', { class: 'rlist' });
     for (const e of S.events) {
       list.append(h('div', { class: 'ritem' },
-        h('button', { class: `ev-pick${e.id === S.eventId ? ' on' : ''}`, type: 'button', onclick: async () => { S.eventId = e.id; ls.set(`od.scout.event.${S.mem.team.id}`, e.id); close(); await loadEventData(); renderShell(); } },
-          h('b', { text: e.name }), h('small', { text: e.starts_on ? new Date(`${e.starts_on}T00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'No date' })),
-        isLead() ? h('button', { class: 'b b-ghost sm icon', type: 'button', 'aria-label': `Edit ${e.name}`, onclick: () => { close(); eventSheet(e); } }, icon('edit')) : null,
-        isLead() ? h('button', { class: 'b b-ghost sm icon', type: 'button', 'aria-label': `Delete ${e.name}`, onclick: () => { close(); confirmSheet('Delete this event?', `${e.name} and every report filed at it will be deleted for your whole team.`, 'Delete event', true, async () => {
-          await store.api.deleteEvent(e.id); store.dropWhere((q) => q.row.event_id === e.id); S.events = S.events.filter((x) => x.id !== e.id); if (S.eventId === e.id) { S.eventId = S.events[0]?.id || null; await loadEventData(); } renderShell(); toast('Event deleted');
+        h('button', { class: `ev-pick${e.id === S.eventId ? ' on' : ''}`, type: 'button', onclick: async () => { S.eventId = e.id; ls.set(`od.scout.event.${S.mem.team.id}`, e.id); close(); retargetBlankForm(); await loadEventData(); renderShell(); } },
+          h('b', { text: e.name }), h('small', { text: `${e.starts_on ? new Date(`${e.starts_on}T00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'No date'}${e.local ? ' · on this phone, not synced yet' : ''}` })),
+        isLead() || e.local ? h('button', { class: 'b b-ghost sm icon', type: 'button', 'aria-label': `Edit ${e.name}`, onclick: () => { close(); eventSheet(e); } }, icon('edit')) : null,
+        isLead() || e.local ? h('button', { class: 'b b-ghost sm icon', type: 'button', 'aria-label': `Delete ${e.name}`, onclick: () => { close(); confirmSheet('Delete this event?', e.local ? `${e.name} and the reports filed to it on this phone will be deleted.` : `${e.name} and every report filed at it will be deleted for your whole team.`, 'Delete event', true, async () => {
+          if (!e.local) await store.api.deleteEvent(e.id);
+          store.dropWhere((q) => q.row.event_id === e.id || (q.kind === 'event' && q.row.id === e.id)); S.events = S.events.filter((x) => x.id !== e.id); if (S.eventId === e.id) { S.eventId = S.events[0]?.id || null; await loadEventData(); } renderShell(); toast('Event deleted');
         }, 'DELETE'); } }, icon('trash')) : null));
     }
     if (!S.events.length) list.append(h('p', { class: 'muted', text: 'No events yet.' }));
@@ -952,11 +1357,11 @@ function viewTeam() {
       h('p', { class: 'help', text: `Signed in as ${S.user.email || 'your Overdrive account'}.` }),
       h('div', { class: 'row start' },
         h('button', { class: 'b b-glass', type: 'button', onclick: () => signOut() }, icon('logout'), h('span', { text: 'Sign out' })),
-        h('button', { class: 'b b-ghost', type: 'button', text: owner && S.mem.members.length > 1 ? 'Leave team (hand it over first)' : 'Leave team', disabled: owner && S.mem.members.length > 1, onclick: () => confirmSheet('Leave this team?', owner ? 'You are the last member, so the team and all its reports will be deleted.' : 'You lose access to its reports. Reports you filed stay with the team.', 'Leave', true, async () => { const tid = t.id; await store.api.leaveTeam(); store.dropWhere((q) => q.team === tid); S.mem = null; route(); }, owner ? 'DELETE' : null) }),
+        h('button', { class: 'b b-ghost', type: 'button', text: owner && S.mem.members.length > 1 ? 'Leave team (hand it over first)' : 'Leave team', disabled: owner && S.mem.members.length > 1, onclick: () => confirmSheet('Leave this team?', owner ? 'You are the last member, so the team and all its reports will be deleted.' : 'You lose access to its reports. Reports you filed stay with the team.', 'Leave', true, async () => { const tid = t.id; await store.api.leaveTeam(); store.dropWhere((q) => q.team === tid); forgetTeam(); route(); }, owner ? 'DELETE' : null) }),
         h('button', { class: 'b b-danger', type: 'button', onclick: () => confirmSheet('Delete your account?', 'This deletes your sign-in, your simulator profile and match history, and removes you from your team. Scouting reports you filed stay with your team. This cannot be undone.', 'Delete account', true, async () => { await store.api.deleteAccount(); store.dropWhere(() => true); store.clearCache(); await signOut(); }, 'DELETE') }, icon('trash'), h('span', { text: 'Delete account' })))),
     h('nav', { class: 'foot-links' }, h('a', { href: '/', text: 'Overdrive home' }), h('a', { href: '/sim', text: 'Simulator' }), h('a', { href: '/terms', text: 'Terms' }), h('a', { href: '/privacy', text: 'Privacy' })));
 }
-async function refreshMembership() { S.mem = await store.api.membership(S.user.id); if (!S.mem) { route(); return; } renderShell(); }
+async function refreshMembership() { S.mem = await store.api.membership(S.user.id); if (!S.mem) { forgetTeam(); route(); return; } store.cacheSet(`mem.${S.user.id}`, S.mem); renderShell(); }
 
 // ------------------------------------------------------------------ Overdrive staff view (every team)
 function viewAdmin() {
@@ -969,7 +1374,8 @@ function viewAdmin() {
       h('option', { value: '', text: `All events (${at.events.length})` }), at.events.map((e) => h('option', { value: e.id, text: e.name, selected: e.id === at.eventId })));
     const reports = at.eventId ? at.reports.filter((r) => r.event_id === at.eventId) : at.reports;
     wrap.append(h('div', { class: 'tools' }, h('div', { class: 'field sel grow' }, evSel, icon('chev', 'i chev'))));
-    wrap.append(rankingsBlock(reports, [], { title: `Team ${at.number} · ${at.name}`, sub: 'Overdrive staff view', exportName: `team-${at.number}`, members: at.members }));
+    const pits = at.eventId ? (at.pits || []).filter((x) => x.event_id === at.eventId) : at.pits || [];
+    wrap.append(rankingsBlock(reports, pits, { title: `Team ${at.number} · ${at.name}`, sub: 'Overdrive staff view', exportName: `team-${at.number}`, members: at.members }));
     return wrap;
   }
   wrap.append(h('div', { class: 'view-head' }, h('div', {}, h('p', { class: 'eyebrow', text: 'Overdrive staff' }), h('h1', { text: 'All teams' }))));
@@ -983,9 +1389,9 @@ function viewAdmin() {
         const at = { id: r.team_id, number: r.number, name: r.name, loaded: false };
         S.adminTeam = at; renderView();
         try {
-          const [events, reports, members] = await Promise.all([store.api.adminEvents(r.team_id), store.api.teamReports(r.team_id), store.api.adminMembers(r.team_id)]);
+          const [events, reports, members, pits] = await Promise.all([store.api.adminEvents(r.team_id), store.api.teamReports(r.team_id), store.api.adminMembers(r.team_id), store.api.teamPits(r.team_id).catch(() => [])]);
           if (S.adminTeam !== at) return;                      // they moved on while it loaded
-          Object.assign(at, { events, reports, members, loaded: true, eventId: '' }); renderView();
+          Object.assign(at, { events, reports, members, pits, loaded: true, eventId: '' }); renderView();
         } catch (e) { if (S.adminTeam === at) { toast(friendly(e)); S.adminTeam = null; renderView(); } }
       } },
         h('span', { class: 'rt' }, h('b', { text: r.number }), h('small', { text: r.name })),
@@ -1019,13 +1425,21 @@ let lastPull = Date.now();
 async function pull() {
   if (!S.mem || !S.eventId || document.hidden || Date.now() - lastPull < 20000) return;
   lastPull = Date.now();
-  if (await loadEventData() && ['data', 'picks', 'admin'].includes(S.view) && !document.querySelector('.scrim')) renderView();
+  afterPull(await loadEventData(), false);
+}
+// fresh numbers redraw the read-only views; the scouting forms are never redrawn under a scout's thumb
+function afterPull(fresh, eventChanged) {
+  if (!S.mem || document.body.dataset.stage !== 'app') return;
+  if (eventChanged) { renderShell(); return; }
+  renderTopbar();
+  if (fresh && ['data', 'picks', 'admin', 'overview'].includes(S.view) && !document.querySelector('.scrim')) renderView();
 }
 document.addEventListener('visibilitychange', () => { pull().catch(() => {}); });
 window.addEventListener('online', () => { lastPull = 0; pull().catch(() => {}); });
 setInterval(() => { pull().catch(() => {}); }, 60000);
-// keep a copy of Scout on the phone so it opens with no signal (demo mode stays out of it)
-if ('serviceWorker' in navigator && !DEMO && location.protocol === 'https:') navigator.serviceWorker.register('/sw.js').catch(() => {});
+// keep a copy of Scout on the phone so it opens with no signal (demo mode stays out of it unless asked, on localhost)
+const swOk = location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname);
+if ('serviceWorker' in navigator && swOk && (!DEMO || new URLSearchParams(location.search).get('sw') === '1')) navigator.serviceWorker.register('/sw.js').catch(() => {});
 document.addEventListener('visibilitychange', () => { if (!document.hidden) store.flush().catch(() => {}); });
 
 boot().catch((e) => { console.error(e); renderFatal(friendly(e), true); });

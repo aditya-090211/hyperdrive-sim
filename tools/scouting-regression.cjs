@@ -23,7 +23,7 @@ const A = U(1), B = U(2), C = U(3), D = U(4), E = U(5);
       grant usage on schema auth to authenticated, anon; grant execute on function auth.uid(), auth.jwt() to authenticated, anon;
       grant usage on schema public to authenticated, anon;`);
     const sql = (f) => fs.readFileSync(path.join(__dirname, '../supabase', f), 'utf8');
-    for (let i = 0; i < 2; i++) { await db.exec(sql('schema.sql')); await db.exec(sql('hardening.sql')); await db.exec(sql('scouting.sql')); await db.exec(sql('scouting-review.sql')); }
+    for (let i = 0; i < 2; i++) { await db.exec(sql('schema.sql')); await db.exec(sql('hardening.sql')); await db.exec(sql('scouting.sql')); await db.exec(sql('scouting-review.sql')); await db.exec(sql('scouting-009.sql')); }
     passed.push('Schema applies twice (idempotent)');
     await db.exec(`insert into auth.users(id, email) values ('${A}','a@x'),('${B}','b@x'),('${C}','c@x'),('${D}','admin@x'),('${E}','e@x');
       insert into public.scout_admins(user_id) values ('${D}');`);
@@ -102,7 +102,29 @@ const A = U(1), B = U(2), C = U(3), D = U(4), E = U(5);
     await fails('Admin (not on team) cannot write reports', `insert into public.scout_reports(id, team_id, event_id, match_number, robot_number, alliance, station, data)
       values (gen_random_uuid(),'${teamA}','${evA}',1,'1','red',1,'{}')`, /row-level security/);
     await db.query(`select public.scout_accept_terms('2026-11-01')`);
-    await ok('Admin may register team 009', `select public.scout_create_team('009','Overdrive','Staff') as t`);
+    const [{ t: team009 }] = await ok('Admin may register team 009', `select public.scout_create_team('009','Overdrive','Staff') as t`);
+    const [{ c: code009 }] = await ok('009 owner reads join code', `select public.scout_team_code() as c`);
+
+    // any member of team 009 (not in scout_admins) reads every team's data, read only
+    const H = '80000000-0000-0000-0000-000000000000';
+    await db.exec(`reset role; insert into auth.users(id, email) values ('${H}','h@x');`);
+    await as(H, 'email'); await db.query(`select public.scout_accept_terms('2026-11-01')`);
+    await ok('Before joining 009: no cross-team access', `select public.scout_is_admin() as a`, (r) => r[0].a === false);
+    await ok('Scout joins team 009', `select public.scout_join_team('${code009}','Hari') as t`, (r) => r[0].t === team009);
+    await ok('009 member is_admin true', `select public.scout_is_admin() as a`, (r) => r[0].a === true);
+    await ok('009 member reads every team report', `select robot_number from public.scout_reports`, (r) => r.length === 1);
+    await ok('009 member reads every team event', `select team_id from public.scout_events where team_id='${teamA}'`, (r) => r.length === 1);
+    await ok('009 member reads other teams and members', `select count(*)::int as n from public.scout_members where team_id='${teamA}'`, (r) => r[0].n === 2);
+    await ok('009 member sees the staff directory', `select number from public.scout_admin_overview()`, (r) => r.length === 3);
+    await fails('009 member cannot file into another team', `insert into public.scout_reports(id, team_id, event_id, match_number, robot_number, alliance, station, data)
+      values (gen_random_uuid(),'${teamA}','${evA}',1,'1','red',1,'{}')`, /row-level security/);
+    await ok('009 member cannot edit another team report', `update public.scout_reports set data='{}' where id='${r1}' returning id`, empty);
+    await ok('009 member cannot delete another team report', `delete from public.scout_reports where id='${r1}' returning id`, empty);
+    await ok('009 member cannot delete another team event', `delete from public.scout_events where id='${evA}' returning id`, empty);
+    await ok('009 member cannot rename another team', `update public.scout_teams set name='Pwned' where id='${teamA}' returning id`, empty);
+    await fails('009 member still cannot read join codes', `select join_code from public.scout_teams`, /permission/);
+    await ok('Leaving team 009', `select public.scout_leave_team()`);
+    await ok('Access ends on leaving 009', `select count(*)::int as n from public.scout_reports`, (r) => r[0].n === 0);
 
     await as(null);
     for (const t of ['scout_reports', 'scout_teams', 'scout_members', 'scout_events', 'scout_pits', 'scout_consents']) await fails(`Anonymous cannot read ${t}`, `select * from public.${t}`, /permission/);

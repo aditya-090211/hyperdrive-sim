@@ -5,10 +5,18 @@ import { getClient, signInUrl } from '../auth-client.js';
 import { TERMS_VERSION, pointsOf, cleanReport, cleanPit } from './game.js';
 
 const QUEUE_KEY = 'od.scout.queue';
+// what can wait on the device: match reports, pit reports, events made offline and deletions of synced reports
+const KINDS = ['report', 'pit', 'event', 'del'];
 const CACHE_KEY = 'od.scout.cache';
 const LOCAL_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
 export const DEMO = LOCAL_HOSTS.includes(location.hostname) && new URLSearchParams(location.search).get('demo') === '1';
 
+const cleanEventRow = (r) => ({ id: r.id, team_id: r.team_id, name: String(r.name || 'Event').slice(0, 80), starts_on: /^\d{4}-\d{2}-\d{2}$/.test(r.starts_on || '') ? r.starts_on : null });
+function tidy(x) {
+  if (x.kind === 'report' || x.kind === 'pit') return { ...x, row: { ...x.row, data: (x.kind === 'report' ? cleanReport : cleanPit)(x.row.data && typeof x.row.data === 'object' ? x.row.data : {}) } };
+  if (x.kind === 'event') return { ...x, row: cleanEventRow(x.row) };
+  return { ...x, row: { id: x.row.id } };
+}
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
@@ -43,19 +51,24 @@ class Remote {
   // at a venue with no signal the token refresh can hang for half a minute and then sign you out: open from the
   // session saved on this device instead, and let it refresh once the connection is back
   async session() {
-    if (navigator.onLine === false) { const s = storedSession(); if (s) return s; }
+    const stored = storedSession();
+    if (navigator.onLine === false && stored) return stored;
     try {
-      const { data } = await timeout(this.c.auth.getSession(), 6000);
-      return data.session || (navigator.onLine === false ? storedSession() : null);
-    } catch { return storedSession(); }
+      // with a session already on the device, do not let dead venue Wi-Fi hold the app at the door
+      const { data } = await timeout(this.c.auth.getSession(), stored ? 2500 : 6000);
+      return data.session || (navigator.onLine === false ? stored : null);
+    } catch { return stored; }
   }
   onAuth(fn) { this.c.auth.onAuthStateChange((_e, s) => fn(s)); }
   async signIn() { location.href = signInUrl('/scout'); }
   async signOut() { await this.c.auth.signOut(); }
   async q(p) {
-    if (navigator.onLine === false) throw new Error(friendly({ message: 'Failed to fetch' }));
-    const { data, error } = await timeout(p, 9000);
-    if (error) throw new Error(friendly(error));
+    if (navigator.onLine === false) { this.onNet?.(false); throw new Error(friendly({ message: 'Failed to fetch' })); }
+    let res;
+    try { res = await timeout(p, 9000); } catch (e) { if (/fetch|network|timed out|load failed/i.test(e.message)) this.onNet?.(false); throw new Error(friendly(e)); }
+    const { data, error } = res;
+    if (error) { this.onNet?.(!/failed to fetch|network|load failed/i.test(error.message || '')); throw new Error(friendly(error)); }
+    this.onNet?.(true);
     return data;
   }
   rpc(fn, args) { return this.q(this.c.rpc(fn, args)); }
@@ -107,6 +120,12 @@ class Remote {
   adminOverview() { return this.rpc('scout_admin_overview'); }
   adminEvents(teamId) { return this.events(teamId); }
   adminMembers(teamId) { return this.q(this.c.from('scout_members').select('user_id, role, display_name, joined_at').eq('team_id', teamId)); }
+  // team 009 / staff: every team's events, and the reports and pit reports filed at a set of them (read only)
+  allTeams() { return this.q(this.c.from('scout_teams').select('id, number, name').limit(2000)); }
+  allEvents() { return this.q(this.c.from('scout_events').select('id, team_id, name, starts_on, created_at').order('created_at', { ascending: false }).limit(5000)); }
+  reportsAt(eventIds) { return eventIds.length ? this.q(this.c.from('scout_reports').select('*').in('event_id', eventIds).limit(20000)) : Promise.resolve([]); }
+  pitsAt(eventIds) { return eventIds.length ? this.q(this.c.from('scout_pits').select('*').in('event_id', eventIds).limit(5000)) : Promise.resolve([]); }
+  teamPits(teamId) { return this.q(this.c.from('scout_pits').select('*').eq('team_id', teamId).limit(5000)); }
   deleteAccount() { return this.rpc('delete_my_account'); }
 }
 
@@ -120,8 +139,13 @@ class Demo {
     this.db.admin = qp.get('admin') === '1';
     this.cb = null;
   }
-  // the demo keeps its state for this tab, so a reload carries on where you were
-  wait(v) { try { sessionStorage.setItem('od.scout.demo', JSON.stringify(this.db)); } catch { /* ignore */ } return new Promise((r) => setTimeout(() => r(v), 120)); }
+  // the demo keeps its state for this tab, so a reload carries on where you were. ?offline=1 (or the
+  // od.scout.demo.offline session flag) makes every request fail the way a dead connection does
+  offline() { try { return new URLSearchParams(location.search).get('offline') === '1' || navigator.onLine === false || sessionStorage.getItem('od.scout.demo.offline') === '1'; } catch { return false; } }
+  wait(v) {
+    try { sessionStorage.setItem('od.scout.demo', JSON.stringify(this.db)); } catch { /* ignore */ }
+    return new Promise((r, no) => setTimeout(() => { if (this.offline()) { this.onNet?.(false); no(new Error('No connection. Try again when you are back online.')); } else { this.onNet?.(true); r(v); } }, 120));
+  }
   async session() { return this.db.signedIn ? { user: this.db.me } : null; }
   onAuth(fn) { this.cb = fn; }
   async signIn() { this.db.signedIn = true; await this.wait(); this.cb?.({ user: this.db.me }); }
@@ -149,36 +173,56 @@ class Demo {
   async renameTeam(_id, name) { this.db.team.name = name; return this.wait(); }
   async renameSelf(_t, _u, name) { this.db.members[0].display_name = name; return this.wait(); }
   async events() { return this.wait([...this.db.events]); }
-  async createEvent(teamId, name, startsOn) { const e = { id: uuid(), team_id: teamId, name, starts_on: startsOn || null, created_at: new Date().toISOString() }; this.db.events.unshift(e); return this.wait(e); }
+  async createEvent(teamId, name, startsOn) { if (this.offline()) return this.wait(); const e = { id: uuid(), team_id: teamId, name, starts_on: startsOn || null, created_at: new Date().toISOString() }; this.db.events.unshift(e); return this.wait(e); }
   async renameEvent(id, name, startsOn) { const e = this.db.events.find((x) => x.id === id); if (e) { e.name = name; e.starts_on = startsOn || null; } return this.wait(); }
   async deleteEvent(id) { this.db.events = this.db.events.filter((e) => e.id !== id); this.db.reports = this.db.reports.filter((r) => r.event_id !== id); return this.wait(); }
   async reports(eventId) { return this.wait(this.db.reports.filter((r) => r.event_id === eventId)); }
-  async teamReports() { return this.wait([...this.db.reports]); }
+  async teamReports(teamId) { return this.wait([...(this.allTeamRows().find((t) => t.team.id === teamId)?.reports || this.db.reports)]); }
   async upsertReport(r) {
-    if (new URLSearchParams(location.search).get('offline') === '1') throw new Error('Failed to fetch');
+    if (this.offline()) return this.wait();
     const i = this.db.reports.findIndex((x) => x.id === r.id);
     const row = { ...r, team_id: this.db.team.id, scout_id: i >= 0 ? this.db.reports[i].scout_id : 'demo-user', points: pointsOf(r.data), created_at: new Date().toISOString() };
     if (i >= 0) this.db.reports[i] = row; else this.db.reports.push(row);
     return this.wait();
   }
-  async deleteReport(id) { this.db.reports = this.db.reports.filter((r) => r.id !== id); return this.wait(); }
+  async deleteReport(id) { if (this.offline()) return this.wait(); this.db.reports = this.db.reports.filter((r) => r.id !== id); return this.wait(); }
   async pits(eventId) { return this.wait(this.db.pits.filter((p) => p.event_id === eventId)); }
-  async upsertPit(p) { const i = this.db.pits.findIndex((x) => x.event_id === p.event_id && x.robot_number === p.robot_number); const row = { ...p, scout_id: 'demo-user', updated_at: new Date().toISOString() }; if (i >= 0) this.db.pits[i] = { ...this.db.pits[i], data: p.data }; else this.db.pits.push(row); return this.wait(); }
-  async isAdmin() { return this.wait(this.db.admin); }
-  async adminOverview() { return this.wait(this.db.team ? [{ team_id: this.db.team.id, number: this.db.team.number, name: this.db.team.name, members: this.db.members.length, events: this.db.events.length, reports: this.db.reports.length, pits: this.db.pits.length, last_report: new Date().toISOString() }] : []); }
-  async adminEvents() { return this.events(); }
-  async adminMembers() { return this.wait(this.db.members); }
+  async upsertPit(p) { if (this.offline()) return this.wait(); const i = this.db.pits.findIndex((x) => x.event_id === p.event_id && x.robot_number === p.robot_number); const row = { ...p, scout_id: 'demo-user', updated_at: new Date().toISOString() }; if (i >= 0) this.db.pits[i] = { ...this.db.pits[i], data: p.data }; else this.db.pits.push(row); return this.wait(); }
+  // like the server: staff, or anyone on team 009
+  is009() { return this.db.admin || (this.db.team && (parseInt(this.db.team.number, 10) || 0) === 9); }
+  async isAdmin() { return this.wait(!!this.is009()); }
+  allTeamRows() { return [...(this.db.team ? [{ team: this.db.team, members: this.db.members, events: this.db.events, reports: this.db.reports, pits: this.db.pits }] : []), ...(this.is009() ? this.db.others || [] : [])]; }
+  async adminOverview() { return this.wait(this.allTeamRows().map((t) => ({ team_id: t.team.id, number: t.team.number, name: t.team.name, members: t.members.length, events: t.events.length, reports: t.reports.length, pits: t.pits.length, last_report: new Date().toISOString() }))); }
+  async adminEvents(teamId) { return this.wait([...(this.allTeamRows().find((t) => t.team.id === teamId)?.events || [])]); }
+  async adminMembers(teamId) { return this.wait(this.allTeamRows().find((t) => t.team.id === teamId)?.members || []); }
+  async allTeams() { return this.wait(this.allTeamRows().map((t) => ({ id: t.team.id, number: t.team.number, name: t.team.name }))); }
+  async allEvents() { return this.wait(this.allTeamRows().flatMap((t) => t.events)); }
+  async reportsAt(ids) { return this.wait(this.allTeamRows().flatMap((t) => t.reports).filter((r) => ids.includes(r.event_id))); }
+  async pitsAt(ids) { return this.wait(this.allTeamRows().flatMap((t) => t.pits).filter((p) => ids.includes(p.event_id))); }
+  async teamPits(teamId) { return this.wait(this.allTeamRows().find((t) => t.team.id === teamId)?.pits || []); }
   async deleteAccount() { this.db = { ...this.db, signedIn: false, team: null, consent: null }; this.cb?.(null); return this.wait(); }
   seed() {
     const ev = { id: uuid(), team_id: 'team-demo', name: 'Demo Regional', starts_on: '2026-11-14', created_at: new Date().toISOString() };
     this.db.events = [ev];
+    this.db.reports = []; this.db.pits = [];
+    this.db.others = [['1530', 'Ironclad', 'Demo regional', 16, '2026-11-14'], ['2001', 'Byte Force', 'DEMO REGIONAL 2026', 14, null], ['317', 'Tidebreakers', 'Pune Scrimmage', 6, '2026-10-02']].map(([number, name, evName, matches, date]) => {
+      const team = { id: `team-${number}`, number, name, created_at: new Date().toISOString() };
+      const e = { id: uuid(), team_id: team.id, name: evName, starts_on: date, created_at: new Date().toISOString() };
+      const t = { team, members: [{ user_id: `u-${number}`, role: 'owner', display_name: `${name} lead`, joined_at: team.created_at }], events: [e], reports: [], pits: [] };
+      this.seedReports(t.reports, team.id, e.id, matches, `u-${number}`);
+      t.pits.push({ id: uuid(), team_id: team.id, event_id: e.id, robot_number: '88', scout_id: `u-${number}`, data: { v: 1, drive: 'swerve', apex: true, station: 'balance', strategy: `Told ${name}: they want a partner that docks` }, updated_at: team.created_at });
+      return t;
+    });
+    this.seedReports(this.db.reports, 'team-demo', ev.id, 12, null);
+  }
+  seedReports(out, teamId, eventId, matches, scout) {
     const robots = ['009', '1002', '2001', '2002', '317', '4242', '88', '1530'];
     let n = 0;
-    for (let m = 1; m <= 12; m++) for (let k = 0; k < 4; k++) {
+    for (let m = 1; m <= matches; m++) for (let k = 0; k < 4; k++) {
       const robot = robots[(m * 3 + k * 5) % robots.length], skill = (parseInt(robot, 10) % 7) / 7;
       const r = (a) => Math.max(0, Math.round(a + (Math.random() - 0.5) * 2));
       const data = { v: 1, m_high: r(2 + skill * 4), m_star: r(1 + skill * 3), m_drop: r(1), m_miss: r(2 - skill), l_high: r(skill * 2), l_star: r(skill * 2), l_apex: Math.random() < skill * 0.4 ? 1 : 0, station: ['none', 'engage', 'dock', 'balance'][Math.min(3, Math.floor(skill * 4 + Math.random()))], payload: Math.random() < 0.5 ? 'scored' : 'none', driver: Math.min(5, 1 + Math.round(skill * 4)), defense: Math.round(Math.random() * 2), died: Math.random() < 0.06, note: n % 7 === 0 ? 'Fast cycles, struggled on the ramp' : '' };
-      this.db.reports.push({ id: uuid(), team_id: 'team-demo', event_id: ev.id, match_type: 'qm', match_number: m, robot_number: robot, alliance: k < 2 ? 'red' : 'blue', station: (k % 2) + 1, scout_id: k % 2 ? 'demo-2' : 'demo-user', data, points: pointsOf(data), created_at: new Date().toISOString() });
+      out.push({ id: uuid(), team_id: teamId, event_id: eventId, match_type: 'qm', match_number: m, robot_number: robot, alliance: k < 2 ? 'red' : 'blue', station: (k % 2) + 1, scout_id: scout || (k % 2 ? 'demo-2' : 'demo-user'), data, points: pointsOf(data), created_at: new Date().toISOString() });
       n++;
     }
   }
@@ -190,15 +234,19 @@ export class Store {
   constructor() {
     this.api = DEMO ? new Demo() : (getClient() ? new Remote() : null);
     const q = ls.get(QUEUE_KEY, []);
-    this.queue = (Array.isArray(q) ? q.filter((x) => x && typeof x === 'object' && x.row && typeof x.row.id === 'string' && (x.kind === 'report' || x.kind === 'pit')) : [])
-      .map((x) => ({ ...x, row: { ...x.row, data: (x.kind === 'report' ? cleanReport : cleanPit)(x.row.data && typeof x.row.data === 'object' ? x.row.data : {}) } }));
+    this.queue = (Array.isArray(q) ? q.filter((x) => x && typeof x === 'object' && x.row && typeof x.row.id === 'string' && KINDS.includes(x.kind)) : []).map(tidy);
     this.listeners = new Set();
     this.syncing = false;
     this.uid = null;                     // reports wait on the device for the account that filed them
     this.dirty = false;
-    window.addEventListener('online', () => this.flush());
+    this.reachable = true;               // false after a request fails for want of a connection (dead Wi-Fi counts)
+    this.onRemap = null;                 // (localEventId, serverEvent) once an event made offline reaches the server
+    if (this.api) this.api.onNet = (ok) => { if (ok !== this.reachable) { this.reachable = ok; this.emit(); if (ok) this.flush(); } };
+    window.addEventListener('online', () => { this.reachable = true; this.emit(); this.flush(); });
+    window.addEventListener('offline', () => this.emit());
   }
   get available() { return !!this.api; }
+  get online() { return navigator.onLine !== false && this.reachable; }
   on(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   emit() { for (const f of this.listeners) f(); }
 
@@ -215,6 +263,7 @@ export class Store {
     return { synced: !this.queue.includes(item) };
   }
   pending(teamId) { return this.queue.filter((q) => q.uid === this.uid && (!teamId || q.team === teamId)); }
+  pendingOf(kind, teamId) { return this.pending(teamId).filter((q) => q.kind === kind); }
   // upload this user's waiting rows. Rows the server refused stay parked (shown in the Sync sheet) until retried.
   async flush({ retry = false } = {}) {
     if (!this.api || !this.uid) return;
@@ -228,9 +277,18 @@ export class Store {
           try {
             if (item.kind === 'report') await this.api.upsertReport(item.row);
             else if (item.kind === 'pit') await this.api.upsertPit(item.row);
+            else if (item.kind === 'del') await this.api.deleteReport(item.row.id);
+            else if (item.kind === 'event') {
+              // the server picks the event's id: point everything filed under the offline one at it
+              const created = await this.api.createEvent(item.row.team_id, item.row.name, item.row.starts_on);
+              if (!created?.id) throw new Error('No connection (event not created)');
+              for (const q of this.queue) if (q.row.event_id === item.row.id) q.row = { ...q.row, event_id: created.id };
+              this.save();
+              try { this.onRemap?.(item.row.id, created); } catch (err) { console.error(err); }
+            }
             this.queue = this.queue.filter((q) => q !== item); this.save();
           } catch (e) {
-            if (/connection|offline|fetch|timed out/i.test(e.message)) return;        // still offline: everything stays queued
+            if (/connection|offline|fetch|timed out/i.test(e.message)) { this.reachable = false; return; }   // still offline: everything stays queued
             if (/session|jwt|token/i.test(e.message)) { try { await this.api.c?.auth.refreshSession(); } catch { /* next flush */ } return; }
             item.error = e.message; this.save();
           }

@@ -1,8 +1,9 @@
-.vercel
-supabase
-README.md
-AUDIT-*.md
-promo
-tools
+# a leading slash means "only at the top of the project": a bare name also hides folders deeper down (js/tools)
+/.vercel
+/supabase
+/README.md
+/AUDIT-*.md
+/promo
+/tools
 *.log
-lib/src
+/lib/src

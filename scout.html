@@ -15,13 +15,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..600&family=Martian+Mono:wght@400..600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/od.css?v=6">
-<link rel="stylesheet" href="css/scout.css?v=6">
+<link rel="stylesheet" href="css/od.css?v=7">
+<link rel="stylesheet" href="css/scout.css?v=7">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/assets/scout-icon.svg">
 <link rel="modulepreload" href="js/scout/app.js">
 <link rel="modulepreload" href="js/scout/store.js">
 <link rel="modulepreload" href="js/scout/game.js">
+<link rel="modulepreload" href="js/scout/insights.js">
 <link rel="modulepreload" href="js/auth-client.js">
 <link rel="modulepreload" href="js/supabase-config.js">
 <link rel="modulepreload" href="js/handoff.js">
@@ -39,12 +40,12 @@
   </a>
   <span class="team-pill" title="Your team"><b id="tb-team">—</b><span id="tb-team-name"></span></span>
   <button class="event-btn" id="tb-event-btn" type="button" aria-label="Switch event"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span id="tb-event">No event</span><svg class="i chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-  <button class="sync" id="tb-sync" type="button" data-state="ok" aria-label="Sync status"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 0 1-.6-10A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></svg><span id="tb-sync-n"></span></button>
+  <button class="sync" id="tb-sync" type="button" data-state="ok" aria-label="Sync status"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 0 1-.6-10A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></svg><span class="sync-l" id="tb-sync-l"></span><span class="sync-n" id="tb-sync-n"></span></button>
   <button class="avatar-btn" id="tb-avatar" type="button" aria-label="Team and account">?</button>
 </header>
 
 <main id="app" tabindex="-1">
-  <div class="boot"><div class="spin" aria-hidden="true"></div><span>Loading Overdrive Scout…</span></div>
+  <div class="boot"><div class="spin" aria-hidden="true"></div><span>Opening Overdrive Scout…</span></div>
 </main>
 
 <nav class="tabbar nav" id="tabbar" aria-label="Sections" hidden></nav>

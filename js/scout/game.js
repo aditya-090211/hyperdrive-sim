@@ -116,7 +116,18 @@ export function summarize(reports) {
     const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
     const sd = (arr) => { if (arr.length < 2) return 0; const m = avg(arr); return Math.sqrt(avg(arr.map((x) => (x - m) ** 2))); };
     const rated = played.filter((r) => r.data?.driver);
+    const share = (f) => (played.length ? played.filter((r) => f(r.data || {})).length / played.length : 0);
+    const tags = {};
+    for (const r of played) for (const t of r.data?.tags || []) tags[t] = (tags[t] || 0) + 1;
+    const last = pts.slice(-3);
     rows.push({
+      apex: share((d) => n(d, 'l_apex') > 0),
+      golden: avg(played.map((r) => n(r.data, 'm_gstar') + n(r.data, 'm_gdrop') + n(r.data, 'l_gstar') + n(r.data, 'l_gdrop'))),
+      payload: share((d) => d.payload === 'scored'),
+      starburst: share((d) => d.starburst),
+      tipped: played.filter((r) => r.data?.tipped).length,
+      recent: last.length ? avg(last) : 0,
+      tags,
       robot, n: list.length, played: played.length, noshows: list.length - played.length,
       avg: avg(pts), max: pts.length ? Math.max(...pts) : 0, sd: sd(pts),
       cores: played.length ? cores / played.length : 0,

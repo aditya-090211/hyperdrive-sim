@@ -23,7 +23,8 @@ lighting truss, LED boards, score screens, plinth). Old links to `/?room=…` or
 
 ### Overdrive Scout setup (once per Supabase project)
 
-1. Apply `supabase/scouting.sql` (after `schema.sql` and `hardening.sql`), then `supabase/scouting-review.sql`. Both are safe to re-run.
+1. Apply `supabase/scouting.sql` (after `schema.sql` and `hardening.sql`), then `supabase/scouting-review.sql`, then `supabase/scouting-009.sql`
+   (every member of team 009 can read, never change, every team's scouting data). All are safe to re-run.
 2. Make Overdrive staff admins (they can read every team's scouting data):
    `insert into public.scout_admins (user_id) select id from auth.users where email = 'someone@example.com' on conflict do nothing;`
 3. Accounts are email and password (Supabase → Authentication → Sign In / Providers → Email: enabled, with "Confirm email" on).
@@ -35,7 +36,20 @@ lighting truss, LED boards, score screens, plinth). Old links to `/?room=…` or
 Background stills of the venue (`assets/stadium-wide.jpg`, `assets/stadium-tall.jpg`) are rendered by `node tools/render-stadium.cjs` with the dev server running.
 
 Local demo without an account: `http://127.0.0.1:8766/scout?demo=1&fresh=1` (in-memory backend, only on localhost; add `&admin=1` for the
-staff view, `&offline=1` to simulate a dropped connection). Database rules are tested by `tools/scouting-regression.cjs` (PGlite).
+staff view, `&offline=1` to simulate a dropped connection, `&sw=1` to run the service worker in the demo). Register the demo team as `009`
+to see the Overview tab. Database rules are tested by `tools/scouting-regression.cjs` (PGlite).
+
+**Offline.** After one visit, `sw.js` keeps every file Scout needs (fonts included) on the phone, so it opens with no signal. The app
+opens from the data it last synced and checks the server behind it. Match and pit reports, deletions of synced reports and new events
+wait in a queue on the device (`js/scout/store.js`) and upload when the connection is back. Reports filed to an event made offline
+follow it to its server id. Bump `CACHE` in `sw.js` when Scout's file list changes.
+
+**Overview (team 009 only).** `js/scout/insights.js` ranks every robot by a pick score (qualification average shrunk toward the event
+mean for small samples, less foul points, variance and breakdown rate). It lists strengths and drawbacks against the rest of the event
+and recommends picks that cover 009's weakest areas, with sleepers and risky picks. The tab waits until this phone's queue has synced
+(with a "preview anyway" option) and is drawn only when the signed-in team's number is 009. Its "All teams" source pools every team's
+reports at the same competition (events matched by name ignoring case, punctuation and year, or by start date; adjustable in Choose
+events). The League tab lists every team with its reports and pit reports. Both rely on `scouting-009.sql`.
 
 ## Run it locally
 
