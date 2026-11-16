@@ -1,29 +1,22 @@
-// Overdrive Scout data layer: Supabase (email sign-in, row-level security) plus an offline queue so reports
-// filed with no signal are kept on the device and synced later. On localhost, ?demo=1 swaps in an in-memory
+// Overdrive Scout data layer. Every read and write goes to the phone's own database first (IndexedDB, js/scout/outbox.js);
+// Supabase (email sign-in, row-level security) is synced behind it. On localhost, ?demo=1 swaps in an in-memory
 // backend so the interface can be exercised without a real account (never available on a real host).
 import { getClient, signInUrl } from '../auth-client.js';
-import { TERMS_VERSION, pointsOf, cleanReport, cleanPit } from './game.js';
+import { SUPABASE_URL, SUPABASE_KEY } from '../supabase-config.js';
+import { TERMS_VERSION, pointsOf, robotKey } from './game.js';
 
-const QUEUE_KEY = 'od.scout.queue';
-// what can wait on the device: match reports, pit reports, events made offline and deletions of synced reports
-const KINDS = ['report', 'pit', 'event', 'del'];
-const CACHE_KEY = 'od.scout.cache';
+const db = self.OdOutbox;
+// what can wait on the device: match reports, pit reports, pick lists, events made offline and deletions of reports
+const KINDS = ['report', 'pit', 'picks', 'event', 'del'];
+const SYNC_TAG = 'od-scout-sync';
 const LOCAL_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
 export const DEMO = LOCAL_HOSTS.includes(location.hostname) && new URLSearchParams(location.search).get('demo') === '1';
 
-const cleanEventRow = (r) => ({ id: r.id, team_id: r.team_id, name: String(r.name || 'Event').slice(0, 80), starts_on: /^\d{4}-\d{2}-\d{2}$/.test(r.starts_on || '') ? r.starts_on : null });
-function tidy(x) {
-  if (x.kind === 'report' || x.kind === 'pit') return { ...x, row: { ...x.row, data: (x.kind === 'report' ? cleanReport : cleanPit)(x.row.data && typeof x.row.data === 'object' ? x.row.data : {}) } };
-  if (x.kind === 'event') return { ...x, row: cleanEventRow(x.row) };
-  return { ...x, row: { id: x.row.id } };
-}
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
   del(k) { try { localStorage.removeItem(k); } catch { /* storage blocked */ } },
 };
-export const uuid = () => (crypto.randomUUID ? crypto.randomUUID()
-  : '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c) => (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)));
+export const uuid = db.uuid;
 
 // the session supabase-js saved on this device (shared storage key with the simulator)
 function storedSession() {
@@ -59,7 +52,15 @@ class Remote {
       return data.session || (navigator.onLine === false ? stored : null);
     } catch { return stored; }
   }
-  onAuth(fn) { this.c.auth.onAuthStateChange((_e, s) => fn(s)); }
+  onAuth(fn) { this.c.auth.onAuthStateChange((event, s) => fn(s, event)); }
+  // true: a fresh token; false: the server refused the saved sign-in; null: no connection to ask over
+  async refresh() {
+    try {
+      const { data, error } = await timeout(this.c.auth.refreshSession(), 9000);
+      if (!error) return !!data.session;
+      return /fetch|network|timed out|load failed/i.test(error.message || '') || error.name === 'AuthRetryableFetchError' ? null : false;
+    } catch { return null; }
+  }
   async signIn() { location.href = signInUrl('/scout'); }
   async signOut() { await this.c.auth.signOut(); }
   async q(p) {
@@ -98,24 +99,14 @@ class Remote {
   renameTeam(id, name) { return this.q(this.c.from('scout_teams').update({ name }).eq('id', id)); }
   renameSelf(teamId, uid, name) { return this.q(this.c.from('scout_members').update({ display_name: name }).eq('team_id', teamId).eq('user_id', uid)); }
   events(teamId) { return this.q(this.c.from('scout_events').select('id, team_id, name, starts_on, created_at').eq('team_id', teamId).order('created_at', { ascending: false })); }
-  createEvent(teamId, name, startsOn) { return this.q(this.c.from('scout_events').insert({ team_id: teamId, name, starts_on: startsOn || null }).select('id, team_id, name, starts_on, created_at').single()); }
   renameEvent(id, name, startsOn) { return this.q(this.c.from('scout_events').update({ name, starts_on: startsOn || null }).eq('id', id)); }
   deleteEvent(id) { return this.q(this.c.from('scout_events').delete().eq('id', id)); }
   reports(eventId) { return this.q(this.c.from('scout_reports').select('*').eq('event_id', eventId).order('match_number').limit(5000)); }
   teamReports(teamId) { return this.q(this.c.from('scout_reports').select('*').eq('team_id', teamId).order('created_at', { ascending: false }).limit(5000)); }
-  upsertReport(r) { return this.q(this.c.from('scout_reports').upsert(r, { onConflict: 'id' })); }
-  deleteReport(id) { return this.q(this.c.from('scout_reports').delete().eq('id', id)); }
   pits(eventId) { return this.q(this.c.from('scout_pits').select('*').eq('event_id', eventId).limit(2000)); }
-  async upsertPit(p) {
-    // one pit report per robot per event: update the existing row if there is one
-    const found = await this.q(this.c.from('scout_pits').select('id').eq('event_id', p.event_id).eq('robot_number', p.robot_number).maybeSingle());
-    if (found) {
-      const rows = await this.q(this.c.from('scout_pits').update({ data: p.data }).eq('id', found.id).select('id'));
-      if (!rows?.length) throw new Error('Only the scout who filed this pit report, or a team lead, can change it.');
-      return rows;
-    }
-    return this.q(this.c.from('scout_pits').insert(p));
-  }
+  picks(eventId) { return this.q(this.c.from('scout_picklists').select('event_id, data, updated_at').eq('event_id', eventId).maybeSingle()); }
+  // replay one offline write: { status: 'ok', row } or { status: 'conflict', server }
+  push(item) { return this.rpc(...db.rpcOf(item)); }
   isAdmin() { return this.rpc('scout_is_admin'); }
   adminOverview() { return this.rpc('scout_admin_overview'); }
   adminEvents(teamId) { return this.events(teamId); }
@@ -173,21 +164,41 @@ class Demo {
   async renameTeam(_id, name) { this.db.team.name = name; return this.wait(); }
   async renameSelf(_t, _u, name) { this.db.members[0].display_name = name; return this.wait(); }
   async events() { return this.wait([...this.db.events]); }
-  async createEvent(teamId, name, startsOn) { if (this.offline()) return this.wait(); const e = { id: uuid(), team_id: teamId, name, starts_on: startsOn || null, created_at: new Date().toISOString() }; this.db.events.unshift(e); return this.wait(e); }
   async renameEvent(id, name, startsOn) { const e = this.db.events.find((x) => x.id === id); if (e) { e.name = name; e.starts_on = startsOn || null; } return this.wait(); }
   async deleteEvent(id) { this.db.events = this.db.events.filter((e) => e.id !== id); this.db.reports = this.db.reports.filter((r) => r.event_id !== id); return this.wait(); }
   async reports(eventId) { return this.wait(this.db.reports.filter((r) => r.event_id === eventId)); }
   async teamReports(teamId) { return this.wait([...(this.allTeamRows().find((t) => t.team.id === teamId)?.reports || this.db.reports)]); }
-  async upsertReport(r) {
-    if (this.offline()) return this.wait();
-    const i = this.db.reports.findIndex((x) => x.id === r.id);
-    const row = { ...r, team_id: this.db.team.id, scout_id: i >= 0 ? this.db.reports[i].scout_id : 'demo-user', points: pointsOf(r.data), created_at: new Date().toISOString() };
-    if (i >= 0) this.db.reports[i] = row; else this.db.reports.push(row);
-    return this.wait();
-  }
-  async deleteReport(id) { if (this.offline()) return this.wait(); this.db.reports = this.db.reports.filter((r) => r.id !== id); return this.wait(); }
   async pits(eventId) { return this.wait(this.db.pits.filter((p) => p.event_id === eventId)); }
-  async upsertPit(p) { if (this.offline()) return this.wait(); const i = this.db.pits.findIndex((x) => x.event_id === p.event_id && x.robot_number === p.robot_number); const row = { ...p, scout_id: 'demo-user', updated_at: new Date().toISOString() }; if (i >= 0) this.db.pits[i] = { ...this.db.pits[i], data: p.data }; else this.db.pits.push(row); return this.wait(); }
+  async picks(eventId) { return this.wait((this.db.picks || []).find((p) => p.event_id === eventId) || null); }
+  // the same replies as the scout_push_* functions in supabase/scouting-offline.sql
+  stamp() { this.clock = Math.max(Date.now(), (this.clock || 0) + 1); return new Date(this.clock).toISOString(); }
+  async push({ kind, row, base, mid }) {
+    if (this.offline()) return this.wait();
+    const ok = (cur) => this.wait({ status: 'ok', row: cur }), conflict = (cur) => this.wait({ status: 'conflict', server: cur });
+    if (kind === 'event') {
+      let e = this.db.events.find((x) => x.id === row.id);
+      if (!e) { e = { id: row.id, team_id: this.db.team.id, name: row.name, starts_on: row.starts_on || null, created_at: this.stamp() }; this.db.events.unshift(e); }
+      return ok(e);
+    }
+    if (kind === 'del') {
+      const cur = this.db.reports.find((r) => r.id === row.id);
+      if (cur && base && cur.updated_at !== base) return conflict(cur);
+      this.db.reports = this.db.reports.filter((r) => r.id !== row.id);
+      return ok(null);
+    }
+    const list = kind === 'report' ? this.db.reports : kind === 'pit' ? this.db.pits : (this.db.picks = this.db.picks || []);
+    const i = list.findIndex((x) => (kind === 'report' ? x.id === row.id : x.event_id === row.event_id && (kind === 'picks' || robotKey(x.robot_number) === robotKey(row.robot_number))));
+    const cur = list[i], t = this.stamp();
+    if (!cur) {
+      if (base && kind !== 'picks') return conflict(null);
+      list.push({ ...row, team_id: this.db.team.id, scout_id: 'demo-user', ...(kind === 'report' ? { points: pointsOf(row.data) } : {}), created_at: t, updated_at: t, client_rev: mid });
+      return ok(list[list.length - 1]);
+    }
+    if (cur.client_rev === mid) return ok(cur);
+    if (!base || cur.updated_at !== base) return conflict(cur);
+    list[i] = { ...cur, ...row, id: cur.id, scout_id: cur.scout_id, ...(kind === 'report' ? { points: pointsOf(row.data) } : {}), updated_at: t, client_rev: mid };
+    return ok(list[i]);
+  }
   // like the server: staff, or anyone on team 009
   is009() { return this.db.admin || (this.db.team && (parseInt(this.db.team.number, 10) || 0) === 9); }
   async isAdmin() { return this.wait(!!this.is009()); }
@@ -222,7 +233,7 @@ class Demo {
       const robot = robots[(m * 3 + k * 5) % robots.length], skill = (parseInt(robot, 10) % 7) / 7;
       const r = (a) => Math.max(0, Math.round(a + (Math.random() - 0.5) * 2));
       const data = { v: 1, m_high: r(2 + skill * 4), m_star: r(1 + skill * 3), m_drop: r(1), m_miss: r(2 - skill), l_high: r(skill * 2), l_star: r(skill * 2), l_apex: Math.random() < skill * 0.4 ? 1 : 0, station: ['none', 'engage', 'dock', 'balance'][Math.min(3, Math.floor(skill * 4 + Math.random()))], payload: Math.random() < 0.5 ? 'scored' : 'none', driver: Math.min(5, 1 + Math.round(skill * 4)), defense: Math.round(Math.random() * 2), died: Math.random() < 0.06, note: n % 7 === 0 ? 'Fast cycles, struggled on the ramp' : '' };
-      out.push({ id: uuid(), team_id: teamId, event_id: eventId, match_type: 'qm', match_number: m, robot_number: robot, alliance: k < 2 ? 'red' : 'blue', station: (k % 2) + 1, scout_id: scout || (k % 2 ? 'demo-2' : 'demo-user'), data, points: pointsOf(data), created_at: new Date().toISOString() });
+      out.push({ id: uuid(), team_id: teamId, event_id: eventId, match_type: 'qm', match_number: m, robot_number: robot, alliance: k < 2 ? 'red' : 'blue', station: (k % 2) + 1, scout_id: scout || (k % 2 ? 'demo-2' : 'demo-user'), data, points: pointsOf(data), created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
       n++;
     }
   }
@@ -233,16 +244,17 @@ class Demo {
 export class Store {
   constructor() {
     this.api = DEMO ? new Demo() : (getClient() ? new Remote() : null);
-    const q = ls.get(QUEUE_KEY, []);
-    this.queue = (Array.isArray(q) ? q.filter((x) => x && typeof x === 'object' && x.row && typeof x.row.id === 'string' && KINDS.includes(x.kind)) : []).map(tidy);
+    this.kv = new Map();                 // the phone's copy of what this account may see (mirrors the 'kv' table)
+    this.queue = [];                     // unsynced creates, edits and deletes (mirrors the 'outbox' table)
     this.listeners = new Set();
     this.syncing = false;
-    this.uid = null;                     // reports wait on the device for the account that filed them
-    this.dirty = false;
+    this.uid = null;                     // entries wait on the device for the account that filed them
+    this.team = null;                    // ...and are only ever sent for the team that account is on now
     this.reachable = true;               // false after a request fails for want of a connection (dead Wi-Fi counts)
-    this.onRemap = null;                 // (localEventId, serverEvent) once an event made offline reaches the server
+    this.authStale = false;              // the saved sign-in was refused: uploads wait until the scout signs in again
+    this.delay = 5000;
     if (this.api) this.api.onNet = (ok) => { if (ok !== this.reachable) { this.reachable = ok; this.emit(); if (ok) this.flush(); } };
-    window.addEventListener('online', () => { this.reachable = true; this.emit(); this.flush(); });
+    window.addEventListener('online', () => { this.reachable = true; this.delay = 5000; this.emit(); this.flush(); });
     window.addEventListener('offline', () => this.emit());
   }
   get available() { return !!this.api; }
@@ -250,60 +262,159 @@ export class Store {
   on(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   emit() { for (const f of this.listeners) f(); }
 
+  // read the phone's database into memory once, so every later read is synchronous
+  async init() {
+    if (DEMO && new URLSearchParams(location.search).get('fresh') === '1') await Promise.all([db.clear('kv'), db.clear('outbox')]);
+    await this.reload();
+    await this.adoptLegacy();
+  }
+  // also run when the service worker has synced with the app in the background
+  async reload() {
+    const [names, values, queue] = await Promise.all([db.keys('kv'), db.all('kv'), db.all('outbox')]);
+    names.forEach((k, i) => this.kv.set(k, values[i]));
+    this.queue = queue; this.emit();
+  }
+  // earlier versions kept the queue and the read cache in localStorage: move them over once
+  async adoptLegacy() {
+    const old = ls.get('od.scout.queue', null);
+    for (const x of Array.isArray(old) ? old : []) {
+      if (!x || !x.row || typeof x.row.id !== 'string' || !KINDS.includes(x.kind) || !x.uid) continue;
+      const item = { key: `${x.uid}|${x.kind === 'del' ? 'report' : x.kind}|${x.row.id}`, kind: x.kind, row: x.row, at: x.at || Date.now(), team: x.team || x.row.team_id, uid: x.uid, mid: uuid(), revs: [], base: null, snap: null, tries: 0, error: null, conflict: null };
+      await db.put('outbox', item); this.queue.push(item);
+    }
+    ls.del('od.scout.queue');
+    for (const k of Object.keys(localStorage)) {
+      if (k.startsWith('od.scout.cache.')) this.cacheSet(k.slice(15), ls.get(k, null));
+      else if (k.startsWith('od.scout.picks.')) this.cacheSet(`picks.${k.slice(15)}`, { data: ls.get(k, []), updated_at: null });
+      else continue;
+      ls.del(k);
+    }
+  }
+
   setUser(uid) { this.uid = uid || null; this.emit(); }
-  save() { ls.set(QUEUE_KEY, this.queue); }
-  // offline queue: newest version of each row wins. Resolves once this row is saved (or still waiting for a
-  // connection); rejects only if the server refused this particular row.
+  setTeam(id) { if (this.team !== (id || null)) { this.team = id || null; this.saveAuth(); } }
+  // the service worker uploads with this when Background Sync wakes it with the app closed (it never refreshes it)
+  setSession(s) { this.session = s && s.access_token ? s : null; this.saveAuth(); }
+  saveAuth() {
+    if (DEMO) return;
+    const s = this.session;
+    const v = s && this.team ? { url: SUPABASE_URL, key: SUPABASE_KEY, token: s.access_token, exp: s.expires_at || 0, uid: s.user?.id, team: this.team } : null;
+    (v ? db.put('kv', v, 'auth') : db.del('kv', 'auth')).catch(() => {});
+  }
+
+  // the copy of this record the server last gave this phone: what an edit is later compared against
+  serverRow(kind, row) {
+    if (kind === 'picks') { const p = this.kv.get(`picks.${row.event_id}`); return p && p.updated_at ? { event_id: row.event_id, data: p.data, updated_at: p.updated_at } : null; }
+    const c = this.kv.get(`ev.${row.event_id}`);
+    if (!c || kind === 'event') return null;
+    return (kind === 'pit' ? (c.pits || []).find((p) => p.id === row.id || robotKey(p.robot_number) === robotKey(row.robot_number)) : (c.reports || []).find((r) => r.id === row.id)) || null;
+  }
+  // Save a create, edit or delete on the phone, then try to upload it. Resolves once it is safely stored (synced or
+  // still waiting for a connection); rejects if the phone could not store it or the server refused this entry.
   async enqueue(kind, row) {
-    this.queue = this.queue.filter((q) => !(q.kind === kind && q.row.id === row.id && q.uid === this.uid));
-    const item = { kind, row, at: Date.now(), team: row.team_id, uid: this.uid };
-    this.queue.push(item); this.save(); this.emit();
+    const key = `${this.uid}|${kind === 'del' ? 'report' : kind}|${row.id}`;
+    const old = this.queue.find((q) => q.key === key);
+    const snap = old ? old.snap : this.serverRow(kind, row);
+    const item = { key, kind, row, at: old?.at || Date.now(), team: row.team_id, uid: this.uid, mid: uuid(), revs: old ? [...old.revs, old.mid] : [],
+      base: old ? old.base : snap?.updated_at || null, snap, tries: 0, error: null, conflict: old?.conflict || null, attempted: !!old?.attempted };
+    await db.put('outbox', item);
+    this.queue = [...this.queue.filter((q) => q.key !== key), item];
+    this.emit();
+    this.askBackgroundSync();
     await this.flush();
-    if (this.queue.includes(item) && item.error) throw new Error(item.error);
-    return { synced: !this.queue.includes(item) };
+    const left = this.queue.find((q) => q.key === key);
+    if (left?.error) throw new Error(left.error);
+    return { synced: !left };
   }
   pending(teamId) { return this.queue.filter((q) => q.uid === this.uid && (!teamId || q.team === teamId)); }
   pendingOf(kind, teamId) { return this.pending(teamId).filter((q) => q.kind === kind); }
-  // upload this user's waiting rows. Rows the server refused stay parked (shown in the Sync sheet) until retried.
+  // one status for the whole app: Offline, Syncing, Synced or Needs attention, with the number of unsynced entries
+  status() {
+    const mine = this.pending(this.team), stuck = mine.filter((q) => q.error || q.conflict).length;
+    const state = this.syncing ? 'syncing' : stuck || this.authStale ? 'attention' : !this.online ? 'offline' : mine.length ? 'syncing' : 'synced';
+    return { state, unsynced: mine.length, stuck, auth: this.authStale };
+  }
+
+  async send(item) {
+    if (!item.attempted) { item.attempted = true; await db.put('outbox', item); }
+    try { return await this.api.push(item); } catch (e) {
+      if (/connection|offline|fetch|timed out/i.test(e.message)) e.offline = true;
+      else if (/session|jwt|token|signed in/i.test(e.message)) e.auth = true;
+      throw e;
+    }
+  }
+  // Upload this account's waiting entries. One run at a time; a call made during a run queues one more pass.
   async flush({ retry = false } = {}) {
-    if (!this.api || !this.uid) return;
-    if (this.syncing) { this.dirty = true; return this.running; }
+    if (!this.api || !this.uid || !this.team) return;
+    if (this.running) { this.again = { retry: retry || !!this.again?.retry }; return this.running; }
     this.syncing = true; this.emit();
     this.running = (async () => {
-      do {
-        this.dirty = false;
-        for (const item of this.queue.filter((q) => q.uid === this.uid && (retry || !q.error))) {
-          if (!this.queue.includes(item)) continue;           // deleted while this sync was running
-          try {
-            if (item.kind === 'report') await this.api.upsertReport(item.row);
-            else if (item.kind === 'pit') await this.api.upsertPit(item.row);
-            else if (item.kind === 'del') await this.api.deleteReport(item.row.id);
-            else if (item.kind === 'event') {
-              // the server picks the event's id: point everything filed under the offline one at it
-              const created = await this.api.createEvent(item.row.team_id, item.row.name, item.row.starts_on);
-              if (!created?.id) throw new Error('No connection (event not created)');
-              for (const q of this.queue) if (q.row.event_id === item.row.id) q.row = { ...q.row, event_id: created.id };
-              this.save();
-              try { this.onRemap?.(item.row.id, created); } catch (err) { console.error(err); }
-            }
-            this.queue = this.queue.filter((q) => q !== item); this.save();
-          } catch (e) {
-            if (/connection|offline|fetch|timed out/i.test(e.message)) { this.reachable = false; return; }   // still offline: everything stays queued
-            if (/session|jwt|token/i.test(e.message)) { try { await this.api.c?.auth.refreshSession(); } catch { /* next flush */ } return; }
-            item.error = e.message; this.save();
-          }
-        }
-        retry = false;
-      } while (this.dirty);
+      let pass = { retry }, refreshed = false;
+      while (pass) {
+        this.again = null;
+        const res = await db.push((item) => this.send(item), { uid: this.uid, team: this.team, retry: pass.retry });
+        this.queue = await db.all('outbox');
+        for (const k of res.touched) this.kv.set(k, await db.get('kv', k));
+        if (res.sent) this.delay = 5000;
+        if (res.stop === 'offline') this.reachable = false;
+        else if (res.stop === 'auth') {
+          // the token ran out while the phone was offline: get a new one and go again, once
+          const fresh = refreshed ? false : await this.api.refresh?.();
+          refreshed = true;
+          if (fresh) this.again = this.again || { retry: false };
+          else if (fresh === null) this.reachable = false;
+          else this.authStale = true;
+        } else this.authStale = false;
+        pass = this.again;
+      }
     })();
-    try { await this.running; } finally { this.syncing = false; this.running = null; this.emit(); }
+    try { await this.running; } catch (e) { console.error(e); } finally { this.running = null; this.syncing = false; this.schedule(); this.emit(); }
   }
-  dropQueued(item) { this.queue = this.queue.filter((q) => q !== item); this.save(); this.emit(); }
-  dropWhere(fn) { this.queue = this.queue.filter((q) => !(q.uid === this.uid && fn(q))); this.save(); this.emit(); }
+  // while entries are still waiting, try again by timer: 5 s, doubling to 5 min (the online event and coming back to
+  // the app also trigger a sync, and Background Sync covers a closed app where the browser supports it)
+  schedule() {
+    clearTimeout(this.timer);
+    if (!this.queue.some((q) => q.uid === this.uid && !q.error && !q.conflict)) { this.delay = 5000; return; }
+    this.timer = setTimeout(() => this.flush(), this.delay);
+    this.delay = Math.min(this.delay * 2, 300000);
+    this.askBackgroundSync();
+  }
+  askBackgroundSync() { navigator.serviceWorker?.ready.then((r) => r.sync?.register(SYNC_TAG)).catch(() => {}); }
 
-  // a small read cache so the last data you saw is there when the venue Wi-Fi is not
-  cacheGet(key) { return ls.get(`${CACHE_KEY}.${key}`, null); }
-  cacheSet(key, v) { ls.set(`${CACHE_KEY}.${key}`, v); }
-  // on sign-out: forget cached team data, drafts and pick lists (reports waiting to sync stay, tagged with their author)
-  clearCache() { try { for (const k of Object.keys(localStorage)) if (k.startsWith('od.scout.') && k !== QUEUE_KEY && !k.startsWith('od.scout.picks.')) localStorage.removeItem(k); } catch { /* ignore */ } }
+  // settle a conflict: 'mine' sends this phone's version over the server's, 'theirs' keeps the server's and drops this one
+  async resolve(item, choice) {
+    const server = item.conflict?.server || null;
+    if (choice === 'theirs') {
+      await db.del('outbox', item.key);
+      const touched = await db.applyRow(server ? item : { kind: 'del', row: item.row }, server);
+      for (const k of touched) this.kv.set(k, await db.get('kv', k));
+      this.queue = this.queue.filter((q) => q.key !== item.key); this.emit();
+      return;
+    }
+    const next = { ...item, row: server && item.kind === 'pit' ? { ...item.row, id: server.id } : item.row, base: server ? server.updated_at : null, snap: server,
+      revs: [...item.revs, item.mid], mid: uuid(), conflict: null, error: null };
+    await db.put('outbox', next);
+    this.queue = this.queue.map((q) => (q.key === item.key ? next : q));
+    await this.flush({ retry: true });
+  }
+  dropQueued(item) { this.dropWhere((q) => q.key === item.key); }
+  dropWhere(fn) {
+    const gone = this.queue.filter((q) => q.uid === this.uid && fn(q));
+    this.queue = this.queue.filter((q) => !gone.includes(q));
+    for (const q of gone) db.del('outbox', q.key).catch(() => {});
+    this.emit();
+  }
+
+  cacheGet(key) { const v = this.kv.get(key); return v == null ? null : structuredClone(v); }
+  cacheSet(key, v) {
+    if (v == null) { this.kv.delete(key); db.del('kv', key).catch(() => {}); return; }
+    this.kv.set(key, v); db.put('kv', v, key).catch(() => {});
+  }
+  // on sign-out: forget everything this account could see (team data, other teams' data, pick lists, drafts).
+  // Entries that have not synced stay in the outbox, tagged with their author, and upload when that scout signs in again.
+  clearLocal() {
+    this.kv.clear(); this.session = null; this.team = null; this.authStale = false; clearTimeout(this.timer);
+    try { for (const k of Object.keys(localStorage)) if (k.startsWith('od.scout.')) localStorage.removeItem(k); } catch { /* storage blocked */ }
+    return db.clear('kv').catch(() => {});
+  }
 }
