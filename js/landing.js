@@ -7,15 +7,14 @@ const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 const io = 'IntersectionObserver' in window
   ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12 })
   : null;
-document.querySelectorAll('.reveal, .rise').forEach((el) => (io ? io.observe(el) : el.classList.add('in')));
+document.querySelectorAll('.reveal').forEach((el) => (io ? io.observe(el) : el.classList.add('in')));
 
 // ----- which side the stage copy is on (the ink wash follows it), whether the hero is behind us, and the nav lens:
 // a pane of glass that slides under the link for the part of the page you are reading
 const stages = [...document.querySelectorAll('.stage')];
 const sections = [...document.querySelectorAll('main > section')];
 const lens = document.querySelector('.nav .lens');
-const PART = { drawing: 'robot', field: 'season' };
-const light = document.getElementById('viora');           // the one cream page: the nav turns to light glass over it      // the solid pages that belong to a stage section's link
+const PART = { drawing: 'robot', field: 'season' };      // the solid pages that belong to a stage section's link
 let lit = null;
 const moveLens = (a) => {
   if (a === lit) return;
@@ -33,7 +32,6 @@ const onScroll = () => {
   const here = stages.find(at);
   if (here) document.body.classList.toggle('at-right', here.classList.contains('right'));
   document.body.classList.toggle('past-hero', window.scrollY > window.innerHeight * 0.6);
-  if (light) { const r = light.getBoundingClientRect(); document.body.classList.toggle('on-light', r.top <= 44 && r.bottom >= 44); }
   if (lens) {
     const sec = sections.find(at), id = sec && (PART[sec.id] || sec.id);
     const a = id ? document.querySelector(`.nav a.lnk[href="#${id}"]`) : null;
@@ -92,14 +90,6 @@ if (field && rows.length) {
   list.addEventListener('focusout', (e) => { if (!list.contains(e.relatedTarget)) show(pinned); });
 }
 
-// ----- team tools: one open at a time (a list of tabs beside one preview on wide screens, an accordion on phones)
-const tools = [...document.querySelectorAll('.tool')];
-for (const t of tools) {
-  t.querySelector('.tool-tab').addEventListener('click', () => {
-    for (const o of tools) { o.classList.toggle('on', o === t); o.querySelector('.tool-tab').setAttribute('aria-expanded', String(o === t)); }
-  });
-}
-
 // ----- the 3D stage (three.js, the robot CAD and the venue, about 2.5 MB): on desktops once the page has loaded and gone
 // quiet; on phones only when the reader scrolls toward the robot section, so a phone that reads the top never pays
 // for it. Never on a data-saver connection. Until it is ready the poster and the venue still stand in for it.
@@ -113,4 +103,15 @@ if (!navigator.connection?.saveData) {
     const idle = () => ('requestIdleCallback' in window ? requestIdleCallback(go, { timeout: 2500 }) : setTimeout(go, 600));
     if (document.readyState === 'complete') idle(); else window.addEventListener('load', idle, { once: true });
   }
+}
+
+// ----- Viora's indicator ink: a small WebGL module, fetched when the section is a screen away
+const viora = document.getElementById('viora');
+if (viora && 'IntersectionObserver' in window) {
+  const near = new IntersectionObserver((es) => {
+    if (!es.some((e) => e.isIntersecting)) return;
+    near.disconnect();
+    import('./viora-ink.js').then((m) => m.startInk(viora, viora.querySelector('.ink'), { side: true })).catch(() => {});
+  }, { rootMargin: `${window.innerHeight}px 0px` });
+  near.observe(viora);
 }

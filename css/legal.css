@@ -1,7 +1,7 @@
 /* Terms and Privacy pages */
 .legal-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--ink); }
 .legal-bg::before { content: ''; position: absolute; inset: -24px; background: url('../assets/stadium-wide.jpg') center / cover no-repeat; filter: blur(6px) saturate(0.85); }
-.legal-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13, 14, 16, 0.8), rgba(13, 14, 16, 0.94) 38vh); }
+.legal-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.94) 38vh); }
 @media (max-width: 767px), (max-width: 1024px) and (orientation: portrait) { .legal-bg::before { background-image: url('../assets/stadium-tall.jpg'); } }
 .prose b { color: var(--text); font-weight: 600; }
 /* narrow phones: the date line breaks between its two dates, never inside one */

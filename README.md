@@ -6,21 +6,21 @@ and the rules from `NRL/NRL_2026_HYPERDRIVE_GAME_MANUAL.pdf`.
 It has four independently controlled robots (2 Red + 2 Blue), the full 12 × 12 ft field with every
 game element, Human Player actions, the 2:30 match flow, live scoring, automatic fouls and Ranking Points.
 
-**Live:** <https://overdrive009.in> · Scout: <https://scout.overdrive009.in> · Viora (our Changemakers project, its own repo): <https://viora.overdrive009.in>
+**Live:** <https://overdrive009.in> · Scout: <https://scout.overdrive009.in> · Viora, our Changemakers project: <https://overdrive009.in/viora> (also <https://viora.overdrive009.in>)
 
 ### Domains
 
 `vercel.json` sends every old address to the new ones:
 
 * `scout.overdrive009.in/` serves `/scout`, with its own manifest so the installed app's home is the subdomain root.
-* `overdrive009.in/scout` and `/viora` redirect to their subdomains, and `www.` redirects to the bare domain.
+* `overdrive009.in/scout` redirects to `scout.overdrive009.in`, and `www.` redirects to the bare domain.
+* `overdrive009.in/viora` is the Viora page (`viora.html`, in Viora's own theme), and `viora.overdrive009.in` serves the same page. Its "Take a reading" links go to the Viora app at viora-lemon.vercel.app.
 * `hyperdrive-sim.vercel.app` redirects every page to `overdrive009.in`, except Scout and the files it needs. Phones that
   installed Scout there keep their unsynced entries in that origin's storage, so Scout keeps running there with a
   "Scout has moved" note until those entries have synced.
 * Accounts are stored per origin, so Scout on its subdomain asks for one sign-in there.
 
-Add `overdrive009.in`, `www.overdrive009.in` and `scout.overdrive009.in` to this Vercel project. Add `viora.overdrive009.in`
-to the Viora project, and point its old `viora-lemon.vercel.app` address at it from that repo.
+Add `overdrive009.in`, `www.overdrive009.in`, `scout.overdrive009.in` and `viora.overdrive009.in` to this Vercel project.
 
 ## The site
 

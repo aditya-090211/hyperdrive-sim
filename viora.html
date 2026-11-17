@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viora · a cabbage test strip for dehydration · Overdrive 009</title>
+<meta name="description" content="Viora is Overdrive 009's Changemakers project: a saliva test strip made from purple cabbage and filter paper, read by any phone camera, that tells you if you are dehydrated in thirty seconds for less than a rupee.">
+<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16121b" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Viora">
+<meta property="og:description" content="A saliva test strip made from purple cabbage and filter paper, read by any phone camera. A Changemakers project by Overdrive 009.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://overdrive009.in/viora">
+<link rel="canonical" href="https://overdrive009.in/viora">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235b3a7a'/%3E%3Crect x='9' y='9' width='14' height='14' rx='4' fill='%23f3eee4'/%3E%3C/svg%3E">
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/viora.css?v=1">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/viora"><span class="dot" aria-hidden="true"></span>Viora</a>
+    <nav aria-label="Viora">
+      <a href="#problem">Why it matters</a>
+      <a href="#how">How it works</a>
+      <a href="#evidence">Evidence</a>
+      <a href="https://viora-lemon.vercel.app/#check">Take a reading</a>
+      <a class="od" href="/#team"><svg class="mark" viewBox="0 0 32 32" width="24" height="24" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="currentColor" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#ee7a7a" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Overdrive 009</a>
+    </nav>
+  </header>
+</div>
+
+<main id="main">
+  <section class="hero" id="hero" aria-labelledby="viora-h">
+    <canvas class="ink" aria-hidden="true"></canvas>
+    <div class="hero-in">
+      <p class="eyebrow">A Changemakers project by Overdrive 009</p>
+      <h1 id="viora-h" class="title" translate="no">Viora</h1>
+      <p class="lede">A saliva test strip made from purple cabbage and filter paper, read by any phone camera. It tells you if you are dehydrated in thirty seconds, for less than a rupee.</p>
+      <div class="ctas">
+        <a class="btn solid" href="https://viora-lemon.vercel.app/#check">Take a reading</a>
+        <a class="btn" href="#problem">Why it matters</a>
+      </div>
+    </div>
+    <p class="hint">Move or tap the ink. Blue means hydrated.</p>
+  </section>
+
+  <div class="wrap">
+    <section class="sec" id="problem" aria-labelledby="problem-h">
+      <p class="kicker">The problem</p>
+      <div class="split">
+        <h2 class="h2" id="problem-h">Dehydration is <em>invisible</em> until it is already a problem.</h2>
+        <p class="p">Mild dehydration slows thinking, causes headaches and raises the risk of heat illness, yet most people only notice it when they are already short of water. The tools that measure it properly sit in labs and clinics. The people most exposed to heat rarely have access to them.</p>
+      </div>
+      <div class="cols">
+        <div><h3>Thirst arrives late</h3><p>The body signals thirst after water loss has begun. Children absorbed in play and older adults, whose sense of thirst weakens with age, often miss it entirely.</p></div>
+        <div><h3>Testing needs a lab</h3><p>Blood tests and urine analysers are accurate but need equipment, trained staff or privacy. None of them fit a school field, a building site or a village street.</p></div>
+        <div><h3>Heat is rising</h3><p>Heatwaves are becoming longer and more frequent. Every extra hot day puts students, outdoor workers and elderly people at greater risk, especially where cooling is scarce.</p></div>
+      </div>
+    </section>
+
+    <section class="sec" id="idea" aria-labelledby="idea-h">
+      <p class="kicker">The idea</p>
+      <div class="split">
+        <h2 class="h2" id="idea-h">A strip that <em>changes colour</em> with your hydration.</h2>
+        <p class="p">Purple cabbage contains anthocyanins, natural dyes that change colour with pH. When you are short of water you make less saliva, it carries less bicarbonate and becomes more acidic. The strip turns pinker. Drag the slider to see it.</p>
+      </div>
+      <div class="demo">
+        <div class="stage">
+          <svg viewBox="0 0 600 400" role="img" aria-label="Test strip on the printed reference card">
+            <defs>
+              <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf9f6"/><stop offset="1" stop-color="#ece7e0"/></linearGradient>
+              <radialGradient id="wet"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".6" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+              <clipPath id="padclip"><rect x="376" y="186" width="84" height="84" rx="6"/></clipPath>
+              <filter id="tex"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .12 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+            </defs>
+            <g transform="rotate(-4 300 200)">
+              <rect x="40" y="40" width="520" height="340" rx="16" fill="url(#paper)"/>
+              <rect x="58" y="58" width="40" height="40" fill="#111"/><rect x="70" y="70" width="16" height="16" fill="#fbf9f6"/><rect x="502" y="58" width="40" height="40" fill="#111"/><rect x="58" y="322" width="40" height="40" fill="#111"/><rect x="502" y="322" width="40" height="40" fill="#111"/>
+              <rect x="128" y="76" width="44" height="44" rx="3" fill="#fff" stroke="#ddd"/>
+              <rect x="186" y="76" width="44" height="44" rx="3" fill="#808080"/>
+              <rect x="244" y="76" width="44" height="44" rx="3" fill="#735a78"/><rect x="302" y="76" width="44" height="44" rx="3" fill="#5b4963"/><rect x="360" y="76" width="44" height="44" rx="3" fill="#7a7698"/>
+              <rect x="80" y="210" width="440" height="36" rx="5" fill="#f3efe7" stroke="#d9d2c6"/>
+              <rect x="136" y="186" width="84" height="84" rx="6" fill="#6f5f86"/>
+              <rect x="376" y="186" width="84" height="84" rx="6" fill="#7a7698" data-v="pad"/>
+              <g clip-path="url(#padclip)"><circle cx="418" cy="228" r="0" fill="url(#wet)" data-v="wick"/></g>
+              <rect x="136" y="186" width="84" height="84" rx="6" filter="url(#tex)" fill="#000"/>
+              <rect x="376" y="186" width="84" height="84" rx="6" filter="url(#tex)" fill="#000"/>
+              <text x="178" y="296" text-anchor="middle" font-size="15" fill="#6b6573" font-family="IBM Plex Sans, sans-serif">Control (dry)</text>
+              <text x="418" y="296" text-anchor="middle" font-size="15" fill="#6b6573" font-family="IBM Plex Sans, sans-serif">Test (saliva)</text>
+            </g>
+          </svg>
+        </div>
+        <div class="readout">
+          <div>
+            <label class="small" for="hours">Hours without water</label>
+            <input type="range" class="range" id="hours" min="0" max="12" step="0.1" value="2">
+            <div class="scale"><span class="small">Just drank</span><output class="small" for="hours" data-v="hours">2.0 h</output><span class="small">12 h</span></div>
+          </div>
+          <p class="big" data-v="band" aria-live="polite">Hydrated</p>
+          <div class="meter" aria-hidden="true"><i data-v="pin"></i></div>
+          <dl class="mini">
+            <div><dt>Score</dt><dd data-v="score">80</dd></div>
+            <div><dt>Saliva pH</dt><dd data-v="ph">7.2</dd></div>
+            <div><dt>Colour</dt><dd class="hex" data-v="hex" translate="no">#7a7698</dd></div>
+          </dl>
+          <p class="small">Illustration using the colours measured in our first saliva trial. Real readings come from the analyser in the <a href="https://viora-lemon.vercel.app/#check">Viora app</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="how" aria-labelledby="how-h">
+      <p class="kicker">How it works</p>
+      <h2 class="h2" id="how-h">From a vegetable to an answer in <em>four steps</em>.</h2>
+      <ol class="pipe">
+        <li><svg viewBox="0 0 200 110" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path class="draw" style="--len:330" d="M100 20c-40 0-62 26-62 50s28 32 62 32 62-8 62-32-22-50-62-50z"/>
+            <path class="draw" style="--len:200" d="M100 26v74M100 50c-14-6-26-4-38 6M100 50c14-6 26-4 38 6M100 74c-16-6-30-2-44 8M100 74c16-6 30-2 44 8"/></g>
+            <circle class="pop" cx="100" cy="66" r="10" fill="currentColor" opacity=".35"/></svg>
+          <h3>Cabbage</h3><p>Boil purple cabbage, keep the dark purple water. That extract is the indicator.</p></li>
+        <li><svg viewBox="0 0 200 110" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path class="draw" style="--len:420" d="M20 48h160v16H20z"/></g>
+            <rect class="pop" x="42" y="40" width="30" height="32" rx="3" fill="#6f5f86"/><rect class="pop" x="128" y="40" width="30" height="32" rx="3" fill="#a23b6c"/></svg>
+          <h3>Strip</h3><p>Soak filter paper squares, dry them and stick two on a strip. One stays dry as a control.</p></li>
+        <li><svg viewBox="0 0 200 110" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path class="draw" style="--len:380" d="M64 12h72a8 8 0 018 8v72a8 8 0 01-8 8H64a8 8 0 01-8-8V20a8 8 0 018-8z"/>
+            <path class="draw" style="--len:120" d="M76 34h48v40H76z"/></g>
+            <circle class="pop" cx="100" cy="54" r="9" fill="currentColor" opacity=".5"/></svg>
+          <h3>Photo</h3><p>Touch the test pad to your tongue, lay the strip on the printed card and take a photo.</p></li>
+        <li><svg viewBox="0 0 200 110" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path class="draw" style="--len:300" d="M24 92a76 76 0 01152 0"/>
+            <path class="draw" style="--len:90" d="M100 92l34-44"/></g>
+            <circle class="pop" cx="100" cy="92" r="7" fill="currentColor"/></svg>
+          <h3>Answer</h3><p>The phone corrects the lighting against the card, reads the colour and tells you how hydrated you are.</p></li>
+      </ol>
+    </section>
+
+    <section class="sec" id="who" aria-labelledby="who-h">
+      <p class="kicker">Who it helps</p>
+      <div class="split">
+        <h2 class="h2" id="who-h">Built for the people <em>heat reaches first</em>.</h2>
+        <p class="p">Viora is cheap enough to hand out by the hundred and simple enough to use without training. These are the groups we designed it around.</p>
+      </div>
+      <div class="list">
+        <div class="row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11v5c0 1.5 2.5 3 5 3s5-1.5 5-3v-5"/><path d="M21 9v6"/></svg><h3>Schools in hot regions</h3><p>A class-wide check before sports day or an outdoor assembly. Teachers see who needs water before anyone faints in the sun.</p><div class="use">Morning check, under a minute per student</div></div>
+        <div class="row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15a8 8 0 0116 0"/><path d="M2 15h20v2H2z"/><path d="M12 7V4"/><path d="M9 8l-.5-2M15 8l.5-2"/></svg><h3>Outdoor workers</h3><p>Construction crews and delivery riders work through the hottest hours. A strip in the pocket turns &ldquo;drink more water&rdquo; into a number they can act on.</p><div class="use">Midday check on the job</div></div>
+        <div class="row"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M10 21l1-7-2-3 3-3 3 3"/><path d="M14 21l-1-5"/><path d="M17 11v10"/></svg><h3>Older adults and carers</h3><p>Thirst fades with age, and dehydration in older people is easy to mistake for confusion or tiredness. Carers get an objective daily check.</p><div class="use">Daily baseline, alerts when it drops</div></div>
+        <div class="row"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/><path d="M12 3v4M21 10l-5 0M3 10h5M7 19l2.5-4.5M17 19l-2.5-4.5"/></svg><h3>Sports teams</h3><p>Players test before and after training and the coach sees the whole squad on one dashboard, with anyone who is dry highlighted at the top.</p><div class="use">Live team dashboard, built in</div></div>
+        <div class="row"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V8l8-5 8 5v13"/><path d="M12 10v6M9 13h6"/><path d="M9 21v-3h6v3"/></svg><h3>Community health workers</h3><p>In places without a lab, a health worker with a phone and a stack of strips can screen a whole street during a heatwave and prioritise who to help first.</p><div class="use">Works offline, no lab needed</div></div>
+      </div>
+    </section>
+
+    <section class="sec" id="scale" aria-labelledby="scale-h">
+      <p class="kicker">Why it can scale</p>
+      <h2 class="h2" id="scale-h">Cheap to make, <em>free to share</em>, private by design.</h2>
+      <dl class="nums">
+        <div><dd>&lt;&#8202;&#8377;1</dd><dt><span class="k">Estimated cost per strip</span><span class="f">Our estimate: one cabbage and a few sheets of filter paper make hundreds of pads.</span></dt></div>
+        <div><dd>30 s</dd><dt><span class="k">From wet strip to result</span><span class="f">The guided camera captures automatically once the colour settles.</span></dt></div>
+        <div><dd>0</dd><dt><span class="k">Photos uploaded</span><span class="f">All analysis runs on the phone. Teams share only scores.</span></dt></div>
+        <div><dd>Open</dd><dt><span class="k">Card, recipe and code</span><span class="f">Anyone can print the card and make strips with kitchen equipment.</span></dt></div>
+      </dl>
+    </section>
+
+    <section class="sec" id="evidence" aria-labelledby="evidence-h">
+      <p class="kicker">Our early evidence</p>
+      <div class="split">
+        <div>
+          <h2 class="h2" id="evidence-h">The colour <em>moved</em> with hydration.</h2>
+          <div class="tubes" role="img" aria-label="Indicator colour for three saliva samples: pinkest after ten to twelve hours without water"><div class="tube"><div class="glass"><div class="liq" style="background:#735a78"></div></div><div><b>10 to 12 h</b>without water</div></div><div class="tube"><div class="glass"><div class="liq" style="background:#5b4963"></div></div><div><b>5 to 15 min</b>after drinking</div></div><div class="tube"><div class="glass"><div class="liq" style="background:#7a7698"></div></div><div><b>1 to 3 h</b>without water</div></div></div>
+        </div>
+        <div>
+          <p class="p">In our first trial, saliva collected after ten to twelve hours without water turned the indicator the pinkest of all three samples, exactly as the chemistry predicts. We also showed that salt concentration alone did not change the colour, so the strip is reading pH rather than saltiness.</p>
+          <p class="p">The trial was small: one person, two samples per condition, and the sample taken just after drinking did not sit neatly between the other two. We say so openly. That is why the app includes a study mode, a reference card and a control pad, so the next round of testing can prove, or disprove, that the strip works.</p>
+          <div class="ctas"><a class="btn" href="https://viora-lemon.vercel.app/methods.html">Read the full methods</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="plan" aria-labelledby="plan-h">
+      <p class="kicker">Impact plan</p>
+      <h2 class="h2" id="plan-h">From one experiment to <em>thousands of strips</em>.</h2>
+      <div class="road">
+        <div class="phase now"><p class="when">Phase 1, now</p><h3>Validate</h3><ul><li>Recruit 30 volunteers at school</li><li>Record every reading against the urine colour chart</li><li>Train and test the model on real data</li></ul></div>
+        <div class="phase"><p class="when">Phase 2, next term</p><h3>Pilot</h3><ul><li>Run with school sports teams through the hot months</li><li>Coaches use the live squad dashboard</li><li>Measure how often players drink after a low reading</li></ul></div>
+        <div class="phase"><p class="when">Phase 3, year one</p><h3>Share</h3><ul><li>Publish the card, strip recipe and app openly</li><li>Strip-making workshops for other schools</li><li>The app is already available in Hindi and Marathi</li></ul></div>
+        <div class="phase"><p class="when">Phase 4, beyond</p><h3>Scale</h3><ul><li>Partner with NGOs running heat action plans</li><li>Kits for care homes and construction sites</li><li>Train community health workers to screen during heatwaves</li></ul></div>
+      </div>
+    </section>
+
+    <section class="sec" id="goals" aria-labelledby="goals-h">
+      <p class="kicker">Global goals</p>
+      <h2 class="h2" id="goals-h">Aligned with the UN <em>Sustainable Development Goals</em>.</h2>
+      <div class="sdg">
+        <div><span class="n">3</span><h3>Good health and well-being</h3><p>Early, everyday detection of dehydration before it becomes heat illness.</p></div>
+        <div><span class="n">10</span><h3>Reduced inequalities</h3><p>A health check that costs almost nothing and needs no lab, clinic or specialist.</p></div>
+        <div><span class="n">13</span><h3>Climate action</h3><p>A practical tool for adapting to longer, hotter heatwaves in the communities hit hardest.</p></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="final" aria-labelledby="try-h">
+    <div class="wrap">
+      <p class="kicker">Try it</p>
+      <h2 class="h2" id="try-h">Make a strip. Take a photo. <em>Know.</em></h2>
+      <p class="p">Print the reference card, make a strip with the recipe and take your first reading. Every labelled reading helps prove whether the strip works.</p>
+      <div class="ctas">
+        <a class="btn solid" href="https://viora-lemon.vercel.app/#check">Take a reading</a>
+        <a class="btn" href="https://viora-lemon.vercel.app/card.html">Print the card</a>
+        <a class="btn" href="https://viora-lemon.vercel.app/#study">Join the study</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <p class="note">Viora is a student research prototype and has not been clinically validated. The impact plan describes what we intend to do, and the cost per strip is our own estimate. It is not a medical device; anyone who feels dizzy or confused, or has stopped urinating, should seek medical help.</p>
+  </div>
+</main>
+
+<div class="wrap">
+  <footer class="foot">
+    <span>Viora is made by Overdrive 009, B.D. Somani International School, Mumbai.</span>
+    <nav aria-label="Overdrive 009">
+      <a href="/#team">The team</a>
+      <a href="/">Overdrive 009</a>
+      <a href="mailto:nrloverdrive009@gmail.com">Email us</a>
+      <a href="/privacy">Privacy</a>
+    </nav>
+  </footer>
+</div>
+<script type="module" src="/js/viora-page.js"></script>
+</body>
+</html>

@@ -25,17 +25,6 @@
       "permanent": true
     },
     {
-      "source": "/viora",
-      "has": [
-        {
-          "type": "host",
-          "value": "overdrive009.in"
-        }
-      ],
-      "destination": "https://viora.overdrive009.in/",
-      "permanent": true
-    },
-    {
       "source": "/((?!scout|signin|js/|css/|lib/|assets/|sw\\.js|manifest).*)",
       "has": [
         {
@@ -67,6 +56,16 @@
         }
       ],
       "destination": "/manifest-scout-host.webmanifest"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "viora.overdrive009.in"
+        }
+      ],
+      "destination": "/viora"
     }
   ],
   "headers": [

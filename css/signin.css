@@ -4,12 +4,12 @@ body.signin { min-height: 100vh; min-height: 100dvh; overflow-x: hidden; }
 #stage { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh; display: block; z-index: 1; opacity: 0; transition: opacity 1.2s var(--ease); }
 body.live #stage { opacity: 1; }
 .shade { position: fixed; inset: 0; z-index: 2; pointer-events: none;
-  background: linear-gradient(90deg, rgba(13, 14, 16, 0.94), rgba(13, 14, 16, 0.84) 34vw, rgba(13, 14, 16, 0.2) 60vw, rgba(13, 14, 16, 0) 74vw); }
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.94), rgba(0, 0, 0, 0.84) 34vw, rgba(0, 0, 0, 0.2) 60vw, rgba(0, 0, 0, 0) 74vw); }
 .panel { position: relative; z-index: 3; width: min(500px, 100vw); min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center;
   padding: calc(var(--s-10) + var(--safe-t)) 0 calc(var(--s-7) + var(--safe-b)) max(var(--gutter), calc((100vw - var(--wrap)) / 2)); }
 .panel h1 { margin: var(--s-4) 0; font: 600 clamp(44px, 5.2vw, 76px)/0.98 var(--serif); letter-spacing: -0.025em; }
 .panel h1 em { color: var(--cream-2); }
-.panel .lede { margin: 0 0 var(--s-6); color: #d6d0c5; font-size: 17px; line-height: 1.7; max-width: 440px; }
+.panel .lede { margin: 0 0 var(--s-6); color: #c8c8c5; font-size: 17px; line-height: 1.7; max-width: 440px; }
 .panel section { display: grid; gap: 12px; }
 .panel .help { margin: 2px 2px 0; }
 .email { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
@@ -29,17 +29,17 @@ body.live #stage { opacity: 1; }
 #signout { justify-self: start; margin-top: 6px; }
 .fine { margin: 26px 0 0; color: var(--faint); font-size: 13px; }
 .fine a { color: var(--muted); text-underline-offset: 3px; }
-.match-tag { position: fixed; z-index: 3; right: 28px; bottom: calc(24px + var(--safe-b)); display: flex; align-items: center; gap: 10px; color: rgba(242, 237, 227, 0.85); font: 500 11px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase;
+.match-tag { position: fixed; z-index: 3; right: 28px; bottom: calc(24px + var(--safe-b)); display: flex; align-items: center; gap: 10px; color: rgba(255, 255, 255, 0.85); font: 500 11px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase;
   padding: 10px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
 .match-tag i { width: 7px; height: 7px; border-radius: var(--pill); background: var(--od); animation: live 1s var(--ease) infinite alternate; }
 @keyframes live { to { opacity: 0.25; } }
 .noscript { position: relative; z-index: 4; padding: 40px; }
 @media (min-width: 768px) and (max-width: 1279px) {
-  .shade { background: linear-gradient(90deg, rgba(13, 14, 16, 0.94), rgba(13, 14, 16, 0.84) 46vw, rgba(13, 14, 16, 0.15) 72vw, rgba(13, 14, 16, 0) 86vw); }
+  .shade { background: linear-gradient(90deg, rgba(0, 0, 0, 0.94), rgba(0, 0, 0, 0.84) 46vw, rgba(0, 0, 0, 0.15) 72vw, rgba(0, 0, 0, 0) 86vw); }
   .panel { width: min(480px, 58vw); }
 }
 @media (max-width: 767px), (max-width: 1024px) and (orientation: portrait) {
-  .shade { background: linear-gradient(0deg, rgba(13, 14, 16, 0.96), rgba(13, 14, 16, 0.86) 52vh, rgba(13, 14, 16, 0.1) 80vh); }
+  .shade { background: linear-gradient(0deg, rgba(0, 0, 0, 0.96), rgba(0, 0, 0, 0.86) 52vh, rgba(0, 0, 0, 0.1) 80vh); }
   .still { background-image: url('../assets/stadium-tall.jpg'); }
   .panel { justify-content: flex-end; padding: 36vh var(--gutter) calc(var(--s-6) + var(--safe-b)); width: min(600px, 100vw); }
   .match-tag { display: none; }
@@ -50,7 +50,7 @@ body.live #stage { opacity: 1; }
 .panel > * { animation: siRise 0.9s var(--ease-out) backwards; }
 .panel > :nth-child(2) { animation-delay: 0.1s; } .panel > :nth-child(3) { animation-delay: 0.22s; }
 .panel > :nth-child(4), .panel > :nth-child(5) { animation-delay: 0.32s; } .panel > :nth-child(n+6) { animation-delay: 0.42s; }
-.match-tag { font: 500 13px/1.3 var(--font); letter-spacing: 0; text-transform: none; color: rgba(242, 237, 227, 0.86); animation: siRise 0.9s var(--ease-out) 0.8s backwards; }
+.match-tag { font: 500 13px/1.3 var(--font); letter-spacing: 0; text-transform: none; color: rgba(255, 255, 255, 0.86); animation: siRise 0.9s var(--ease-out) 0.8s backwards; }
 .match-tag i { animation: live 2s var(--ease) infinite; }
 @media (prefers-reduced-motion: reduce) { .panel > *, .match-tag { animation: none; } }
 
