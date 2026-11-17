@@ -14,13 +14,13 @@
 <meta property="og:image" content="https://overdrive009.in/assets/site/poster-wide-1280.webp">
 <link rel="canonical" href="https://overdrive009.in/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314171b'/%3E%3Cpath d='M22.6 7.7A11 11 0 1 0 22.6 24.3' stroke='%23ede6da' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M14.6 10.6l5.6 5.4-5.6 5.4' stroke='%23e4483f' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="preload" href="assets/fonts/big-shoulders-display.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/schibsted-grotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" as="image" type="image/avif" media="(max-aspect-ratio: 2/3)" imagesrcset="assets/site/poster-tall-540.avif 540w, assets/site/poster-tall-1080.avif 1080w" imagesizes="100vw" fetchpriority="high">
 <link rel="preload" as="image" type="image/avif" media="(min-aspect-ratio: 2/3) and (orientation: portrait)" imagesrcset="assets/site/poster-mid-768.avif 768w, assets/site/poster-mid-1536.avif 1536w" imagesizes="100vw" fetchpriority="high">
 <link rel="preload" as="image" type="image/avif" media="(orientation: landscape)" imagesrcset="assets/site/poster-wide-1280.avif 1280w, assets/site/poster-wide-1920.avif 1920w, assets/site/poster-wide-2560.avif 2560w" imagesizes="100vw" fetchpriority="high">
-<link rel="stylesheet" href="css/od.css?v=7">
-<link rel="stylesheet" href="css/landing.css?v=8">
+<link rel="stylesheet" href="css/od.css?v=8">
+<link rel="stylesheet" href="css/landing.css?v=9">
 <script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script>
 <script src="js/redirect.js"></script>
 </head>
@@ -48,14 +48,14 @@
   <a class="lnk opt" href="#built">Software</a>
   <a class="lnk opt" href="#viora">Viora</a>
   <a class="b b-glass sm nav-cta" href="/sim" data-go="sim">Open the simulator</a>
-  <i class="nav-progress" aria-hidden="true"></i>
+  <i class="lens" aria-hidden="true"></i>
 </nav>
 
 <main id="main">
   <!-- ============================================================ hero: the robot on its plinth -->
   <section class="sec stage hero" data-key="0" aria-labelledby="hero-h">
     <div class="copy">
-      <p class="eyebrow reveal"><span class="long">National Robotics League</span><span class="short">NRL</span> 2026 · HYPERDRIVE</p>
+      <p class="eyebrow glass frost reveal"><span class="long">National Robotics League</span><span class="short">NRL</span> 2026 · HYPERDRIVE</p>
       <h1 id="hero-h" class="reveal lines"><span class="ln"><span>Overdrive</span></span><span class="ln"><span><em>009</em></span></span></h1>
       <p class="lede reveal">We are a student robotics team. This is our robot for HYPERDRIVE, and below it the simulator and scouting app we built so every team in the league can practise and scout.</p>
       <div class="ctas reveal">
@@ -72,7 +72,7 @@
       <h2 id="team-h" class="statement rise">A student team in the <em>National Robotics League 2026.</em></h2>
       <div class="team-body rise">
         <p>We build, wire and drive one robot for HYPERDRIVE and write the code it runs. We also wrote the software on this page, and any NRL team can use it.</p>
-        <dl class="facts">
+        <dl class="facts glass">
           <div><dt>Team number</dt><dd>009</dd></div>
           <div><dt>League</dt><dd>National Robotics League 2026</dd></div>
           <div><dt>Game</dt><dd>HYPERDRIVE</dd></div>
@@ -89,7 +89,7 @@
     <div class="copy">
       <p class="eyebrow reveal">01 · The robot</p>
       <h2 id="robot-h" class="reveal lines"><span class="ln"><span>Four wheels, one arm,</span></span><span class="ln"><span><em>a claw for COREs.</em></span></span></h2>
-      <dl class="specs reveal">
+      <dl class="specs glass frost reveal">
         <div><dt>Drive</dt><dd>Four-motor skid-steer on 110 mm wheels</dd></div>
         <div><dt>Frame</dt><dd>300 × 412 mm bumper frame, 21 mm off the floor</dd></div>
         <div><dt>Arm</dt><dd>Servo parallelogram, 145.7 mm links, so the claw stays level</dd></div>
@@ -109,7 +109,7 @@
         <p class="lede rise">Every line here comes from our robot's CAD file, in millimetres. Move the arm: the parallelogram keeps the claw level from the floor to straight up.</p>
       </header>
       <div class="draw-grid">
-        <figure class="draw side rise">
+        <figure class="draw glass side rise">
           <svg class="draw-svg" viewBox="-178 -252 420 300" role="img" aria-labelledby="side-t side-d">
 <title id="side-t">Side view of the Overdrive 009 robot</title>
 <desc id="side-d">Traced from the robot CAD, in millimetres. 110 mm wheels on a 145 mm wheelbase, a 300 mm long bumper frame 21 mm off the floor, and a parallelogram arm with 145.7 mm links holding a 95 by 30 mm CORE.</desc>
@@ -130,7 +130,7 @@
             <output id="arm-out" class="arm-out" for="arm" aria-live="polite"><b data-o="deg">52.1°</b><span>claw centre <b data-o="h">171</b> mm up</span><span data-o="clear">clears the HIGH pole top</span></output>
           </figcaption>
         </figure>
-        <figure class="draw top rise">
+        <figure class="draw glass top rise">
           <svg class="draw-svg" viewBox="-178 -232 420 464" role="img" aria-labelledby="top-t top-d">
 <title id="top-t">Top view of the Overdrive 009 robot</title>
 <desc id="top-d">Traced from the robot CAD, in millimetres: a 300 by 412 mm bumper frame, wheels on a 306 mm track.</desc>
@@ -156,7 +156,7 @@
       <p class="eyebrow reveal">02 · The season</p>
       <h2 id="season-h" class="reveal lines"><span class="ln"><span>HYPERDRIVE,</span></span><span class="ln"><span><em>two and a half minutes.</em></span></span></h2>
       <p class="lede reveal">Two squads, Red and Blue, two robots each. They play on a 12 by 12 foot field of 36 foam tiles. The last 30 seconds are LEVEL UP.</p>
-      <dl class="figures reveal">
+      <dl class="figures glass frost reveal">
         <div><dt>Match</dt><dd>2:30</dd></div>
         <div><dt>LEVEL UP</dt><dd>30 s</dd></div>
         <div><dt>Field</dt><dd>144 in</dd></div>
@@ -174,7 +174,7 @@
         <p class="lede rise">Robots carry COREs, 95 mm rings, and thread them onto poles or drop them in a zone. Pick a row to find it on the field. Points are from the 2026 game manual.</p>
       </header>
       <div class="field-grid">
-        <figure class="field-fig rise">
+        <figure class="field-fig glass rise">
           <svg class="field-svg" viewBox="-6 -14 156 172" role="img" aria-labelledby="field-t field-d">
 <title id="field-t">The HYPERDRIVE field from above</title>
 <desc id="field-d">A 144 inch square of 36 tiles. Red drives from the top, Blue from the bottom, and the layout is the same for both turned half a circle. Each squad has a start zone, three HIGH poles, two STAR poles, a Space Station with two APEX poles on its wall, a DROP zone, a Source Zone and a vault.</desc>
@@ -182,7 +182,7 @@
 </svg>
           <figcaption>Drawn from the field coordinates in our simulator. Blue's half is Red's turned half a circle.</figcaption>
         </figure>
-        <ol class="score-list" aria-label="Scoring">
+        <ol class="score-list glass" aria-label="Scoring">
           <li><button type="button" data-k="high" aria-pressed="false"><span class="sl-name">HIGH pole</span><span class="sl-pts"><b>3</b> per CORE</span><span class="sl-note">Three per squad, on the line in front of the start zone.</span></button></li>
           <li><button type="button" data-k="star" aria-pressed="false"><span class="sl-name">STAR pole</span><span class="sl-pts"><b>5</b> per CORE · <b>7</b> golden</span><span class="sl-note">A full pole in the STAR MAP pattern on the TRIFRON adds 10.</span></button></li>
           <li><button type="button" data-k="apex" aria-pressed="false"><span class="sl-name">APEX pole</span><span class="sl-pts"><b>9</b> per CORE</span><span class="sl-note">On the wall beside your station. Only in LEVEL UP, from your own station.</span></button></li>
@@ -192,7 +192,7 @@
           <li><button type="button" data-k="payload" aria-pressed="false"><span class="sl-name">Team Payload</span><span class="sl-pts"><b>10</b> bonus</span><span class="sl-note">The Human Player loads it in the Source Zone; the robot tips it into the DROP zone.</span></button></li>
         </ol>
       </div>
-      <figure class="venue rise">
+      <figure class="venue glass rise">
         <picture>
           <source type="image/webp" media="(max-width: 767px)" srcset="assets/site/venue-tall-450.webp 450w, assets/site/venue-tall-900.webp 900w" sizes="calc(100vw - 40px)">
           <img src="assets/site/venue-wide-1280.webp" srcset="assets/site/venue-wide-960.webp 960w, assets/site/venue-wide-1280.webp 1280w, assets/site/venue-wide-1920.webp 1920w" sizes="(min-width: 1280px) 1180px, calc(100vw - 64px)" width="1920" height="1080" loading="lazy" decoding="async" alt="Our simulator's model of the competition venue: two fields, ALPHA and BRAVO, with terraces of spectators and a stage screen.">
@@ -211,7 +211,7 @@
       </header>
 
       <article class="feature">
-        <figure class="shot rise">
+        <figure class="shot glass rise">
           <img src="assets/site/sim-home-1600.webp" srcset="assets/site/sim-home-960.webp 960w, assets/site/sim-home-1600.webp 1600w" sizes="(min-width: 1024px) 700px, calc(100vw - 40px)" width="1600" height="1000" loading="lazy" decoding="async" alt="The simulator's home screen: our robot on its plinth beside the field, with Play, Online, Practice, Robot code and the four team tools.">
         </figure>
         <div class="feature-copy">
@@ -248,14 +248,14 @@
 
       <div class="pair">
         <article class="half">
-          <figure class="shot rise"><img src="assets/site/ai-match-960.webp" srcset="assets/site/ai-match-960.webp 960w, assets/site/ai-match-1600.webp 1600w" sizes="(min-width: 1024px) 560px, calc(100vw - 40px)" width="1600" height="1000" loading="lazy" decoding="async" alt="A simulated match with the Champion AI driving all four robots, 58 to 63 with 52 seconds left."></figure>
+          <figure class="shot glass rise"><img src="assets/site/ai-match-960.webp" srcset="assets/site/ai-match-960.webp 960w, assets/site/ai-match-1600.webp 1600w" sizes="(min-width: 1024px) 560px, calc(100vw - 40px)" width="1600" height="1000" loading="lazy" decoding="async" alt="A simulated match with the Champion AI driving all four robots, 58 to 63 with 52 seconds left."></figure>
           <p class="kicker">AI drivers</p>
           <h3 class="rise">Rookie, Pro and Champion.</h3>
           <p class="rise">They drive with the same controls a person has and keep the same rules. Each plans its path with A* on a 74 by 74 cost grid of the field. In AI-only matches Rookie scores about 45 to 60, Pro about 67 to 69, Champion 100 to 110.</p>
           <p class="cap">Champion on all four robots, 0:52 left.</p>
         </article>
         <article class="half">
-          <figure class="shot rise"><img src="assets/site/robot-code-1000.webp" srcset="assets/site/robot-code-560.webp 560w, assets/site/robot-code-1000.webp 1000w" sizes="(min-width: 1024px) 560px, calc(100vw - 40px)" width="1000" height="1021" loading="lazy" decoding="async" alt="The Robot code dialog: drop .cpp and .h files, choose the robot and its start position."></figure>
+          <figure class="shot glass rise"><img src="assets/site/robot-code-1000.webp" srcset="assets/site/robot-code-560.webp 560w, assets/site/robot-code-1000.webp 1000w" sizes="(min-width: 1024px) 560px, calc(100vw - 40px)" width="1000" height="1021" loading="lazy" decoding="async" alt="The Robot code dialog: drop .cpp and .h files, choose the robot and its start position."></figure>
           <p class="kicker">Robot code</p>
           <h3 class="rise">Run your real OpMode.</h3>
           <p class="rise">Drop in your HexaNRL .cpp and the headers it includes. It compiles in the browser and runs on a simulated control hub: the 100 Hz loop, actions, servos, motors, the IMU and telemetry. The files stay in your browser.</p>
@@ -272,28 +272,28 @@
             <button type="button" class="tool-tab" aria-expanded="true" aria-controls="tool-1"><span class="tn">01</span><span class="tt">Auto planner</span></button>
             <div class="tool-body" id="tool-1">
               <p>Draw an AUTO route on the field. It writes the HexaNRL OpMode, runs it, tunes the drives on a perfect robot and tests the route on a batch of imperfect ones.</p>
-              <figure class="shot"><img src="assets/site/tool-planner-1200.webp" srcset="assets/site/tool-planner-640.webp 640w, assets/site/tool-planner-1200.webp 1200w" sizes="(min-width: 1024px) 640px, calc(100vw - 40px)" width="1200" height="752" loading="lazy" decoding="async" alt="The Auto planner: a numbered route on the top-down field and the list of drive, turn and claw steps."></figure>
+              <figure class="shot glass"><img src="assets/site/tool-planner-1200.webp" srcset="assets/site/tool-planner-640.webp 640w, assets/site/tool-planner-1200.webp 1200w" sizes="(min-width: 1024px) 640px, calc(100vw - 40px)" width="1200" height="752" loading="lazy" decoding="async" alt="The Auto planner: a numbered route on the top-down field and the list of drive, turn and claw steps."></figure>
             </div>
           </li>
           <li class="tool">
             <button type="button" class="tool-tab" aria-expanded="false" aria-controls="tool-2"><span class="tn">02</span><span class="tt">Driver trainer</span></button>
             <div class="tool-body" id="tool-2">
               <p>Timed drills on Red 1: cycle sprint, precision, payload run, balance and a full match against the AI. Personal bests, split times and a ghost of your best run.</p>
-              <figure class="shot tall"><img src="assets/site/tool-trainer-1000.webp" srcset="assets/site/tool-trainer-560.webp 560w, assets/site/tool-trainer-1000.webp 1000w" sizes="(min-width: 1024px) 560px, calc(100vw - 40px)" width="1000" height="1145" loading="lazy" decoding="async" alt="The Driver trainer: five drills to pick from, CORE count and ghost settings."></figure>
+              <figure class="shot glass tall"><img src="assets/site/tool-trainer-1000.webp" srcset="assets/site/tool-trainer-560.webp 560w, assets/site/tool-trainer-1000.webp 1000w" sizes="(min-width: 1024px) 560px, calc(100vw - 40px)" width="1000" height="1145" loading="lazy" decoding="async" alt="The Driver trainer: five drills to pick from, CORE count and ghost settings."></figure>
             </div>
           </li>
           <li class="tool">
             <button type="button" class="tool-tab" aria-expanded="false" aria-controls="tool-3"><span class="tn">03</span><span class="tt">Alliance strategy</span></button>
             <div class="tool-body" id="tool-3">
               <p>Profiles of what each team can do, from presets or Scout data, and a Monte Carlo match model that scores like the simulator. Head-to-head odds and partner rankings.</p>
-              <figure class="shot"><img src="assets/site/tool-strategy-1200.webp" srcset="assets/site/tool-strategy-640.webp 640w, assets/site/tool-strategy-1200.webp 1200w" sizes="(min-width: 1024px) 640px, calc(100vw - 40px)" width="1200" height="943" loading="lazy" decoding="async" alt="Alliance strategy with sample teams: win odds, expected scores, a score distribution and points by category."></figure>
+              <figure class="shot glass"><img src="assets/site/tool-strategy-1200.webp" srcset="assets/site/tool-strategy-640.webp 640w, assets/site/tool-strategy-1200.webp 1200w" sizes="(min-width: 1024px) 640px, calc(100vw - 40px)" width="1200" height="943" loading="lazy" decoding="async" alt="Alliance strategy with sample teams: win odds, expected scores, a score distribution and points by category."></figure>
             </div>
           </li>
           <li class="tool">
             <button type="button" class="tool-tab" aria-expanded="false" aria-controls="tool-4"><span class="tn">04</span><span class="tt">Robot designer</span></button>
             <div class="tool-body" id="tool-4">
               <p>Change the gearing, battery, tyres, mass or arm, put the design on the robots in the simulator, and measure it against the stock robot with a headless test battery.</p>
-              <figure class="shot"><img src="assets/site/tool-designer-1200.webp" srcset="assets/site/tool-designer-640.webp 640w, assets/site/tool-designer-1200.webp 1200w" sizes="(min-width: 1024px) 640px, calc(100vw - 40px)" width="1200" height="905" loading="lazy" decoding="async" alt="The Robot designer: drivetrain and battery settings beside a side view of the arm and its reach."></figure>
+              <figure class="shot glass"><img src="assets/site/tool-designer-1200.webp" srcset="assets/site/tool-designer-640.webp 640w, assets/site/tool-designer-1200.webp 1200w" sizes="(min-width: 1024px) 640px, calc(100vw - 40px)" width="1200" height="905" loading="lazy" decoding="async" alt="The Robot designer: drivetrain and battery settings beside a side view of the arm and its reach."></figure>
             </div>
           </li>
         </ol>
@@ -308,7 +308,7 @@
         <p class="eyebrow">04 · Changemakers Award project</p>
         <h2 id="viora-h" class="viora-name rise">Viora</h2>
         <p class="viora-lede rise">A saliva test strip made from purple cabbage and filter paper, read by any phone camera. It tells you if you are dehydrated in thirty seconds, for less than a rupee.</p>
-        <dl class="facts light rise">
+        <dl class="facts light glass rise">
           <div><dt>Indicator</dt><dd>Anthocyanin from the cabbage changes colour with pH</dd></div>
           <div><dt>Reading</dt><dd>Analysed on the phone. No photos are uploaded.</dd></div>
           <div><dt>Evidence</dt><dd>Our first trial was small, one person, and the project site says so.</dd></div>
@@ -322,14 +322,14 @@
 
   <!-- ============================================================ sponsors and contact -->
   <section class="sec solid support" id="support" aria-labelledby="support-h">
-    <div class="wrap support-grid">
+    <div class="wrap"><div class="support-grid glass">
       <p class="eyebrow">05 · Sponsor us</p>
       <h2 id="support-h" class="rise">Help us build the next robot.</h2>
       <!-- TODO: confirm what sponsorship funds for this team -->
       <p class="lede rise">We are looking for sponsors. Support pays for robot parts, competition fees and travel to events. Write to us and we will tell you what we need.</p>
       <!-- TODO: team email (team@overdrive009.in is a placeholder) -->
       <a class="mail rise" href="mailto:team@overdrive009.in">team@overdrive009.in</a>
-    </div>
+    </div></div>
   </section>
 </main>
 

@@ -9,15 +9,39 @@ const io = 'IntersectionObserver' in window
   : null;
 document.querySelectorAll('.reveal, .rise').forEach((el) => (io ? io.observe(el) : el.classList.add('in')));
 
-// ----- which side the stage copy is on (the ink wash follows it) and whether the hero is behind us
+// ----- which side the stage copy is on (the ink wash follows it), whether the hero is behind us, and the nav lens:
+// a pane of glass that slides under the link for the part of the page you are reading
 const stages = [...document.querySelectorAll('.stage')];
+const sections = [...document.querySelectorAll('main > section')];
+const lens = document.querySelector('.nav .lens');
+const PART = { drawing: 'robot', field: 'season' };
+const light = document.getElementById('viora');           // the one cream page: the nav turns to light glass over it      // the solid pages that belong to a stage section's link
+let lit = null;
+const moveLens = (a) => {
+  if (a === lit) return;
+  if (lit) lit.removeAttribute('aria-current');
+  lit = a;
+  if (!a) { lens.classList.remove('on'); return; }
+  a.setAttribute('aria-current', 'true');
+  lens.style.setProperty('--lx', `${a.offsetLeft}px`);
+  lens.style.setProperty('--lw', `${a.offsetWidth}px`);
+  lens.classList.add('on');
+};
 const onScroll = () => {
   const mid = window.innerHeight / 2;
-  const here = stages.find((s) => { const r = s.getBoundingClientRect(); return r.top <= mid && r.bottom >= mid; });
+  const at = (s) => { const r = s.getBoundingClientRect(); return r.top <= mid && r.bottom >= mid; };
+  const here = stages.find(at);
   if (here) document.body.classList.toggle('at-right', here.classList.contains('right'));
   document.body.classList.toggle('past-hero', window.scrollY > window.innerHeight * 0.6);
+  if (light) { const r = light.getBoundingClientRect(); document.body.classList.toggle('on-light', r.top <= 44 && r.bottom >= 44); }
+  if (lens) {
+    const sec = sections.find(at), id = sec && (PART[sec.id] || sec.id);
+    const a = id ? document.querySelector(`.nav a.lnk[href="#${id}"]`) : null;
+    moveLens(a && a.offsetParent ? a : null);      // offsetParent is null while the link is hidden on phones
+  }
 };
 window.addEventListener('scroll', onScroll, { passive: true });
+window.addEventListener('resize', () => { const a = lit; lit = null; moveLens(a); onScroll(); });
 onScroll();
 
 // ----- side view: the arm is a parallelogram, so the claw translates and stays level as the links turn.

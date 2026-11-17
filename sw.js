@@ -8,12 +8,12 @@
 //    outbox with js/scout/outbox.js, the same code the app runs, and tells any open Scout tab to re-read its data.
 importScripts('/js/scout/outbox.js');
 
-const CACHE = 'od-scout-v6';
+const CACHE = 'od-scout-v7';
 const SHELL = ['/scout', '/js/scout/app.js', '/js/scout/store.js', '/js/scout/game.js', '/js/scout/insights.js', '/js/scout/outbox.js',
   '/js/auth-client.js', '/js/handoff.js', '/js/supabase-config.js', '/css/od.css', '/css/scout.css', '/lib/supabase.umd.js',
   '/manifest.webmanifest', '/assets/scout-icon.svg', '/assets/scout-192.png', '/assets/scout-512.png',
   '/assets/stadium-wide.jpg', '/assets/stadium-tall.jpg', '/privacy', '/terms', '/css/legal.css',
-  '/assets/fonts/big-shoulders-display.woff2', '/assets/fonts/schibsted-grotesk.woff2', '/assets/fonts/schibsted-grotesk-italic.woff2'];
+  '/assets/fonts/bricolage-grotesque.woff2', '/assets/fonts/instrument-sans.woff2'];
 const KEEP = [/^\/scout$/, /^\/js\/scout\//, /^\/js\/(auth-client|handoff|supabase-config)\.js$/, /^\/css\/(od|scout|legal)\.css$/, /^\/lib\/supabase\.umd\.js$/,
   /^\/assets\/stadium-(wide|tall)\.jpg$/, /^\/assets\/fonts\/[a-z-]+\.woff2$/, /^\/manifest\.webmanifest$/, /^\/assets\/scout-(icon\.svg|192\.png|512\.png)$/, /^\/(privacy|terms)$/];
 const WAIT = 2500;

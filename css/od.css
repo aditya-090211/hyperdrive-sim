@@ -1,16 +1,15 @@
-/* OVERDRIVE 009 — shared design language for the landing page, Overdrive Scout and the legal pages.
-   The palette is taken from the field: graphite from the arena walls, the grey of the foam tiles, the warm paper of the
-   venue's late-afternoon light, and one accent, the Red squad's red (Overdrive 009 drives Red 1). Big Shoulders
-   Display, a condensed industrial grotesque, sets display type and figures; Schibsted Grotesk sets everything you
-   read and tap, small uppercase labels included. Both are self-hosted (assets/fonts, SIL OFL). Frosted glass is kept
-   for chrome that floats over the 3D venue (the nav, sheets, toasts); everything in the flow of a page is a solid
-   surface with a hairline edge and a one-pixel top light. A fine film grain sits over every page. Motion is slow
-   and weighted (ease-out, no overshoot).
-   Layout: mobile-first. Stacked below 768 px and on portrait tablets; split (copy beside the 3D stage) from 768 px
-   landscape up; the content measure caps at 1180 px from 1280 px. Spacing comes from the --s-* scale. */
-@font-face { font-family: 'Big Shoulders Display'; font-style: normal; font-weight: 400 900; font-display: swap; src: url('../assets/fonts/big-shoulders-display.woff2') format('woff2'); }
-@font-face { font-family: 'Schibsted Grotesk'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('../assets/fonts/schibsted-grotesk.woff2') format('woff2'); }
-@font-face { font-family: 'Schibsted Grotesk'; font-style: italic; font-weight: 400; font-display: swap; src: url('../assets/fonts/schibsted-grotesk-italic.woff2') format('woff2'); }
+/* OVERDRIVE 009: shared design language for the landing page, Overdrive Scout, sign-in and the legal pages.
+   Palette from the field: graphite from the arena walls, the grey of the foam tiles, warm paper for the venue's
+   late-afternoon light, and one accent, the Red squad's red (Overdrive 009 drives Red 1).
+   Type: Bricolage Grotesque for display and figures, set tight; Instrument Sans for everything you read and tap,
+   small uppercase labels included. Both self-hosted (assets/fonts, SIL OFL).
+   Liquid glass: chrome and panels are clear panes with a light fill, a bright specular rim that fades round the edge,
+   a soft inner top light and a long shadow. Panes that float over the 3D venue (nav, stage panels, glass buttons)
+   also blur and saturate what is behind them; panes inside the page flow skip the blur, which costs nothing.
+   Motion is slow and weighted (ease-out, no overshoot).
+   Layout: mobile-first. Stacked below 768 px and on portrait tablets; split from 768 px landscape up. */
+@font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 400 800; font-display: swap; src: url('../assets/fonts/bricolage-grotesque.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('../assets/fonts/instrument-sans.woff2') format('woff2'); }
 :root {
   color-scheme: dark;
   --ink: #14171b;             /* arena wall graphite, a shade deeper */
@@ -29,9 +28,9 @@
   --od-fill: #c4202b;         /* the squad red itself as a button fill: cream text on it passes AA (5.0:1) */
   --od-fill-hi: #ab1b25;
   --red: #d23a40; --blue: #3d64d8; --gold: #d9a441; --green: #4fb58a; --danger: #e5564d;
-  --serif: 'Big Shoulders Display', sans-serif;
-  --font: 'Schibsted Grotesk', sans-serif;
-  --mono: 'Schibsted Grotesk', sans-serif;
+  --serif: 'Bricolage Grotesque', 'Instrument Sans', sans-serif;
+  --font: 'Instrument Sans', sans-serif;
+  --mono: 'Instrument Sans', sans-serif;
   --display: var(--serif);
   --ease: cubic-bezier(0.22, 0.61, 0.21, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);       /* entrances: fast start, long settle, no overshoot */
@@ -48,7 +47,14 @@
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
   --pane: rgba(20, 23, 27, 0.72);
   --pane-strong: rgba(20, 23, 27, 0.9);
-  --frost: blur(22px) saturate(1.15);
+  --frost: blur(24px) saturate(1.7) brightness(1.06);
+  /* liquid glass: a clear fill, a specular rim (bright where the light comes from, nearly gone opposite), an inner
+     top light and a long soft shadow */
+  --g-fill: linear-gradient(180deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.03));
+  --g-tint: linear-gradient(180deg, rgba(34, 38, 45, 0.62), rgba(20, 23, 27, 0.7));
+  --g-rim: linear-gradient(155deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.22));
+  --g-light: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 12px 24px -12px rgba(255, 255, 255, 0.07), inset 0 -10px 22px -14px rgba(0, 0, 0, 0.45);
+  --g-drop: 0 1px 2px rgba(0, 0, 0, 0.3), 0 26px 60px -30px rgba(0, 0, 0, 0.75);
   --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
 }
 @media (min-width: 768px) { :root { --gutter: 32px; } }
@@ -58,7 +64,7 @@ html { -webkit-text-size-adjust: none; text-size-adjust: none; }
 body { margin: 0; background: var(--ink); color: var(--text); font: 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 /* film grain over everything: one tiled noise image, plain alpha (no blend mode, so it costs nothing per frame) */
 body::after { content: ''; position: fixed; inset: 0; z-index: 150; pointer-events: none; background: var(--grain); opacity: 0.045; }
-h1, h2, h3 { text-wrap: balance; }
+h1, h2, h3 { text-wrap: balance; font-optical-sizing: auto; }
 p, li, dd { text-wrap: pretty; }
 .skip { position: fixed; z-index: 200; left: var(--s-4); top: calc(var(--s-4) + var(--safe-t)); padding: var(--s-3) var(--s-4); border-radius: var(--r-sm); background: var(--cream); color: var(--ink); font-weight: 600; text-decoration: none; transform: translateY(-120px); transition: transform 0.3s var(--ease); }
 .skip:focus { transform: none; }
@@ -72,24 +78,22 @@ img, svg { display: block; }
 :focus:not(:focus-visible) { outline: none; }
 ::selection { background: rgba(228, 72, 63, 0.35); }
 svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.lg-defs { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
 .mono { font-family: var(--mono); }
 .eyebrow { margin: 0; font: 600 11.5px/1.55 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .od-text { color: var(--od-2); }
 em, .it { font-style: italic; }
-/* in display type the second voice is a change of tone, not a slant (the display face has no italic) */
-:is(h1, h2, h3) em { font-style: normal; color: var(--muted); }
+/* in display type the second voice is a change of tone and weight, not a slant (the display face has no italic) */
+:is(h1, h2, h3) em { font-style: normal; font-weight: 450; color: var(--muted); }
 
 /* ------------------------------------------------------------------ surfaces
    Floating chrome (nav, sheets, toasts) is frosted; everything in the page flow is a solid surface. */
-.glass, .nav, .sheet, .toast {
-  position: relative;
-  background: var(--pane);
-  border: 1px solid var(--line);
-  backdrop-filter: var(--frost); -webkit-backdrop-filter: var(--frost);
-}
-.glass.strong, .sheet, .toast { background: var(--pane-strong); }
-.b-glass, .chip, .seg, .field, .card, .stepper, .tile { position: relative; background: var(--surface); border: 1px solid var(--line); }
+.sheet, .toast { position: relative; background: var(--pane-strong); border: 1px solid var(--line); backdrop-filter: var(--frost); -webkit-backdrop-filter: var(--frost); }
+/* liquid glass. .glass is a pane in the page flow; .glass.frost, the nav and glass buttons float over the 3D and blur it */
+.glass, .nav, .b-glass { position: relative; isolation: isolate; background: var(--g-fill); border: 0; box-shadow: var(--g-light), var(--g-drop); }
+.glass.frost, .nav, .b-glass { background: var(--g-fill), var(--g-tint); backdrop-filter: var(--frost); -webkit-backdrop-filter: var(--frost); }
+.glass::after, .nav::after, .b-glass::after { content: ''; position: absolute; inset: 0; z-index: 2; border-radius: inherit; padding: 1px; background: var(--g-rim); pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.chip, .seg, .field, .card, .stepper, .tile { position: relative; background: var(--surface); border: 1px solid var(--line); }
 .card, .stepper, .seg { box-shadow: var(--top-light); }
 .card.strong { background: var(--surface-2); }
 .card { border-radius: var(--r); padding: var(--s-5); }
@@ -105,8 +109,8 @@ em, .it { font-style: italic; }
 .b-primary:hover { background: #f7f2e9; }
 .b-od { background: var(--od-fill); color: var(--cream); }
 .b-od:hover { background: var(--od-fill-hi); }
-.b-glass { color: var(--text); border-color: var(--line-2); }
-.b-glass:hover { background: var(--surface-2); border-color: rgba(237, 230, 218, 0.32); }
+.b-glass { color: var(--text); }
+.b-glass:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06)), var(--g-tint); }
 .b-ghost { background: transparent; color: var(--muted); }
 .b-ghost:hover { color: var(--text); background: rgba(237, 230, 218, 0.06); }
 .b-danger { background: transparent; color: #f0a39c; border-color: rgba(224, 88, 79, 0.45); }
@@ -126,10 +130,10 @@ em, .it { font-style: italic; }
 
 /* ------------------------------------------------------------------ top navigation */
 .nav { position: fixed; z-index: 50; top: calc(14px + var(--safe-t)); left: 14px; right: 14px; max-width: 1180px; margin: 0 auto;
-  display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 8px 0 18px; border-radius: 14px; view-transition-name: od-nav; }
-.nav .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 22px/1 var(--serif); letter-spacing: 0.02em; text-transform: uppercase; margin-right: auto; }
+  display: flex; align-items: center; gap: 2px; height: 58px; padding: 0 8px 0 20px; border-radius: var(--pill); view-transition-name: od-nav; }
+.nav .brand { display: flex; align-items: center; gap: 9px; text-decoration: none; font: 700 19px/1 var(--serif); letter-spacing: -0.025em; margin-right: auto; }
 .nav .brand .num { font: 600 11.5px/1 var(--mono); letter-spacing: 0.1em; color: var(--od-2); padding: 0; background: none; }
-.nav a.lnk { display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 8px; color: var(--muted); text-decoration: none; font-weight: 500; font-size: 14px; transition: color 0.3s var(--ease); }
+.nav a.lnk { display: inline-flex; align-items: center; height: 42px; padding: 0 15px; border-radius: var(--pill); color: var(--muted); text-decoration: none; font-weight: 500; font-size: 14px; transition: color 0.3s var(--ease); }
 .nav a.lnk:hover, .nav a.lnk[aria-current="page"] { color: var(--text); }
 .nav a.lnk { position: relative; }
 .nav a.lnk::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: 10px; height: 1px; background: var(--od-2); transform: scaleX(0); transform-origin: left; transition: transform 0.35s var(--ease-out); }
@@ -191,7 +195,7 @@ label.lab, .lab { display: block; margin: 0 0 8px 2px; font: 500 10.5px/1 var(--
 /* ------------------------------------------------------------------ sheets, toasts */
 .scrim { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 18px; background: rgba(12, 14, 17, 0.6); animation: odFade 0.4s var(--ease); }
 .sheet { width: min(520px, calc(100vw - 36px)); max-height: min(86vh, 860px); overflow: auto; border-radius: 18px; padding: 28px; animation: odRise 0.55s var(--ease); }
-.sheet h2 { margin: 0 0 6px; font: 700 34px/1.05 var(--serif); }
+.sheet h2 { margin: 0 0 6px; font: 650 30px/1.08 var(--serif); letter-spacing: -0.025em; }
 .sheet .sub { margin: 0 0 20px; color: var(--muted); }
 .sheet .row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; flex-wrap: wrap; }
 .toast { position: fixed; z-index: 90; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: calc(22px + var(--safe-b)); transform: translateY(12px); max-width: calc(100vw - 32px); padding: 13px 18px; border-radius: 12px;
@@ -204,9 +208,9 @@ label.lab, .lab { display: block; margin: 0 0 8px 2px; font: 500 10.5px/1 var(--
 
 /* ------------------------------------------------------------------ long-form text */
 .prose { margin: 0 var(--gutter); padding: calc(var(--s-10) + var(--safe-t)) 0 var(--s-9); }
-.prose h1 { font: 800 clamp(52px, 8vw, 96px)/0.95 var(--serif); letter-spacing: -0.01em; text-transform: uppercase; margin: var(--s-4) 0 var(--s-3); }
+.prose h1 { font: 700 clamp(48px, 7vw, 88px)/0.98 var(--serif); letter-spacing: -0.04em; margin: var(--s-4) 0 var(--s-3); }
 .prose .updated { color: var(--faint); font: 400 12px var(--mono); letter-spacing: 0.06em; }
-.prose h2 { font: 700 30px/1.15 var(--serif); margin: 52px 0 12px; }
+.prose h2 { font: 600 28px/1.15 var(--serif); letter-spacing: -0.02em; margin: 52px 0 12px; }
 .prose p, .prose li { color: #d5cec2; line-height: 1.8; }
 .prose ul { padding-left: 20px; }
 .prose li { margin: 6px 0; }
@@ -223,12 +227,12 @@ label.lab, .lab { display: block; margin: 0 0 8px 2px; font: 500 10.5px/1 var(--
 @view-transition { navigation: auto; }
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.5s; animation-timing-function: var(--ease); }
 
-@media (prefers-reduced-transparency: reduce) { :root { --pane: rgba(20, 21, 24, 0.97); --pane-strong: rgba(14, 15, 17, 0.99); --frost: none; } }
+@media (prefers-reduced-transparency: reduce) { :root { --pane: rgba(20, 21, 24, 0.97); --pane-strong: rgba(14, 15, 17, 0.99); --frost: none; --g-tint: linear-gradient(#1b1e23, #1b1e23); } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
   @view-transition { navigation: none; }
 }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { :root { --pane: rgba(20, 21, 24, 0.96); --pane-strong: rgba(14, 15, 17, 0.98); } }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { :root { --pane: rgba(20, 21, 24, 0.96); --pane-strong: rgba(14, 15, 17, 0.98); --g-tint: linear-gradient(rgba(27, 30, 35, 0.96), rgba(20, 23, 27, 0.97)); } }
 /* touch screens: every control at least 44 px tall */
 @media (pointer: coarse) {
   .b.sm { height: 44px; }
@@ -237,7 +241,7 @@ label.lab, .lab { display: block; margin: 0 0 8px 2px; font: 500 10.5px/1 var(--
   .nav a.lnk { height: 44px; }
 }
 @media (max-width: 767px) {
-  .nav { height: 52px; padding: 0 6px 0 14px; top: calc(10px + var(--safe-t)); left: 10px; right: 10px; }
+  .nav { height: 54px; padding: 0 6px 0 16px; top: calc(10px + var(--safe-t)); left: 10px; right: 10px; }
   .nav a.lnk.opt { display: none; }
   .sheet { padding: 24px 20px; }
 }
@@ -270,6 +274,6 @@ label.lab, .lab { display: block; margin: 0 0 8px 2px; font: 500 10.5px/1 var(--
 /* touch screens keep no sticky hover state */
 @media (hover: none) {
   .b-primary:hover { background: var(--cream); } .b-od:hover { background: var(--od-fill); }
-  .b-glass:hover { background: var(--surface); border-color: var(--line-2); } .b-ghost:hover { background: transparent; color: var(--muted); }
+  .b-glass:hover { background: var(--g-fill), var(--g-tint); } .b-ghost:hover { background: transparent; color: var(--muted); }
   .b:hover .arrow { transform: none; }
 }
