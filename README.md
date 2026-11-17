@@ -12,9 +12,11 @@ game element, Human Player actions, the 2:30 match flow, live scoring, automatic
 
 `vercel.json` sends every old address to the new ones:
 
-* `scout.overdrive009.in/` serves `/scout`, with its own manifest so the installed app's home is the subdomain root.
+* `scout.overdrive009.in/` redirects to `/scout` on the same host, so Scout's offline data stays on that origin. (Vercel serves a real file such as `index.html` before applying rewrites, so a rewrite of `/` would show the home page.)
 * `overdrive009.in/scout` redirects to `scout.overdrive009.in`, and `www.` redirects to the bare domain.
-* `overdrive009.in/viora` is the Viora page (`viora.html`, in Viora's own theme), and `viora.overdrive009.in` serves the same page. Its "Take a reading" links go to the Viora app at viora-lemon.vercel.app.
+* `overdrive009.in/viora/` is the Viora app (the `viora/` folder; `/viora` redirects to `/viora/`). `viora.overdrive009.in` redirects there too,
+  keeping the path, so all Viora data lives in one origin. The app's team sync calls `/api/team/…`, which is proxied to the original
+  deployment at viora-lemon.vercel.app (its serverless function and Redis store).
 * `hyperdrive-sim.vercel.app` redirects every page to `overdrive009.in`, except Scout and the files it needs. Phones that
   installed Scout there keep their unsynced entries in that origin's storage, so Scout keeps running there with a
   "Scout has moved" note until those entries have synced.
@@ -34,6 +36,7 @@ Add `overdrive009.in`, `www.overdrive009.in`, `scout.overdrive009.in` and `viora
 | `/scout` | `scout.html`, `js/scout/*` | Overdrive Scout: match and pit scouting, team analytics, pick lists. Sign-in required |
 | `/signin` | `signin.html`, `js/signin.js`, `js/stadium.js` | The one Overdrive account for both apps (email and password: sign in, create account, reset), with a match playing at the venue behind it |
 | `/terms`, `/privacy` | `terms.html`, `privacy.html` | Terms of Use and Privacy Policy (Overdrive 009 can access all teams' scouting data: Terms §5, Privacy §2) |
+| `/viora/`, `/viora/methods`, `/viora/card` | `viora/` | Viora, our Changemakers project: a purple-cabbage saliva strip read by the phone camera. This is the team's app from [Rezza122/viora](https://github.com/Rezza122/viora), copied in whole: hash routes `#home` `#check` `#today` `#trends` `#study` `#model` `#team` `#settings`, English, Hindi and Marathi (`viora/i18n/`), data in the browser's IndexedDB and localStorage. Changes from the original: inline page scripts moved to `viora/js/card-page.js` and `viora/js/methods-page.js` for the CSP, Latin fonts self-hosted (`viora/css/fonts.css`), links made relative to `/viora/`, and the punk skin `viora/css/punk-viora.css` loaded last |
 
 The punk skin for the simulator, Scout, sign-in, terms and privacy is `css/punk.css`, loaded last on each of those pages; it only overrides design tokens and surface styles. Shared pieces: `css/od.css` (liquid-glass design system), `js/robot-model.js` (robot CAD visual), `js/arena.js` (stands, crowd,
 lighting truss, LED boards, score screens, plinth). Old links to `/?room=…` or password-reset links are forwarded to `/sim` by `js/redirect.js`.

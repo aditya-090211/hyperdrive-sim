@@ -1,5 +1,7 @@
 // simulator.js: poster page script (moved out of the HTML so the site's Content-Security-Policy allows it)
-import * as THREE from '/lib/three.module.js';
+// three.js (~650 KB) is imported after first paint (see startRobot) so the cards paint and
+// animate in without waiting for it to download and compile
+var THREE;
 
 (function () {
   var root = document.documentElement;
@@ -58,7 +60,8 @@ import * as THREE from '/lib/three.module.js';
 
   /* ---- scribble-then-erase reveal for every block on a card ---- */
   var timers = [];
-  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  var introEnd = 0;                                    // when the current card's paste-and-scribble intro finishes
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); introEnd = Math.max(introEnd, performance.now() + ms); }
   function dress(sc) {
     timers.forEach(clearTimeout); timers = [];
     Array.prototype.forEach.call(sc.querySelectorAll('.scr'), function (x) { x.parentNode.removeChild(x); });
@@ -109,7 +112,7 @@ import * as THREE from '/lib/three.module.js';
   function wipeAnim(from, to, ms) { stepDash(wipePath, from, to, 30, ms, function (f, t) { setTimeout(f, t); }); }
 
   /* ---- pager ---- */
-  var dots = document.getElementById('dots'), count = document.getElementById('count');
+  var dots = document.getElementById('dots'), count = document.getElementById('count'), announce = document.getElementById('announce');
   var prev = document.getElementById('prev'), next = document.getElementById('next');
   scenes.forEach(function (sc, i) {
     var b = document.createElement('button');
@@ -129,6 +132,7 @@ import * as THREE from '/lib/three.module.js';
   next.addEventListener('click', function () { go(cur + 1); });
 
   function show(n) {
+    var had = scenes[cur].contains(document.activeElement);  // focus was on a link in the card that is leaving
     scenes[cur].classList.remove('active', 'leaving');
     cur = n;
     var sc = scenes[cur];
@@ -137,6 +141,14 @@ import * as THREE from '/lib/three.module.js';
     sc.classList.add('active');
     chrome();
     placeRobot();
+    focusable();
+    announce.textContent = 'Card ' + (cur + 1) + ' of ' + scenes.length + ': ' + sc.getAttribute('aria-label');
+    if (had) { var h = sc.querySelector('.tiles'); h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+  }
+  /* a card taller than the screen scrolls inside itself, so it has to be reachable from the keyboard */
+  function focusable() {
+    var el = scenes[cur].querySelector('.inner');
+    if (el.scrollHeight > el.clientHeight + 2) el.setAttribute('tabindex', '0'); else el.removeAttribute('tabindex');
   }
 
   function go(n) {
@@ -171,8 +183,16 @@ import * as THREE from '/lib/three.module.js';
   window.addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var k = e.key;
-    if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && e.target === document.body)) { e.preventDefault(); go(cur + 1); }
-    else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(cur - 1); }
+    var vert = k === 'ArrowDown' || k === 'ArrowUp' || k === 'PageDown' || k === 'PageUp' || k === ' ';
+    var dir = (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || k === ' ') ? 1 : (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') ? -1 : 0;
+    if (k === ' ' && e.target !== document.body) dir = 0;
+    if (dir) {
+      e.preventDefault();
+      if (vert && canScroll(dir)) {
+        var el = scenes[cur].querySelector('.inner');
+        el.scrollBy({ top: dir * (k.indexOf('Page') === 0 || k === ' ' ? el.clientHeight * 0.85 : 60), behavior: reduce ? 'auto' : 'smooth' });
+      } else go(cur + dir);
+    }
     else if (k === 'Home') go(0);
     else if (k === 'End') go(scenes.length - 1);
   });
@@ -185,9 +205,6 @@ import * as THREE from '/lib/three.module.js';
     if (Math.abs(dy) > 60 && Math.abs(dy) > Math.abs(dx)) { var dir = dy > 0 ? 1 : -1; if (!canScroll(dir)) go(cur + dir); }
     else if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx > 0 ? 1 : -1));
   }, { passive: true });
-
-  /* ---- boil: re-seed the wobble a few times a second so lines never sit still ---- */
-  var noise = document.getElementById('boilNoise'), seed = 1;
 
   /* ---- the robot: same model as the home page, drawn at ~10 frames a second ---- */
   var holder = document.getElementById('robot');
@@ -281,7 +298,7 @@ import * as THREE from '/lib/three.module.js';
     ok = true;
   }
 
-  var tx = 0, ty = 0, lx = 0, ly = 0, lastMove = -1e9, lastFrame = 0;
+  var tx = 0, ty = 0, lx = 0, ly = 0, lastMove = -1e9;
   window.addEventListener('pointermove', function (e) {
     var r = holder.getBoundingClientRect();
     tx = Math.max(-1, Math.min(1, (e.clientX - r.left - r.width / 2) / (window.innerWidth / 2)));
@@ -302,27 +319,55 @@ import * as THREE from '/lib/three.module.js';
     for (var j = 0; j < eyes.length; j++) eyes[j].scale.z = blink;
   }
   function frame(t) {
-    requestAnimationFrame(frame);
-    lastFrame = t;
+    rafId = requestAnimationFrame(frame);
     var x = tx, y = ty;
     if (t - lastMove > 3500) { x = Math.sin(t * 0.0007) * 0.75; y = Math.sin(t * 0.0011 + 1) * 0.4; }
     pose(x, y, 0.1, t);
     renderer.render(scene3, camera);
   }
 
-  try {
-    
-    build();
-  } catch (err) {
-    ok = false;
-    holder.innerHTML = '<img src="/assets/punk/logo.png" alt="">';
+  var rafId = 0;
+  function noRobot() { ok = false; holder.innerHTML = '<img src="/assets/punk/logo.png" alt="">'; }
+  /* robot: fetch three.js once the first card has painted, then build and start in separate tasks */
+  function startRobot() {
+    import('/lib/three.module.js').then(function (m) {
+      THREE = m;
+      setTimeout(function () {
+        try { build(); } catch (err) { noRobot(); return; }
+        var s = parseFloat(holder.style.width) || holder.clientWidth;
+        renderer.setSize(s, s, false);
+        var go = function () {
+          if (reduce) { pose(0.25, -0.1, 1, 0); renderer.render(scene3, camera); }
+          else if (!rafId) rafId = requestAnimationFrame(frame);
+        };
+        // compile the shaders in the background (KHR_parallel_shader_compile) instead of inside the first frame
+        if (renderer.compileAsync) renderer.compileAsync(scene3, camera).then(go, go); else setTimeout(go, 0);
+      }, 0);
+    }, noRobot);
   }
+  var idle = window.requestIdleCallback || function (f) { return setTimeout(f, 1); };
+  function whenLoaded(f) { if (document.readyState === 'complete') f(); else window.addEventListener('load', f, { once: true }); }
+  // after load and after the first frame has actually been presented (two rAFs), on an idle slot
+  // after load, once the first card's intro has played (so the download and compile don't fight it), on an idle slot
+  whenLoaded(function () {
+    setTimeout(function () { idle(startRobot, { timeout: 300 }); }, Math.max(0, introEnd - performance.now()));
+  });
+  // stop drawing while the tab is hidden; pick up again when it comes back
+  document.addEventListener('visibilitychange', function () {
+    if (!ok || reduce) return;
+    if (document.hidden) { cancelAnimationFrame(rafId); rafId = 0; }
+    else if (!rafId) rafId = requestAnimationFrame(frame);
+  });
 
   /* ---- start ---- */
   dress(scenes[0]);
   chrome();
   placeRobot();
-  window.addEventListener('resize', placeRobot);
+  focusable();
+  var rq = false;                                       // at most one re-layout per frame while the window is dragged
+  window.addEventListener('resize', function () {
+    if (rq) return; rq = true;
+    requestAnimationFrame(function () { rq = false; placeRobot(); focusable(); });
+  });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawDecal);
-  if (ok) { if (reduce) { pose(0.25, -0.1, 1, 0); renderer.render(scene3, camera); } else requestAnimationFrame(frame); }
 })();

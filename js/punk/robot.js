@@ -1,6 +1,7 @@
 // robot.js: poster page script (moved out of the HTML so the site's Content-Security-Policy allows it)
-import * as THREE from 'three';
-import { loadRobotModel, buildRobotVisual, TRAY } from '/js/robot-model.js';
+// three.js and the CAD are lazy-loaded by robot-3d.js once the model is near the viewport
+import { loadKit, toonify, disposeAll } from '/js/punk/robot-3d.js';
+var THREE, loadRobotModel, buildRobotVisual, TRAY;
 
 
 (function () {
@@ -195,20 +196,29 @@ import { loadRobotModel, buildRobotVisual, TRAY } from '/js/robot-model.js';
           drawn in flat toon shading to sit with the poster look. Drag to turn it. ---- */
   var holder = document.getElementById('robot');
   var arrow = document.getElementById('arrow'), aInk = arrow.querySelector('.a-ink'), aCol = arrow.querySelector('.a-col');
-  // one entry per card: where the model turns to, and which part the arrow points at
-  var STEPS = [
-    { yaw: -0.65, pitch: 0.36, part: null },
-    { yaw: -0.95, pitch: 0.22, part: 'wheel' },
-    { yaw: -1.35, pitch: 0.28, part: 'arm' },
-    { yaw: -0.45, pitch: 0.40, part: 'grabber' },
-    { yaw: 2.55, pitch: 0.75, part: 'tray' },
-    { yaw: -1.9, pitch: 0.85, part: 'hub' },
-    { yaw: 0.35, pitch: 0.3, part: 'grabber' },
-    { yaw: -0.65, pitch: 0.36, part: null }
-  ];
-  var renderer, scene3, camera, bot, hero = null, markers = {}, ok = false;
+  // one entry per card, keyed by the card's data-step (or its aria-label): where the model turns to,
+  // and which part the arrow points at. Cards with data-side="full" hide the model instead.
+  var STEP0 = { yaw: -0.65, pitch: 0.36, part: null };
+  var STEPS = {
+    'Meet Aryan': STEP0,
+    'Drive system': { yaw: -0.95, pitch: 0.22, part: 'wheel' },
+    'Arm': { yaw: -1.35, pitch: 0.28, part: 'arm' },
+    'Grabber': { yaw: -0.45, pitch: 0.40, part: 'grabber' },
+    'Cargo tray': { yaw: 2.55, pitch: 0.75, part: 'tray' },
+    'Electronics': { yaw: -1.9, pitch: 0.85, part: 'hub' },
+    'Fixing the grabber': { yaw: 0.35, pitch: 0.3, part: 'grabber' },
+    'Spec sheet': STEP0
+  };
+  function isFull(sc) { return sc.getAttribute('data-side') === 'full'; }
+  function step() {
+    var sc = scenes[cur];
+    if (!sc || isFull(sc)) return STEP0;
+    return STEPS[sc.getAttribute('data-step') || sc.getAttribute('aria-label')] || STEP0;
+  }
+  var renderer, scene3, camera, bot, hero = null, markers = {}, ok = false, dead = false;
   var lastSize = 0, ac = null;   // ac: cached arrow measurements
   var yaw = -0.65, pitch = 0.36, tyaw = yaw, tpitch = pitch, dragging = false, touched = false, lastFrame = 0, arrowTimer = null;
+  var onScreen = true, raf = 0, posterEl = holder.querySelector('.poster');
 
   function sizeRobot() {
     var w = deck.clientWidth, h = deck.clientHeight, s;
@@ -222,15 +232,20 @@ import { loadRobotModel, buildRobotVisual, TRAY } from '/js/robot-model.js';
 
   function placeRobot() {            // called every time a card is shown
     sizeRobot(); ac = null;
-    var st = STEPS[cur] || STEPS[0];
+    var st = step(), full = isFull(scenes[cur]);
+    holder.style.visibility = full ? 'hidden' : '';       // full-width cards (diagrams) get the whole screen
+    holder.tabIndex = full ? -1 : 0;
+    if (full && document.activeElement === holder) holder.blur();
+    loop();
     touched = false;
     tyaw = st.yaw + Math.PI * 2 * Math.round((yaw - st.yaw) / (Math.PI * 2));
     tpitch = st.pitch;
     clearTimeout(arrowTimer);
     aInk.style.strokeDashoffset = aCol.style.strokeDashoffset = 1.01;
     aCol.style.stroke = cssCol(scenes[cur], '--pop');
+    if (reduce) { yaw = tyaw; pitch = tpitch; if (ok && !full) draw(); }
     if (!st.part || !hero) return;
-    if (reduce) { yaw = tyaw; pitch = tpitch; draw(); aInk.style.strokeDashoffset = aCol.style.strokeDashoffset = 0; return; }
+    if (reduce) { aInk.style.strokeDashoffset = aCol.style.strokeDashoffset = 0; return; }
     arrowTimer = setTimeout(function () {
       var sched = function (f, t) { setTimeout(f, t); };
       stepDash(aInk, 1.01, 0, 24, 330, sched); stepDash(aCol, 1.01, 0, 24, 330, sched);
@@ -243,8 +258,10 @@ import { loadRobotModel, buildRobotVisual, TRAY } from '/js/robot-model.js';
 
   function build() {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    var phone = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, phone ? 1.5 : 2));
     renderer.setClearColor(0x000000, 0);
+    renderer.domElement.setAttribute('aria-hidden', 'true');
     holder.appendChild(renderer.domElement);
     scene3 = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
@@ -252,21 +269,15 @@ import { loadRobotModel, buildRobotVisual, TRAY } from '/js/robot-model.js';
     var key = new THREE.DirectionalLight(0xffffff, 0.85 * Math.PI); key.position.set(-5, 9, 7); scene3.add(key);
     bot = new THREE.Group(); scene3.add(bot);
     ok = true;
+    lastSize = 0; sizeRobot();
   }
 
   // load the CAD, restyle it, and fit it to the frame
   function loadCad() {
     return loadRobotModel('/assets/').then(function (model) {
+      if (dead) return;
       hero = buildRobotVisual(model, { squadCol: new THREE.Color(cssCol(root, '--fuchsia')), number: '009', shadows: false });
-      var ramp = new THREE.DataTexture(new Uint8Array([90, 160, 220, 255]), 4, 1, THREE.RedFormat);
-      ramp.minFilter = ramp.magFilter = THREE.NearestFilter; ramp.generateMipmaps = false; ramp.needsUpdate = true;
-      var toon = new Map();
-      hero.root.traverse(function (o) {             // swap the CAD's metal materials for flat toon ones
-        if (!o.isMesh || !o.material || !o.material.isMeshStandardMaterial) return;
-        var m = o.material;
-        if (!toon.has(m)) toon.set(m, new THREE.MeshToonMaterial({ color: m.color, gradientMap: ramp, transparent: m.transparent, opacity: m.opacity, depthWrite: m.depthWrite }));
-        o.material = toon.get(m);
-      });
+      toonify(THREE, hero.root);                    // flat toon shading instead of the sim's metal
       hero.pose(0);
       // CAD frame: metres, +X forward, +Y up. Turn it so the front faces the camera, scale it up, and centre it.
       var inner = new THREE.Group();
@@ -287,6 +298,8 @@ import { loadRobotModel, buildRobotVisual, TRAY } from '/js/robot-model.js';
       marker('hub', hero.g.chassis, -0.02, 0.1, 0);
       placeRobot();
       draw();
+      if (posterEl && posterEl.parentNode) posterEl.parentNode.removeChild(posterEl);   // the real model is on screen: drop the still
+      holder.setAttribute('aria-busy', 'false');
     });
   }
 
@@ -297,15 +310,15 @@ import { loadRobotModel, buildRobotVisual, TRAY } from '/js/robot-model.js';
     var D = 17.5;
     camera.position.set(0, 2.0 + Math.sin(pitch) * D, Math.cos(pitch) * D);
     camera.lookAt(0, 2.0, 0);
-    if (hero) hero.pose(0.12 + Math.sin(t * 0.0012) * 0.06);   // the arm breathes; the parallelogram keeps the claw level
+    if (hero) hero.pose(0.12 + (reduce ? 0 : Math.sin(t * 0.0012) * 0.06));   // the arm breathes; the parallelogram keeps the claw level
     renderer.render(scene3, camera);
     updateArrow();
   }
 
   /* arrow from the notes to the part being talked about; re-aimed every frame so it follows the model */
   function updateArrow() {
-    var st = STEPS[cur];
-    if (!st || !st.part || !markers[st.part]) return;
+    var st = step();
+    if (!st.part || !markers[st.part]) return;
     if (!v3) v3 = new THREE.Vector3();
     markers[st.part].getWorldPosition(v3); v3.project(camera);
     if (!ac) {                                   // measure the page once per card, not once per frame
@@ -340,39 +353,99 @@ import { loadRobotModel, buildRobotVisual, TRAY } from '/js/robot-model.js';
     aInk.setAttribute('d', d); aCol.setAttribute('d', d);
   }
 
+  /* render only while the model is near the viewport, the tab is visible and the card shows it.
+     Reduced motion: no loop at all (no auto-spin, no breathing), it redraws on demand. */
+  function wanted() { return ok && !dead && onScreen && !document.hidden && !isFull(scenes[cur]) && !reduce; }
+  function loop() {
+    if (wanted()) { if (!raf) raf = requestAnimationFrame(frame); }
+    else if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  }
+  function nudge() { if (ok && !dead && reduce) draw(); }
   function frame(t) {
-    requestAnimationFrame(frame);
+    raf = 0;
+    if (!wanted()) return;
+    raf = requestAnimationFrame(frame);
     lastFrame = t;
     if (!dragging) {
-      if (!STEPS[cur].part && !touched) tyaw += 0.008;       // nothing to point at: turn slowly on the spot
+      if (!step().part && !touched) tyaw += 0.008;       // nothing to point at: turn slowly on the spot
       yaw += (tyaw - yaw) * 0.1; pitch += (tpitch - pitch) * 0.1;
     }
     draw();
   }
+  function clampPitch(p) { return Math.max(-0.12, Math.min(1.25, p)); }
 
-  /* drag to orbit */
-  var px = 0, py = 0;
+  /* drag to orbit. touch-action: pan-y, so a vertical swipe on the model still flips the card;
+     a sideways drag turns the model and is kept from flipping the card. */
+  var px = 0, py = 0, dragDist = 0;
   holder.addEventListener('pointerdown', function (e) {
-    dragging = true; touched = true; px = e.clientX; py = e.clientY;
+    dragging = true; touched = true; px = e.clientX; py = e.clientY; dragDist = 0;
     try { holder.setPointerCapture(e.pointerId); } catch (err) {}
   });
   holder.addEventListener('pointermove', function (e) {
     if (!dragging) return;
-    yaw += (e.clientX - px) * 0.011; pitch = Math.max(-0.12, Math.min(1.25, pitch + (e.clientY - py) * 0.007));
+    dragDist += Math.abs(e.clientX - px);
+    yaw += (e.clientX - px) * 0.011;
+    if (e.pointerType !== 'touch') pitch = clampPitch(pitch + (e.clientY - py) * 0.007);
     px = e.clientX; py = e.clientY; tyaw = yaw; tpitch = pitch;
-    if (reduce && ok) draw();
+    nudge();
   });
   var endDrag = function () { dragging = false; };
   holder.addEventListener('pointerup', endDrag); holder.addEventListener('pointercancel', endDrag);
-  holder.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+  holder.addEventListener('touchend', function (e) { if (dragDist > 8) e.stopPropagation(); }, { passive: true });
+
+  /* keyboard: arrow keys turn and tilt the model while it has focus (Shift for bigger steps) */
+  holder.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var a = e.shiftKey ? 0.6 : 0.2, k = e.key;
+    if (k === 'ArrowLeft') tyaw -= a;
+    else if (k === 'ArrowRight') tyaw += a;
+    else if (k === 'ArrowUp') tpitch = clampPitch(tpitch + a * 0.6);
+    else if (k === 'ArrowDown') tpitch = clampPitch(tpitch - a * 0.6);
+    else return;
+    e.preventDefault(); e.stopPropagation();          // keep the card pager from also taking the key
+    touched = true;
+    if (reduce) { yaw = tyaw; pitch = tpitch; nudge(); }
+  });
 
   function fallback() {
     ok = false;
     if (renderer && renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
     holder.innerHTML = '<img src="/assets/punk/logo.png" alt="">';
+    holder.removeAttribute('aria-busy');
   }
-  try { build(); } catch (err) { fallback(); }
-  if (ok) loadCad().catch(fallback);
+
+  /* lazy start: three.js + the CAD are only fetched once the model is near the viewport */
+  var started = false;
+  function start3d() {
+    if (started || dead) return;
+    started = true;
+    holder.setAttribute('aria-busy', 'true');
+    loadKit().then(function (k) {
+      if (dead) return;
+      THREE = k.THREE; loadRobotModel = k.loadRobotModel; buildRobotVisual = k.buildRobotVisual; TRAY = k.TRAY;
+      build();
+      return loadCad();
+    }).then(loop).catch(function (err) { if (!dead) { console.warn('robot model:', err); fallback(); } });
+  }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) {
+      onScreen = es[es.length - 1].isIntersecting;
+      if (onScreen) start3d();
+      loop();
+    }, { rootMargin: '25% 0px' }).observe(holder);
+  } else start3d();
+  document.addEventListener('visibilitychange', loop);
+  window.addEventListener('pagehide', function () {    // navigating away: give the GPU memory back
+    dead = true; ok = false; loop();
+    disposeAll(scene3, renderer);
+    renderer = scene3 = hero = bot = null; markers = {};
+  });
+  window.addEventListener('pageshow', function (e) {   // restored from the back/forward cache: build it again
+    if (!e.persisted || !dead) return;
+    dead = false; started = false;
+    if (posterEl && !posterEl.parentNode) holder.insertBefore(posterEl, holder.firstChild);
+    if (onScreen) start3d();
+  });
 
   /* ---- start ---- */
   dress(scenes[0]);
@@ -380,5 +453,4 @@ import { loadRobotModel, buildRobotVisual, TRAY } from '/js/robot-model.js';
   placeRobot();
   window.addEventListener('resize', function () { ac = null; sizeRobot(); });
   deck.addEventListener('scroll', function () { ac = null; }, true);
-  if (ok) { if (reduce) draw(); else requestAnimationFrame(frame); }
 })();

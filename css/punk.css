@@ -3,6 +3,18 @@
    existing design tokens plus a few surface rules, so no layout or behaviour depends on it.
    Palette and type match the poster pages: dark grey and fuchsia, photocopy paper, the logo's yellow and blue.
    The Red and Blue alliance colours are left readable as red and blue, because the game depends on them. */
+
+/* self-hosted fonts (latin subsets; licences in assets/fonts/OFL.txt). The Instrument and Martian faces are the
+   simulator's own type, kept here because sim.html loads no other stylesheet that declares them. */
+@font-face { font-family: 'Anton'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/anton.woff2') format('woff2'); }
+@font-face { font-family: 'Permanent Marker'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/permanent-marker.woff2') format('woff2'); }
+@font-face { font-family: 'Special Elite'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/special-elite.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('../assets/fonts/instrument-sans.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Sans'; font-style: italic; font-weight: 400 600; font-display: swap; src: url('../assets/fonts/instrument-sans-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Serif'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/instrument-serif.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url('../assets/fonts/instrument-serif-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Martian Mono'; font-style: normal; font-weight: 400 600; font-display: swap; src: url('../assets/fonts/martian-mono.woff2') format('woff2'); }
+
 :root {
   --p-ink: #121013;
   --p-asphalt: #232024;

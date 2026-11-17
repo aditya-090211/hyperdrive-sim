@@ -1,11 +1,23 @@
 <!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Overdrive 009</title>
+<title>Overdrive 009 · NRL 2026 robotics team</title>
+<meta name="description" content="Overdrive 009 is a student robotics team from BD Somani International School, Bombay, in the National Robotics League 2026. Our simulator, our team and our robot.">
+<meta name="theme-color" content="#232024">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <meta name="claude:viewport-fit-sides" content="cover">
 <script src="/js/redirect.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Special+Elite&display=swap">
+<link rel="preload" href="/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/special-elite.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  @font-face { font-family: "Anton"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/anton.woff2") format("woff2"); }
+  @font-face { font-family: "Permanent Marker"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/permanent-marker.woff2") format("woff2"); }
+  @font-face { font-family: "Special Elite"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/special-elite.woff2") format("woff2"); }
   /* Layout: one-screen gig poster. Logo strip on top, ransom-note "team", the name
      wall to wall, a cursor-tracking robot head breaking into the letters, 009 as a
      slapped-on sticker. Single dark theme on purpose. */
@@ -173,7 +185,11 @@
   .hits { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; overflow: visible; }
   .hits a { pointer-events: auto; cursor: pointer; outline: none; }
   .hits polygon { fill: transparent; pointer-events: all; stroke: transparent; stroke-width: 3; stroke-linejoin: round; }
-  .hits a:focus-visible polygon { stroke: var(--paper); stroke-dasharray: 8 6; }
+  .hits a.focus polygon { stroke: var(--paper); stroke-dasharray: 8 6; }
+  /* the real links, for keyboards and screen readers: always visually hidden (focusing one lights up and outlines
+     its region of the lettering). Without JavaScript the <noscript> rules below show them as plain poster words. */
+  .pages { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .pages a:focus { outline: none; }
   .stage .fallback {
     position: absolute; inset: 8% 0 0; margin: auto;
     height: 80%; aspect-ratio: 1; max-width: 80%;
@@ -207,6 +223,11 @@
     font-family: var(--type); font-size: .13em; letter-spacing: .1em;
   }
 
+  /* site links ride in the logo strip on the same paper tag as the season; on phones the tag is hidden as in the
+     original poster, and the same links are on the last card of /about and /simulator */
+  .strip .links { display: flex; gap: 0 12px; }
+  .strip .links a { color: inherit; }
+
   @media (max-width: 560px) {
     .strip .season { display: none; }
     .num { font-size: calc(var(--ts) * .62); }
@@ -217,6 +238,21 @@
     @keyframes slap { from { transform: rotate(-7deg) scale(1.7); opacity: 0; } }
   }
 </style>
+<noscript><style>
+  .pages {
+    inset: 0; width: auto; height: auto; overflow: visible; clip-path: none; z-index: 3; list-style: none; pointer-events: auto;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1em;
+    font-family: var(--display); font-size: clamp(34px, 9vw, 96px); line-height: 1;
+  }
+  .pages a { text-decoration: none; text-transform: uppercase; }
+  .robby { display: none; }                 /* its gear is drawn by the script */
+  .pages li:nth-child(1) a { color: var(--sky); }
+  .pages li:nth-child(2) a { color: var(--paper); }
+  .pages li:nth-child(3) a { color: var(--fuchsia); }
+  .pages a:focus-visible { outline: 3px dashed var(--paper); outline-offset: 4px; }
+</style></noscript>
+</head>
+<body>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="rough" x="-5%" y="-10%" width="110%" height="125%">
@@ -234,6 +270,7 @@
     <img src="/assets/punk/logo.png" alt="Overdrive 009 team logo: a robot on a gear" width="46" height="46">
     <span class="league">NRL</span>
     <span class="season">Hyperdrive 2026</span>
+    <nav class="season links" aria-label="Site links"><a href="/signin">Sign in</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:nrloverdrive009@gmail.com">Email us</a></nav>
   </header>
 
   <h1 class="name" aria-label="Team Overdrive 009">
@@ -245,10 +282,15 @@
     <canvas id="lettering" class="lettering" aria-hidden="true"></canvas>
     <p class="robby">robby the robot</p>
     <nav aria-label="Pages">
-      <svg id="hits" class="hits">
-        <a href="/simulator" data-key="simulator" aria-label="Simulator"><polygon></polygon></a>
-        <a href="/about" data-key="about" aria-label="About us"><polygon></polygon></a>
-        <a href="/robot" data-key="robot" aria-label="Our robot"><polygon></polygon></a>
+      <ul class="pages" id="pages">
+        <li><a href="/simulator" data-key="simulator">Simulator</a></li>
+        <li><a href="/about" data-key="about">About us</a></li>
+        <li><a href="/robot" data-key="robot">Our robot</a></li>
+      </ul>
+      <svg id="hits" class="hits" aria-hidden="true">
+        <a href="/simulator" data-key="simulator" tabindex="-1"><polygon></polygon></a>
+        <a href="/about" data-key="about" tabindex="-1"><polygon></polygon></a>
+        <a href="/robot" data-key="robot" tabindex="-1"><polygon></polygon></a>
       </svg>
     </nav>
   </div>
@@ -257,3 +299,5 @@
 </main>
 
 <script type="module" src="/js/punk/landing.js"></script>
+</body>
+</html>

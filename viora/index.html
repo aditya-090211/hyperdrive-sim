@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base href="/viora/">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viora</title>
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Devanagari:wght@400;500;600&family=Noto+Serif+Devanagari:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/home.css" id="home-css">
+<link rel="stylesheet" href="css/punk-viora.css">
+</head>
+<body>
+<a class="od-home" href="/"><img src="/assets/punk/logo.png" alt="" width="34" height="34"><span>&larr; HOME</span></a>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#home"><span class="dot"></span>Viora</a>
+    <nav class="main" id="nav">
+      <a href="#home">Mission</a>
+      <a href="#check">Check</a>
+      <a href="#today">Today</a>
+      <a href="#trends">Trends</a>
+      <a href="#study">Study</a>
+      <a href="#model">Model</a>
+      <a href="#team">Team</a>
+      <a href="methods">Methods</a>
+      <a href="card">Card</a>
+      <a href="#settings">Settings</a>
+    </nav>
+    <label class="profile-pill">Profile <select id="profileSel" aria-label="Active profile"></select></label>
+  </header>
+  <main id="view"></main>
+  <footer class="foot">Viora is a student research prototype, not a medical device. Saliva pH is also affected by food, drink, illness and oral hygiene. If you feel dizzy or confused, or have stopped urinating, seek medical help.</footer>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="js/app.js"></script>
+<script type="module" src="js/i18n.js"></script>
+</body>
+</html>

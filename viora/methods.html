@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Methods and Results - Viora</title>
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Devanagari:wght@400;500;600&family=Noto+Serif+Devanagari:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  .doc{max-width:760px}
+  .doc h2{font-size:24px;margin:34px 0 8px}
+  .doc h3{font-size:17px;margin:20px 0 6px}
+  .doc p,.doc li{font-size:15.5px}
+  .doc p{margin:0 0 12px}
+  .doc ul,.doc ol{padding-left:20px;margin:0 0 12px}
+  figure.fig{margin:18px 0 22px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px}
+  figure.fig img{display:block;width:100%;height:auto;border-radius:8px}
+  figure.fig figcaption{color:var(--muted);font-size:13.5px;padding:10px 4px 2px}
+  .toc{font-size:14px;margin:16px 0 0;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+  .toc ol{margin:6px 0 0;padding-left:20px}
+  .toc a{text-decoration:none}
+  .doc table.data{margin:10px 0 16px}
+  .chart text{font:13px var(--sans)}
+</style>
+<link rel="stylesheet" href="css/punk-viora.css">
+</head>
+<body>
+<a class="od-home" href="/"><img src="/assets/punk/logo.png" alt="" width="34" height="34"><span>&larr; HOME</span></a>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./#home"><span class="dot"></span>Viora</a>
+    <nav class="main" id="nav">
+      <a href="./#home">Mission</a>
+      <a href="./#check">Check</a>
+      <a href="./#today">Today</a>
+      <a href="./#trends">Trends</a>
+      <a href="./#study">Study</a>
+      <a href="./#model">Model</a>
+      <a href="./#team">Team</a>
+      <a href="methods" class="on" aria-current="page">Methods</a>
+      <a href="card">Card</a>
+      <a href="./#settings">Settings</a>
+    </nav>
+  </header>
+
+  <main class="doc">
+    <div class="page-head">
+      <h1>Methods and results</h1>
+      <p>How the purple cabbage indicator was tested, what the first experiment showed, and how this site turns a photo of a strip into a hydration reading.</p>
+    </div>
+
+    <nav class="toc" aria-label="Contents">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#aim">Aim and principle</a></li>
+        <li><a href="#indicator">Indicator</a></li>
+        <li><a href="#buffers">Step 1: colour reference in buffers</a></li>
+        <li><a href="#salinity">Step 2: salinity test</a></li>
+        <li><a href="#saliva">Step 3: saliva at three times</a></li>
+        <li><a href="#colorimeter">Step 4: colorimeter readings</a></li>
+        <li><a href="#interpretation">Interpretation</a></li>
+        <li><a href="#pipeline">From photo to reading</a></li>
+        <li><a href="#limitations">Limitations and next steps</a></li>
+        <li><a href="#data">Your data so far</a></li>
+      </ol>
+    </nav>
+
+    <h2 id="aim">Aim and principle</h2>
+    <p>The project asks whether a cheap colour indicator, wetted with saliva, can give a useful estimate of hydration. Saliva contains bicarbonate, which buffers its pH. When a person is short of water, salivary flow drops and less bicarbonate is carried into the mouth, so saliva is expected to become slightly more acidic. A pH-sensitive indicator should therefore shift colour with hydration state.</p>
+
+    <h2 id="indicator">Indicator</h2>
+    <p>The indicator is purple cabbage extract. Its colour comes from anthocyanins, natural pigments that change colour with pH: pink and red in acid, purple near neutral, and blue to green as conditions become alkaline.</p>
+
+    <h2 id="buffers">Step 1: colour reference in buffers</h2>
+    <p>To see the range of colours the extract produces, it was added to buffer solutions from pH 4 to pH 9 in six beakers.</p>
+    <figure class="fig">
+      <img src="assets/buffer-calibration.jpg" width="1400" height="1050" alt="Six beakers of purple cabbage extract in buffer solutions, mostly pink and purple shades with one green beaker." loading="lazy">
+      <figcaption>Figure 1. Cabbage extract in buffers of pH 4 to 9 (six beakers). The photo shows pinks and purples and one green beaker. The order of the beakers was not recorded, so specific colours are not assigned to specific pH values here.</figcaption>
+    </figure>
+    <p>This confirms that the extract changes colour visibly across the pH range of interest. Because the beaker order is unknown, the hue to pH curve used by the site is an approximation anchored to the general behaviour of anthocyanins and to the saliva trial, not a calibration from this photo.</p>
+
+    <h2 id="salinity">Step 2: salinity test</h2>
+    <p>Saliva also changes in salt content, so it was important to check whether salt alone moves the indicator colour. A pH 7 buffer was prepared with different concentrations of sodium chloride (five beakers) and the extract added to each.</p>
+    <figure class="fig">
+      <img src="assets/salinity-test.jpg" width="1400" height="1050" alt="Five beakers of pH 7 buffer with different salt concentrations, all the same green colour." loading="lazy">
+      <figcaption>Figure 2. pH 7 buffer with different NaCl concentrations (five beakers). All appeared the same green.</figcaption>
+    </figure>
+    <p>All five beakers appeared the same green. In this test, salt concentration alone did not visibly shift the indicator colour, which supports reading the strip colour as a pH signal rather than a salinity signal.</p>
+
+    <h2 id="saliva">Step 3: saliva at three times</h2>
+    <p>Saliva was collected from one person at three points: after 10 to 12 hours without water, 5 to 15 minutes after drinking water, and after 1 to 3 hours without water. Each sample was mixed with the extract in two test tubes, giving six tubes in total.</p>
+    <figure class="fig">
+      <img src="assets/saliva-trial.jpg" width="1400" height="1050" alt="Six test tubes of saliva mixed with cabbage extract, two for each of three conditions." loading="lazy">
+      <figcaption>Figure 3. Saliva with cabbage extract: two tubes each for 10-12 h without water, 5-15 min after drinking water, and 1-3 h without water.</figcaption>
+    </figure>
+    <p>The site measured the colour of each tube from this photo: the image was white-balanced, the hue was taken in HSV, and the two tubes for each condition were averaged.</p>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Condition</th><th>Average colour</th><th>Average hue</th><th>Individual tubes</th></tr></thead>
+        <tbody>
+          <tr><td>10-12 h without water</td><td><span class="swatch-sm" style="background:#735a78"></span> #735a78</td><td class="num">~291&deg;</td><td class="num">~281&deg;, ~299&deg;</td></tr>
+          <tr><td>5-15 min after drinking</td><td><span class="swatch-sm" style="background:#5b4963"></span> #5b4963</td><td class="num">~282&deg;</td><td class="num">~285&deg;, ~280&deg;</td></tr>
+          <tr><td>1-3 h without water</td><td><span class="swatch-sm" style="background:#7a7698"></span> #7a7698</td><td class="num">~246&deg;</td><td class="num">~256&deg;, ~239&deg;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A higher hue here means a pinker, more acidic colour; a lower hue means bluer. These values were measured from a phone photo of test tubes, not from strips, so they depend on the lighting, the camera and the depth of liquid. They are used by the site only as starting reference colours, which can be replaced with a user's own calibration.</p>
+
+    <h2 id="colorimeter">Step 4: colorimeter readings</h2>
+    <p>The same kinds of samples were measured with a colorimeter. The original bar chart is shown below, followed by the values read from it.</p>
+    <figure class="fig">
+      <img src="assets/colorimeter-chart.jpg" width="1189" height="729" alt="Original bar chart titled Colorimeter readings vs. Test sample, with bars for distilled water, normal saliva, hydrated saliva and dehydrated saliva." loading="lazy">
+      <figcaption>Figure 4. Original colorimeter chart.</figcaption>
+    </figure>
+    <figure class="fig">
+      <svg class="chart" viewBox="0 0 400 268" width="100%" role="img" aria-labelledby="absTitle" style="display:block;color:var(--ink);max-width:560px">
+        <title id="absTitle">Colorimeter absorbance by sample, values read from the original chart</title>
+        <g stroke="var(--line)"><line x1="16" x2="16" y1="8" y2="226"/><line x1="106" x2="106" y1="8" y2="226"/><line x1="196" x2="196" y1="8" y2="226"/><line x1="286" x2="286" y1="8" y2="226"/><line x1="376" x2="376" y1="8" y2="226"/></g>
+        <g fill="var(--muted)" text-anchor="middle"><text x="16" y="244">0.0</text><text x="106" y="244">0.1</text><text x="196" y="244">0.2</text><text x="286" y="244">0.3</text><text x="376" y="244">0.4</text><text x="196" y="263">Absorbance (approximate)</text></g>
+        <text x="20" y="22" fill="currentColor">Distilled water</text>
+        <rect x="16" y="30" width="1.5" height="22" rx="3" fill="var(--accent)"/>
+        <text x="23.5" y="46" fill="currentColor" font-weight="600">0</text>
+        <text x="20" y="76" fill="currentColor">Normal saliva, 1-2 h</text>
+        <rect x="16" y="84" width="288" height="22" rx="3" fill="var(--accent)"/>
+        <text x="310" y="100" fill="currentColor" font-weight="600">~0.32</text>
+        <text x="20" y="130" fill="currentColor">Hydrated saliva, 10-15 min</text>
+        <rect x="16" y="138" width="243" height="22" rx="3" fill="var(--accent)"/>
+        <text x="265" y="154" fill="currentColor" font-weight="600">~0.27</text>
+        <text x="20" y="184" fill="currentColor">Dehydrated saliva, 10-12 h</text>
+        <rect x="16" y="192" width="234" height="22" rx="3" fill="var(--accent)"/>
+        <text x="256" y="208" fill="currentColor" font-weight="600">~0.26</text>
+      </svg>
+      <figcaption>Figure 5. Values read from the original chart, so they are approximate (to about 0.01). The original chart labels the axis "Colorimeter readings" and does not state the wavelength or filter used.</figcaption>
+    </figure>
+    <p>Distilled water read 0. Normal saliva (1-2 h) read about 0.32, hydrated saliva (10-15 min) about 0.27, and dehydrated saliva (10-12 h) about 0.26.</p>
+    <p class="note">The time labels do not match exactly between the two records. The colorimeter chart describes the normal sample as 1-2 hours and the hydrated sample as 10-15 minutes, whereas the photo caption for the test tubes gives 1-3 hours and 5-15 minutes. Both are reported here as recorded; it is not known which is correct.</p>
+
+    <h2 id="interpretation">Interpretation</h2>
+    <p>The most acidic, pinkest colour came from the sample taken after the longest period without water (10-12 hours). That is consistent with the principle above: lower salivary flow carries less bicarbonate, so saliva is less well buffered.</p>
+    <p>The results are not yet a clean, ordered scale. The sample taken just after drinking sat closer in hue to the dehydrated sample (~282&deg; vs ~291&deg;) than to the 1-3 hour sample (~246&deg;), and the colorimeter did not clearly separate dehydrated saliva from saliva taken just after drinking (about 0.26 vs 0.27). The ordering is therefore not monotonic: drinking water did not simply move the colour towards the "well hydrated" end.</p>
+    <p>There were only two samples per condition, all from one person, so none of these differences can be called significant. This is the reason the site includes study mode (to collect labelled readings with an independent hydration measure), the printed reference card (to correct the colour of every photo) and the dry control pad (to cancel out batch-to-batch differences in the strips).</p>
+
+    <h2 id="pipeline">From photo to reading</h2>
+    <ol>
+      <li><strong>Card detection and colour correction.</strong> The site looks for the printed reference card by its four black corner squares, maps the card geometry onto the photo, and uses the white, grey and black areas to correct the colours for lighting and camera. If no card is found, it falls back to a simpler white-balance correction, which is less reliable.</li>
+      <li><strong>Control pad compensation.</strong> With the card, the dry control pad is measured as well as the wet test pad. The hue shift between the wet test pad and the dry control pad is used to compensate the test hue, so differences between strip batches and lighting matter less.</li>
+      <li><strong>Hue to pH.</strong> The corrected hue is converted to an estimated saliva pH using a piecewise curve for anthocyanin colour.</li>
+      <li><strong>Hue to score.</strong> A 0 to 100 hydration score is found by interpolating between the three reference colours from the saliva trial (or the user's own calibration).</li>
+      <li><strong>Bands.</strong> The score is placed in a band: below 30 Dehydrated, 30 to 50 Mildly dehydrated, 50 to 75 Hydrated, above 75 Well hydrated.</li>
+      <li><strong>Personal baseline.</strong> Readings marked as baseline readings build a personal average: the mean of the last 10 baseline readings, available once there are at least 3. New readings are compared with this average as well as with the fixed bands.</li>
+      <li><strong>Learned model.</strong> Once at least 12 readings have an independent label (urine colour or hours since drinking), a logistic regression model can be trained on the corrected colours. Its accuracy is measured by cross-validation and compared with the colour rule and with always guessing the most common label. It is only used if the user chooses to save it.</li>
+    </ol>
+
+    <h2 id="limitations">Limitations and next steps</h2>
+    <ul>
+      <li><strong>Sample size.</strong> Two samples per condition from one person cannot show a reliable effect. A larger study, with more people and repeated readings per person, is needed.</li>
+      <li><strong>Independent measure of hydration.</strong> The conditions in this experiment were defined only by time since drinking. Future readings should be paired with an independent measure, such as urine colour on a standard chart or change in morning body mass.</li>
+      <li><strong>Controlled strip manufacture.</strong> The extract concentration, the paper and the drying method all affect colour. Strips need to be made in a consistent, documented way, with a dry control pad on every strip.</li>
+      <li><strong>Imaging conditions.</strong> Hue values were taken from a phone photo of test tubes. Strips photographed on the reference card should be far more consistent, and this needs to be checked.</li>
+      <li><strong>Blinded testing.</strong> The person reading or labelling the strip should not know the hydration condition, so expectations cannot influence the result.</li>
+      <li><strong>Confounders.</strong> Food, acidic drinks, tooth brushing and illness also change saliva pH. The site records these as context tags, and the testing protocol asks for 30 minutes without food or drink first.</li>
+    </ul>
+
+    <h2 id="data">Your data so far</h2>
+    <p class="sub">Read live from the readings saved in this browser. Nothing here is sample or example data.</p>
+    <div id="live" class="card"><p class="empty">Loading your data...</p></div>
+  </main>
+
+  <footer class="foot">Viora is a student research prototype, not a medical device. Saliva pH is also affected by food, drink, illness and oral hygiene. If you feel dizzy or confused, or have stopped urinating, seek medical help.</footer>
+</div>
+
+<script type="module" src="js/methods-page.js"></script>
+<script type="module" src="js/i18n.js"></script>
+</body>
+</html>

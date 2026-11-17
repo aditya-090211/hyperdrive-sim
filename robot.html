@@ -1,5 +1,8 @@
 <!doctype html>
 <title>Overdrive Robot</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -216,7 +219,8 @@
       drop-shadow(0 3px 0 var(--paper)) drop-shadow(0 -3px 0 var(--paper))
       drop-shadow(7px 8px 0 var(--ink));
   }
-  .robot canvas { display: block; width: 100%; height: 100%; }
+  .robot canvas { position: relative; display: block; width: 100%; height: 100%; }
+  .robot img.poster { position: absolute; inset: 0; border-radius: 0; background: none; object-fit: contain; pointer-events: none; }
   .robot img { width: 100%; height: 100%; border-radius: 50%; background: #fff; object-fit: cover; }
 
   /* ---------- chrome ---------- */
@@ -227,7 +231,7 @@
     background: var(--ink); padding: 5px 14px 5px 6px; box-shadow: 3px 3px 0 var(--fuchsia); transform: rotate(-1.5deg);
   }
   .home:hover, .home:focus-visible { background: var(--fuchsia); color: var(--ink); box-shadow: 3px 3px 0 var(--paper); transform: rotate(1.5deg) scale(1.05); }
-  .home img { width: 34px; height: 34px; border-radius: 50%; background: #fff; object-fit: cover; }
+  .home img { width: 34px; height: 34px; border-radius: 999px; background: #fff; object-fit: cover; }
   .count {
     position: absolute; z-index: 30; top: 16px; right: max(18px, env(safe-area-inset-right, 0px));
     font-family: var(--marker); font-size: 22px; background: var(--paper); color: var(--ink);
@@ -303,8 +307,10 @@
     .deck .scene .inner { padding-top: calc(min(84vw, 38vh) + 78px); padding-bottom: 96px; }
     .deck .copy { margin: 0; }
   }
-  .robot { pointer-events: auto; cursor: grab; touch-action: none; }
+  .robot { pointer-events: auto; cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
   .robot:active { cursor: grabbing; }
+  .robot:focus { outline: none; }
+  .robot:focus-visible { outline: 4px dashed var(--acid); outline-offset: 4px; border-radius: 4%; }
   .arrow { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 25; pointer-events: none; overflow: visible; }
   .arrow path { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; stroke-dashoffset: 1.01; }
   .arrow .a-ink { stroke: var(--ink); stroke-width: 10; }
@@ -323,6 +329,7 @@
   .deck th, .deck td { padding: 4px 10px; white-space: normal; }
   .ph { font-family: var(--marker); font-size: 15px; background: var(--acid); color: var(--ink); padding: 2px 10px; transform: rotate(-2deg); align-self: flex-start; box-shadow: 3px 3px 0 var(--ink); }
 </style>
+<link rel="stylesheet" href="/css/punk-robot.css">
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
@@ -400,6 +407,95 @@
     </div></div>
   </section>
 
+  <!-- engineering cards: numbers from the CAD and four free body diagrams, filled in by js/punk/fbd.js from assets/robot/specs.json -->
+  <section class="scene p-ruled" data-side="full" aria-label="By the numbers">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Measured from the CAD</p>
+      <h2 class="tiles" data-tiles="By the numbers"></h2>
+      <p class="rv">A script reads these straight out of our final CAD file, <span data-n="step"></span> (<span data-n="solids"></span> solids), so they change when the CAD changes.</p>
+      <div class="fbd">
+        <dl class="specs rv" data-list="dims"></dl>
+        <div class="col">
+          <div class="tbl rv">
+            <table>
+              <caption>Heaviest parts</caption>
+              <thead><tr><th>Part</th><th class="n">Qty</th><th class="n">Mass</th></tr></thead>
+              <tbody data-list="parts"></tbody>
+            </table>
+          </div>
+          <p class="small rv">Mass and centre of mass are estimates: each solid's CAD volume times a density for its material (assumed: the CAD has names, not materials), plus catalogue masses for the motors, servos, battery and payload. Nobody has weighed the robot yet.</p>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="scene p-sky" data-side="full" aria-label="Free body diagram: standing still">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Free body diagram 1 of 4</p>
+      <h2 class="tiles" data-tiles="Standing still"></h2>
+      <div class="fbd">
+        <figure class="fig rv" data-fbd="still"><figcaption>Side view, front to the right. Arm in the CAD pose, payload in the tray.</figcaption></figure>
+        <div class="col">
+          <p class="rv">Gravity pulls the whole robot down at its centre of mass: W = m g = <span data-n="W"></span>. The floor pushes back up through the tyres. The centre of mass sits <span data-n="behind"></span> behind the middle of the wheelbase, so the rear tyres carry more of it.</p>
+          <p class="rv">Taking moments about the rear tyres: N<sub>front</sub> &times; <span data-n="L"></span> = W &times; <span data-n="b"></span>.</p>
+          <dl class="specs res rv" data-list="still"></dl>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="scene p-acid" data-side="full" aria-label="Free body diagram: flat out">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Free body diagram 2 of 4</p>
+      <h2 class="tiles" data-tiles="Flat out"></h2>
+      <div class="fbd">
+        <figure class="fig rv" data-fbd="accel"><figcaption>Accelerating forwards. The m&thinsp;a arrow is the robot's inertia, drawn at the centre of mass.</figcaption></figure>
+        <div class="col">
+          <p class="rv">To speed up, the tyres push back on the floor and the floor pushes the robot forwards. That push has three ceilings: tyre grip (&mu; W), motor torque (4 &tau; / r), and the acceleration at which the front tyres lift off (g b / h). The lowest one wins.</p>
+          <div class="dial rv"><label for="acc">Acceleration <output for="acc" data-out="acc"></output></label><input id="acc" type="range" data-in="acc"></div>
+          <dl class="specs res rv" data-list="accel"></dl>
+          <p class="verdict rv" data-n="accelVerdict"></p>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="scene p-pink" data-side="full" aria-label="Free body diagram: arm holding a CORE">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Free body diagram 3 of 4</p>
+      <h2 class="tiles" data-tiles="Holding a CORE"></h2>
+      <div class="fbd">
+        <div class="col">
+          <figure class="fig rv" data-fbd="arm"><figcaption>The arm from the side. The servo turns the lower links.</figcaption></figure>
+          <figure class="fig rv" data-fbd="armChart"><figcaption>Servo torque needed to hold still, against arm angle.</figcaption></figure>
+        </div>
+        <div class="col">
+          <p class="rv">The arm is a parallelogram, so the gripper stays level and slides round on the ends of the links. Its weight acts as if it hung from the link ends, wherever its own centre of mass is. The servo holds (gripper + CORE) &times; g &times; L cos &theta;, plus the links' own weight at <span data-n="linkFrac"></span> of their length.</p>
+          <div class="dial rv"><label for="arm">Arm angle <output for="arm" data-out="arm"></output></label><input id="arm" type="range" data-in="arm"></div>
+          <dl class="specs res rv" data-list="arm"></dl>
+          <p class="verdict rv" data-n="armVerdict"></p>
+          <p class="small rv" data-n="servoNote"></p>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="scene p-ink" data-side="full" aria-label="Free body diagram: on the Space Station">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Free body diagram 4 of 4</p>
+      <h2 class="tiles" data-tiles="On the ramp"></h2>
+      <div class="fbd">
+        <figure class="fig rv" data-fbd="slope"><figcaption>Facing uphill, arm on the floor (how we drive onto the Space Station).</figcaption></figure>
+        <div class="col">
+          <p class="rv">On a slope the weight splits in two: one part along the slope, trying to roll the robot back down, and one part into the surface. To stand still the tyres need that much friction, so &mu; has to be at least tan &theta;. The robot tips over backwards once its weight line passes behind the rear tyres: tan &theta; = b / h.</p>
+          <div class="dial rv"><label for="slope">Slope <output for="slope" data-out="slope"></output></label><input id="slope" type="range" data-in="slope"></div>
+          <dl class="specs res rv" data-list="slope"></dl>
+          <p class="verdict rv" data-n="slopeVerdict"></p>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
   <!-- 6 -->
   <section class="scene p-grid" data-side="left" aria-label="Fixing the grabber">
     <div class="inner"><div class="copy">
@@ -439,7 +535,7 @@
     </div></div>
   </section>
 
-  <div class="robot" id="robot" aria-label="3D model of the robot. Drag to turn it." role="img"></div>
+  <div class="robot" id="robot" tabindex="0" role="img" aria-roledescription="3D model" aria-label="Aryan, our robot, built from the team's CAD: a four-wheel-drive chassis with a parallelogram arm, a two-finger grabber, a rear cargo tray and the 009 number plate. Drag it, or focus it and use the arrow keys, to turn it."><img class="poster" src="/assets/punk/robot-poster.webp" alt="" width="548" height="548" decoding="async"></div>
   <svg class="arrow" id="arrow" aria-hidden="true"><path class="a-ink" pathLength="1"></path><path class="a-col" pathLength="1"></path></svg>
   <svg class="wipe" id="wipe" aria-hidden="true"><path></path></svg>
 
@@ -452,3 +548,4 @@
 
 <script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script>
 <script type="module" src="/js/punk/robot.js"></script>
+<script type="module" src="/js/punk/fbd.js"></script>

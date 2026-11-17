@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference Card - Viora</title>
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Devanagari:wght@400;500;600&family=Noto+Serif+Devanagari:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<style>
+  .card-view{display:flex;justify-content:center;padding:18px 0;background:var(--bg);border-radius:10px;overflow:hidden}
+  .card-view svg{max-width:100%;height:auto;box-shadow:0 1px 4px rgba(0,0,0,.18);background:#fff}
+  .howto ol{margin:8px 0 0;padding-left:20px}
+  .howto li{margin:6px 0}
+  .geom td,.geom th{font-size:13px}
+  #printSheet{display:none}
+  @media print{
+    @page{size:A4 portrait;margin:12mm}
+    body{background:#fff;color:#000}
+    .wrap{display:none}
+    #printSheet{display:flex;flex-direction:column;align-items:center;gap:14mm}
+    #printSheet svg{width:120mm;height:80mm;max-width:none;box-shadow:none}
+    #printSheet .cap{font:9pt "IBM Plex Sans",Arial,sans-serif;color:#444;margin-top:2mm;text-align:center}
+  }
+</style>
+<link rel="stylesheet" href="css/punk-viora.css">
+</head>
+<body>
+<a class="od-home" href="/"><img src="/assets/punk/logo.png" alt="" width="34" height="34"><span>&larr; HOME</span></a>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./#home"><span class="dot"></span>Viora</a>
+    <nav class="main" id="nav">
+      <a href="./#home">Mission</a>
+      <a href="./#check">Check</a>
+      <a href="./#today">Today</a>
+      <a href="./#trends">Trends</a>
+      <a href="./#study">Study</a>
+      <a href="./#model">Model</a>
+      <a href="./#team">Team</a>
+      <a href="methods">Methods</a>
+      <a href="card" class="on">Card</a>
+      <a href="./#settings">Settings</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <h1>Reference card</h1>
+      <p>Print this card once and photograph every strip on it. The black corner squares let the app find the card, the white and grey patches correct the lighting, and the outlines show where the two pads of the strip go.</p>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:10px">
+          <div class="section-title"><h2>The card</h2><p class="sub" style="margin:0">120 x 80 mm. Shown scaled on screen; prints at true size.</p></div>
+          <button class="primary" id="printBtn" type="button">Print card</button>
+        </div>
+        <div class="card-view" id="cardView"></div>
+      </div>
+
+      <div class="grid2" style="margin:0">
+        <div class="card howto">
+          <h2>Printing</h2>
+          <ol>
+            <li>Use a colour printer. In the print dialog set the scale to 100% or "Actual size". Turn off "Fit to page" and any scaling.</li>
+            <li>Print on plain matte paper or matte card stock. Glossy paper reflects light into the camera and spoils the colours.</li>
+            <li>The sheet holds two cards. Cut along the dashed outline of one of them.</li>
+            <li>Check the size with a ruler: the card should be 120 mm wide. The top-left black square has a small white hole; that is how the app knows which way up the card is.</li>
+            <li>Keep the card clean and dry. Reprint it if it gets stained or faded.</li>
+          </ol>
+        </div>
+        <div class="card howto">
+          <h2>Making a two-pad strip</h2>
+          <ol>
+            <li>Soak filter paper (a coffee filter works) in purple cabbage extract and let it dry flat, away from sunlight.</li>
+            <li>Cut plain strips of filter paper about 10 mm wide and 90 mm long.</li>
+            <li>Cut two small squares, about 10 x 10 mm, from the dried cabbage paper and glue or tape them onto a strip about 40 mm apart, centre to centre.</li>
+            <li>Let the strip dry completely. Store strips in a sealed, dark container.</li>
+            <li>Only the right-hand pad ever touches saliva. The left pad stays dry and acts as a control, so the app can see how this batch of paper looks before any reaction.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="card howto">
+        <h2>Taking a reading</h2>
+        <ol>
+          <li>Touch only the right-hand pad to saliva on your tongue for about two seconds. Do not eat, drink or brush your teeth for 15 minutes beforehand.</li>
+          <li>Lay the strip in the dashed slot on the card with the dry pad over the left outline ("Control (dry)") and the wet pad over the right outline ("Test (saliva)").</li>
+          <li>Wait 30 seconds for the colour to settle. The guided camera on the Check page counts this down for you.</li>
+          <li>Photograph from directly above in even daylight, with all four black squares in the frame. Avoid shadows, direct sun and the camera flash.</li>
+        </ol>
+        <p class="note">The app also works without the card, but colours are then corrected against whatever white it can find in the photo, which is less reliable.</p>
+      </div>
+
+      <div class="card">
+        <h2>Card layout</h2>
+        <p class="sub">Positions in millimetres from the top-left corner of the card. The detector and this page use the same definition.</p>
+        <div class="table-wrap"><table class="data geom" id="geomTable"></table></div>
+      </div>
+    </div>
+  </main>
+  <footer class="foot">Viora is a student research prototype, not a medical device. Saliva pH is also affected by food, drink, illness and oral hygiene. If you feel dizzy or confused, or have stopped urinating, seek medical help.</footer>
+</div>
+
+<!-- Print-only sheet: two cards per A4 page plus a one-line caption. -->
+<div id="printSheet" aria-hidden="true"></div>
+
+<script type="module" src="js/card-page.js"></script>
+<script type="module" src="js/i18n.js"></script>
+</body>
+</html>

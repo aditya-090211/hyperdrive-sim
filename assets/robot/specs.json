@@ -1,0 +1,916 @@
+{
+ "generated_by": "tools/robot_step_dump.py (FreeCAD 1.0) + tools/robot_specs.py",
+ "step_file": "OVERDRIVE_009_FINAL_ROBOT_v3.step",
+ "solid_count": 1836,
+ "frame": "mm; x forward, y left, z up; origin on the floor midway between the four wheel centres. CAD pose: arm at the angle below.",
+ "values": {
+  "length": {
+   "value": 368.4,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "overall, gripper fingers to cargo bay, arm in the CAD pose"
+  },
+  "width": {
+   "value": 339.8,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "overall, outside of the tyres"
+  },
+  "height": {
+   "value": 230.4,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "top of the payload in the cargo bay, arm in the CAD pose"
+  },
+  "height_no_payload": {
+   "value": 225.6,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "top of the robot without the payload, arm in the CAD pose"
+  },
+  "front_x": {
+   "value": 206.4,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "gripper finger tips ahead of the origin"
+  },
+  "rear_x": {
+   "value": -161.9,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "rear-most point (cargo bay) behind the origin"
+  },
+  "wheel_diameter": {
+   "value": 110.0,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "outer cylinder of Wheel Grip"
+  },
+  "wheel_width": {
+   "value": 30.0,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "Wheel Grip tread; the wheel_base hub is 48.3 mm wide"
+  },
+  "wheelbase": {
+   "value": 145.5,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "front to rear wheel centres"
+  },
+  "track": {
+   "value": 305.8,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "left to right tyre centre planes"
+  },
+  "tyre_front_x": {
+   "value": 127.8,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "front tyre leading edge"
+  },
+  "ground_clearance": {
+   "value": 6.1,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "lowest point that is not a wheel: QRE1113GR.step"
+  },
+  "base_clearance": {
+   "value": 24.6,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "underside of the acrylic chassis base"
+  },
+  "arm_pivot_lower": {
+   "value": [
+    -9.7,
+    62.6
+   ],
+   "unit": "mm (x, z)",
+   "source": "STEP",
+   "note": "lower link pivot; the arm servo horn is on this axis"
+  },
+  "arm_pivot_upper": {
+   "value": [
+    -9.7,
+    102.6
+   ],
+   "unit": "mm (x, z)",
+   "source": "STEP",
+   "note": "upper link pivot"
+  },
+  "arm_link_length": {
+   "value": 145.7,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "pivot hole to carriage hole, both link pairs"
+  },
+  "arm_cad_angle": {
+   "value": 52.1,
+   "unit": "deg",
+   "source": "STEP",
+   "note": "link angle above horizontal in the CAD pose"
+  },
+  "arm_floor_angle": {
+   "value": -16.45,
+   "unit": "deg",
+   "source": "config.js",
+   "note": "gripper plates 0.5 mm above the floor"
+  },
+  "arm_max_angle": {
+   "value": 90.0,
+   "unit": "deg",
+   "source": "config.js"
+  },
+  "claw_reach_cad": {
+   "value": 206.4,
+   "unit": "mm",
+   "source": "STEP",
+   "note": "finger tips ahead of the origin in the CAD pose"
+  },
+  "claw_reach_floor": {
+   "value": 256.7,
+   "unit": "mm",
+   "source": "STEP + parallelogram geometry",
+   "note": "finger tips ahead of the origin with the arm on the floor"
+  },
+  "claw_reach_max": {
+   "value": 262.6,
+   "unit": "mm",
+   "source": "STEP + parallelogram geometry",
+   "note": "finger tips ahead of the origin with the links horizontal"
+  },
+  "claw_past_tyre_floor": {
+   "value": 128.9,
+   "unit": "mm",
+   "source": "STEP + parallelogram geometry",
+   "note": "how far the finger tips reach past the front tyres with the arm on the floor"
+  },
+  "mass": {
+   "value": 3.348,
+   "unit": "kg",
+   "source": "STEP volumes x densities (assumed materials) + catalogue masses",
+   "note": "with the payload; 3.168 kg without. Simulator uses 3.2 kg (config.js, assumption)."
+  },
+  "mass_no_payload": {
+   "value": 3.168,
+   "unit": "kg",
+   "source": "STEP volumes x densities (assumed materials) + catalogue masses"
+  },
+  "com_cad": {
+   "value": [
+    -14.1,
+    -0.4,
+    80.7
+   ],
+   "unit": "mm (x, y, z)",
+   "source": "STEP volumes x densities (assumed materials)",
+   "note": "with the payload, arm in the CAD pose"
+  },
+  "com_floor": {
+   "value": [
+    -10.2,
+    -0.4,
+    70.0
+   ],
+   "unit": "mm (x, y, z)",
+   "source": "STEP volumes x densities (assumed materials)",
+   "note": "with the payload, arm on the floor (lowest CoM, used on the Space Station)"
+  },
+  "com_cad_no_payload": {
+   "value": [
+    -8.6,
+    2.2,
+    74.6
+   ],
+   "unit": "mm (x, y, z)",
+   "source": "STEP volumes x densities (assumed materials)"
+  },
+  "com_floor_no_payload": {
+   "value": [
+    -4.6,
+    2.2,
+    63.3
+   ],
+   "unit": "mm (x, y, z)",
+   "source": "STEP volumes x densities (assumed materials)"
+  },
+  "arm_links_mass": {
+   "value": 0.128,
+   "unit": "kg",
+   "source": "STEP volumes x densities (assumed materials)",
+   "note": "four link plates and the standoffs along them"
+  },
+  "arm_links_com_frac": {
+   "value": 0.395,
+   "unit": "",
+   "source": "STEP",
+   "note": "link CoM position along the link, 0 = pivot, 1 = carriage"
+  },
+  "arm_end_mass": {
+   "value": 0.172,
+   "unit": "kg",
+   "source": "STEP volumes x densities (assumed materials) + servo catalogue mass",
+   "note": "gripper carriage incl. its servo, fingers and gears"
+  },
+  "core_mass": {
+   "value": 0.04,
+   "unit": "kg",
+   "source": "game manual 3.4.1 (via config.js)"
+  },
+  "servo_model": {
+   "value": "MG996R",
+   "unit": "",
+   "source": "assumption",
+   "note": "assumption: STEP shows a standard-size servo (49 x 10 mm mounting-hole pattern, shaft 10 mm off centre) but no model; numbers are the TowerPro MG996R datasheet"
+  },
+  "servo_stall_torque": {
+   "value": 0.922,
+   "unit": "N m",
+   "source": "assumption: MG996R datasheet, 9.4 kgf cm at 4.8 V",
+   "note": "about 1.08 N m at 6 V"
+  },
+  "mu": {
+   "value": 0.95,
+   "unit": "",
+   "source": "config.js (rubber on EVA foam, static)"
+  },
+  "mu_kinetic": {
+   "value": 0.78,
+   "unit": "",
+   "source": "config.js"
+  },
+  "roll_crr": {
+   "value": 0.035,
+   "unit": "",
+   "source": "config.js"
+  },
+  "motor_stall_torque": {
+   "value": 1.0,
+   "unit": "N m",
+   "source": "config.js (assumption: at the wheel, 12 V)"
+  },
+  "motor_free_rpm": {
+   "value": 300.0,
+   "unit": "rpm",
+   "source": "config.js (assumption: 37 mm 12 V 300 RPM gearmotor)"
+  },
+  "motor_count": {
+   "value": 4,
+   "unit": "",
+   "source": "STEP",
+   "note": "four DC Motor solids, one per wheel"
+  },
+  "gear_hold": {
+   "value": 2.4,
+   "unit": "N per wheel",
+   "source": "config.js (assumption: gearbox back-drive resistance)"
+  },
+  "station_tilt": {
+   "value": 15.0,
+   "unit": "deg",
+   "source": "arena sheet via config.js (STATION.maxTilt hard stop)"
+  },
+  "ramp_angle": {
+   "value": 29.6,
+   "unit": "deg",
+   "source": "field CAD (assets/field.json ramp hulls, deck level)"
+  },
+  "limit_mass": {
+   "value": 8.0,
+   "unit": "kg",
+   "source": "game manual R1.2 (via config.js comment)"
+  },
+  "limit_footprint": {
+   "value": 457.2,
+   "unit": "mm",
+   "source": "game manual (18 in, per robot.html)"
+  },
+  "g": {
+   "value": 9.81,
+   "unit": "m/s^2",
+   "source": "standard gravity"
+  }
+ },
+ "materials": {
+  "aluminium": {
+   "density_g_cm3": 2.7,
+   "source": "assumption: kit plates, arm links and standoffs taken as aluminium"
+  },
+  "acrylic": {
+   "density_g_cm3": 1.18,
+   "source": "STEP part name says ACRYLIC; textbook density"
+  },
+  "polycarbonate": {
+   "density_g_cm3": 1.2,
+   "source": "assumption: PC cover is polycarbonate (name \"PC\")"
+  },
+  "printed": {
+   "density_g_cm3": 1.03,
+   "source": "Engineering book 6: PETG fork, 43.6 cm3 solid prints at 45 g (walls + 40 percent gyroid)"
+  },
+  "moulded plastic": {
+   "density_g_cm3": 1.15,
+   "source": "assumption: wheel hubs and number plate are moulded or printed plastic at full density"
+  },
+  "rubber": {
+   "density_g_cm3": 1.1,
+   "source": "assumption: wheel grip is rubber or TPU"
+  },
+  "steel": {
+   "density_g_cm3": 7.85,
+   "source": "assumption: M2/M3 screws and nuts are steel"
+  },
+  "electronics": {
+   "density_g_cm3": 1.85,
+   "source": "assumption: PCBs and components at FR4 density"
+  }
+ },
+ "catalogue": {
+  "DC Motor": {
+   "mass_g": 170.0,
+   "source": "assumption: typical JGB37-520 gearmotor listing (motor model from the Engineering book, mass not weighed)"
+  },
+  "Battery": {
+   "mass_g": 200.0,
+   "source": "robot.html spec sheet: 3S LiPo, about 200 g (team estimate)"
+  },
+  "MG90S micro servo": {
+   "mass_g": 13.4,
+   "source": "TowerPro MG90S datasheet"
+  },
+  "PAYLOAD game piece": {
+   "mass_g": 180.0,
+   "source": "robot.html cargo card: payload about 180 g (team estimate)"
+  },
+  "AT-1224-TWT-5V-2-R": {
+   "mass_g": 2.0,
+   "source": "assumption: a 12 mm buzzer; the CAD solid with this name fills a 73 x 74 x 82 mm box, so its volume is not used"
+  },
+  "standard servo (x2)": {
+   "mass_g": 55.0,
+   "source": "assumption: STEP shows a standard-size servo (49 x 10 mm mounting-hole pattern, shaft 10 mm off centre) but no model; numbers are the TowerPro MG996R datasheet"
+  }
+ },
+ "outline": {
+  "source": "STEP bounding boxes, CAD pose",
+  "side_plates": [
+   -132.2,
+   20.6,
+   124.8,
+   97.6
+  ],
+  "top": [
+   -125.4,
+   90.6,
+   90.8,
+   127.6
+  ],
+  "cargo_bay": [
+   -161.9,
+   127.6,
+   -24.3,
+   208.6
+  ],
+  "payload": [
+   -151.1,
+   147.0,
+   -67.7,
+   230.4
+  ],
+  "aligner": [
+   96.2,
+   7.1,
+   182.4,
+   42.2
+  ],
+  "gripper": [
+   71.8,
+   156.1,
+   206.4,
+   225.6
+  ],
+  "base": [
+   -125.2,
+   24.6,
+   124.8,
+   28.6
+  ],
+  "core_hold": [
+   165.3,
+   173.1
+  ]
+ },
+ "parts": [
+  {
+   "name": "1.3 inch display",
+   "count": 1,
+   "material": "electronics",
+   "mass_g": 5.9,
+   "counted": "copies"
+  },
+  {
+   "name": "12mm spacers",
+   "count": 5,
+   "material": "aluminium",
+   "mass_g": 5.4,
+   "counted": "copies"
+  },
+  {
+   "name": "15mm Spacer",
+   "count": 2,
+   "material": "aluminium",
+   "mass_g": 2.7,
+   "counted": "copies"
+  },
+  {
+   "name": "16mm Spacers",
+   "count": 10,
+   "material": "aluminium",
+   "mass_g": 14.4,
+   "counted": "copies"
+  },
+  {
+   "name": "20mm Spacer",
+   "count": 2,
+   "material": "aluminium",
+   "mass_g": 3.6,
+   "counted": "copies"
+  },
+  {
+   "name": "25mm Spacer",
+   "count": 4,
+   "material": "aluminium",
+   "mass_g": 9.0,
+   "counted": "copies"
+  },
+  {
+   "name": "30mm Spacer",
+   "count": 5,
+   "material": "aluminium",
+   "mass_g": 13.5,
+   "counted": "copies"
+  },
+  {
+   "name": "4mm spacer",
+   "count": 8,
+   "material": "aluminium",
+   "mass_g": 2.9,
+   "counted": "copies"
+  },
+  {
+   "name": "7.5mm Spacer",
+   "count": 4,
+   "material": "aluminium",
+   "mass_g": 5.8,
+   "counted": "copies"
+  },
+  {
+   "name": "ACRYLIC Chassis Base (laser cut black)",
+   "count": 1,
+   "material": "acrylic",
+   "mass_g": 204.1,
+   "counted": "copies"
+  },
+  {
+   "name": "ACRYLIC Top Plate (laser cut black)",
+   "count": 1,
+   "material": "acrylic",
+   "mass_g": 126.8,
+   "counted": "copies"
+  },
+  {
+   "name": "AT-1224-TWT-5V-2-R",
+   "count": 1,
+   "material": "catalogue",
+   "mass_g": 2.0,
+   "counted": "copies"
+  },
+  {
+   "name": "Arm",
+   "count": 4,
+   "material": "aluminium",
+   "mass_g": 116.0,
+   "counted": "copies"
+  },
+  {
+   "name": "Arm servo (standard size)",
+   "count": 1,
+   "material": "catalogue",
+   "mass_g": 55.0,
+   "counted": "copies"
+  },
+  {
+   "name": "Arm side plate",
+   "count": 2,
+   "material": "aluminium",
+   "mass_g": 20.9,
+   "counted": "copies"
+  },
+  {
+   "name": "Base Block",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 15.8,
+   "counted": "copies"
+  },
+  {
+   "name": "Battery",
+   "count": 1,
+   "material": "catalogue",
+   "mass_g": 200.0,
+   "counted": "copies"
+  },
+  {
+   "name": "Battery Holder",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 5.6,
+   "counted": "copies"
+  },
+  {
+   "name": "Board",
+   "count": 1,
+   "material": "electronics",
+   "mass_g": 17.4,
+   "counted": "copies"
+  },
+  {
+   "name": "Chassis Back 1",
+   "count": 1,
+   "material": "aluminium",
+   "mass_g": 215.7,
+   "counted": "copies"
+  },
+  {
+   "name": "Connecting Rod",
+   "count": 2,
+   "material": "aluminium",
+   "mass_g": 80.0,
+   "counted": "copies"
+  },
+  {
+   "name": "Connector",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 4.2,
+   "counted": "copies"
+  },
+  {
+   "name": "DC Motor",
+   "count": 4,
+   "material": "catalogue",
+   "mass_g": 680.0,
+   "counted": "copies"
+  },
+  {
+   "name": "DC Motor Mount",
+   "count": 4,
+   "material": "printed",
+   "mass_g": 38.8,
+   "counted": "copies"
+  },
+  {
+   "name": "Driving Gear 2.14",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 7.7,
+   "counted": "copies"
+  },
+  {
+   "name": "Electronics (PCBs, connectors, components)",
+   "count": 1665,
+   "material": "electronics",
+   "mass_g": 32.0,
+   "counted": "solids"
+  },
+  {
+   "name": "Follower Gear 2.14",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 7.6,
+   "counted": "copies"
+  },
+  {
+   "name": "Gear Spacer",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 1.0,
+   "counted": "copies"
+  },
+  {
+   "name": "Gripper Base",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 14.9,
+   "counted": "copies"
+  },
+  {
+   "name": "Gripper Servo Holder",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 6.7,
+   "counted": "copies"
+  },
+  {
+   "name": "Gripper servo (standard size)",
+   "count": 1,
+   "material": "catalogue",
+   "mass_g": 55.0,
+   "counted": "copies"
+  },
+  {
+   "name": "HEXA_COMMAND_CONTROLLER_PCB",
+   "count": 1,
+   "material": "electronics",
+   "mass_g": 25.0,
+   "counted": "copies"
+  },
+  {
+   "name": "M2 screw",
+   "count": 4,
+   "material": "steel",
+   "mass_g": 0.8,
+   "counted": "copies"
+  },
+  {
+   "name": "M3 bolt",
+   "count": 14,
+   "material": "steel",
+   "mass_g": 28.7,
+   "counted": "copies"
+  },
+  {
+   "name": "M3 nyloc nut",
+   "count": 14,
+   "material": "steel",
+   "mass_g": 11.5,
+   "counted": "copies"
+  },
+  {
+   "name": "MG90S micro servo",
+   "count": 1,
+   "material": "catalogue",
+   "mass_g": 13.4,
+   "counted": "copies"
+  },
+  {
+   "name": "Middle Support",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 2.9,
+   "counted": "copies"
+  },
+  {
+   "name": "NUMBER PLATE digits",
+   "count": 3,
+   "material": "moulded plastic",
+   "mass_g": 1.0,
+   "counted": "copies"
+  },
+  {
+   "name": "New Number Plate",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 16.1,
+   "counted": "copies"
+  },
+  {
+   "name": "PAYLOAD game piece",
+   "count": 1,
+   "material": "catalogue",
+   "mass_g": 180.0,
+   "counted": "copies"
+  },
+  {
+   "name": "PC cover",
+   "count": 1,
+   "material": "polycarbonate",
+   "mass_g": 79.7,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED ALIGNER arm L",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 12.4,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED ALIGNER arm R",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 12.3,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED ALIGNER clamp L",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 9.1,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED ALIGNER clamp R",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 9.1,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED CARGO BAY",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 109.6,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED GATE BUSHING LEFT",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 1.1,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED GATE BUSHING RIGHT",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 0.2,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED GATE HINGE ROD",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 3.3,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED GATE LIP",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 10.8,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED REAR LASER SENSOR MOUNT",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 5.3,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED TOP FINGER arm 3",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 2.6,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED TOP FINGER arm L",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 2.5,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED TOP FINGER arm R",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 2.7,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED TOP FINGER base",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 2.7,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED TOP FINGER washer 1",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 0.1,
+   "counted": "copies"
+  },
+  {
+   "name": "PRINTED TOP FINGER washer 2",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 0.1,
+   "counted": "copies"
+  },
+  {
+   "name": "SIDE PLATE 1",
+   "count": 2,
+   "material": "aluminium",
+   "mass_g": 195.1,
+   "counted": "copies"
+  },
+  {
+   "name": "Servo Horn",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 0.8,
+   "counted": "copies"
+  },
+  {
+   "name": "Servo Mount",
+   "count": 1,
+   "material": "aluminium",
+   "mass_g": 33.7,
+   "counted": "copies"
+  },
+  {
+   "name": "Servo_Horn",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 0.8,
+   "counted": "copies"
+  },
+  {
+   "name": "Triangular Mount",
+   "count": 1,
+   "material": "aluminium",
+   "mass_g": 32.7,
+   "counted": "copies"
+  },
+  {
+   "name": "Wheel Grip",
+   "count": 4,
+   "material": "rubber",
+   "mass_g": 212.2,
+   "counted": "copies"
+  },
+  {
+   "name": "Wheel insert",
+   "count": 4,
+   "material": "aluminium",
+   "mass_g": 4.7,
+   "counted": "copies"
+  },
+  {
+   "name": "bottom holder left v4",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 6.7,
+   "counted": "copies"
+  },
+  {
+   "name": "bottom holder right v4",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 6.7,
+   "counted": "copies"
+  },
+  {
+   "name": "new mid left",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 13.7,
+   "counted": "copies"
+  },
+  {
+   "name": "new mid right",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 13.7,
+   "counted": "copies"
+  },
+  {
+   "name": "new_finger",
+   "count": 4,
+   "material": "printed",
+   "mass_g": 18.3,
+   "counted": "copies"
+  },
+  {
+   "name": "top holder left v2",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 4.1,
+   "counted": "copies"
+  },
+  {
+   "name": "top holder right v2",
+   "count": 1,
+   "material": "printed",
+   "mass_g": 4.1,
+   "counted": "copies"
+  },
+  {
+   "name": "wheel_base",
+   "count": 4,
+   "material": "moulded plastic",
+   "mass_g": 287.6,
+   "counted": "copies"
+  }
+ ],
+ "mass_by_group_g": {
+  "chassis": 3048.7,
+  "links": 127.5,
+  "end": 171.9
+ }
+}

@@ -1,5 +1,7 @@
 // landing.js: poster page script (moved out of the HTML so the site's Content-Security-Policy allows it)
-import * as THREE from '/lib/three.module.js';
+// three.js (~650 KB) is imported after first paint (see startRobot) so the title and lettering
+// paint without waiting for it to download and compile
+var THREE;
 
 (function () {
   var root = document.documentElement;
@@ -176,6 +178,7 @@ import * as THREE from '/lib/three.module.js';
     fitTitle();
     var w = stage.clientWidth, h = stage.clientHeight;
     if (!w || !h) return;
+    stageRect = null;
     computeLayout(w, h);
     drawLettering();
     stage.style.setProperty('--rx', geom.cx + 'px');
@@ -194,8 +197,9 @@ import * as THREE from '/lib/three.module.js';
 
   /* ---- pointer tracking ---- */
   var tx = 0, ty = 0, lastMove = -1e9;
+  var stageRect = null;                                  // cached in resize(); the poster never scrolls
   function onPointer(e) {
-    var r = stage.getBoundingClientRect();
+    var r = stageRect || (stageRect = stage.getBoundingClientRect());
     var cx = r.left + (geom.cx || r.width / 2), cy = r.top + (geom.cy || r.height / 2);
     tx = Math.max(-1, Math.min(1, (e.clientX - cx) / (window.innerWidth / 2)));
     ty = Math.max(-1, Math.min(1, (e.clientY - cy) / (window.innerHeight / 2)));
@@ -233,7 +237,6 @@ import * as THREE from '/lib/three.module.js';
     }
     pose(x, y, 0.085, t);
     renderer.render(scene, camera);
-    requestAnimationFrame(frame);
   }
 
   /* ---- contour lettering: each nav word is stretched to fill a region whose
@@ -387,23 +390,19 @@ import * as THREE from '/lib/three.module.js';
     });
   }
 
-  Array.prototype.forEach.call(hits.querySelectorAll('a'), function (aEl) {
+  var setHot = function (v) { return function () { if (hot !== v) { hot = v; drawLettering(); } }; };
+  Array.prototype.forEach.call(hits.querySelectorAll('a'), function (aEl) {   // pointer targets
     var key = aEl.getAttribute('data-key');
-    var set = function (v) { return function () { if (hot !== v) { hot = v; drawLettering(); } }; };
-    aEl.addEventListener('pointerenter', set(key));
-    aEl.addEventListener('focus', set(key));
-    aEl.addEventListener('pointerleave', set(null));
-    aEl.addEventListener('blur', set(null));
+    aEl.addEventListener('pointerenter', setHot(key));
+    aEl.addEventListener('pointerleave', setHot(null));
   });
-
-  try {
-    
-    build();
-  } catch (err) {
-    ok = false;
-    if (renderer && renderer.domElement.parentNode) stage.removeChild(renderer.domElement);
-    fallback();
-  }
+  // keyboard and screen readers use the plain links in #pages; focusing one lights up and outlines its region
+  Array.prototype.forEach.call(document.querySelectorAll('#pages a'), function (aEl) {
+    var key = aEl.getAttribute('data-key');
+    var hit = hits.querySelector('a[data-key="' + key + '"]');
+    aEl.addEventListener('focus', function () { hit.classList.add('focus'); setHot(key)(); });
+    aEl.addEventListener('blur', function () { hit.classList.remove('focus'); setHot(null)(); });
+  });
 
   resize();
   var resizeQueued = false;
@@ -413,8 +412,42 @@ import * as THREE from '/lib/three.module.js';
     requestAnimationFrame(function () { resizeQueued = false; resize(); });
   });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { buildSprites(); drawDecal(); resize(); });
-  if (ok) {
-    if (reduce) { pose(0.25, -0.1, 1, 0); renderer.render(scene, camera); }
-    else requestAnimationFrame(frame);
+
+  /* robot: fetch three.js once the poster has painted, then build, compile and start in separate
+     tasks so no single one blocks input for long */
+  var rafId = 0;
+  function loop(t) { rafId = requestAnimationFrame(loop); frame(t); }
+  function startRobot() {
+    import('/lib/three.module.js').then(function (m) {
+      THREE = m;
+      setTimeout(function () {
+        try {
+          build();
+        } catch (err) {
+          ok = false;
+          if (renderer && renderer.domElement.parentNode) stage.removeChild(renderer.domElement);
+          fallback();
+          return;
+        }
+        resize();
+        var go = function () {
+          if (reduce) { pose(0.25, -0.1, 1, 0); renderer.render(scene, camera); }
+          else if (!rafId) rafId = requestAnimationFrame(loop);
+        };
+        // compile the shaders in the background (KHR_parallel_shader_compile) instead of inside the first frame
+        if (renderer.compileAsync) renderer.compileAsync(scene, camera).then(go, go); else setTimeout(go, 0);
+      }, 0);
+    }, fallback);
   }
+  var idle = window.requestIdleCallback || function (f) { return setTimeout(f, 1); };
+  function whenLoaded(f) { if (document.readyState === 'complete') f(); else window.addEventListener('load', f, { once: true }); }
+  // after load and after the first frame has actually been presented (two rAFs), on an idle slot
+  whenLoaded(function () { requestAnimationFrame(function () { requestAnimationFrame(function () { idle(startRobot, { timeout: 300 }); }); }); });
+
+  // stop drawing while the tab is hidden; pick up again when it comes back
+  document.addEventListener('visibilitychange', function () {
+    if (!ok || reduce) return;
+    if (document.hidden) { cancelAnimationFrame(rafId); rafId = 0; }
+    else if (!rafId) rafId = requestAnimationFrame(loop);
+  });
 })();

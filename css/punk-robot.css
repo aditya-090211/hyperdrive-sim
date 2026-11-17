@@ -1,0 +1,104 @@
+/* robot.html: the engineering cards (CAD numbers and free body diagrams, drawn by js/punk/fbd.js).
+   Reuses the page's own tokens and parts (--ink, --paper, --fuchsia, --acid, --sky, .scrap, .specs, .tbl, .note)
+   and the about page's taped-up photo look for the diagrams. */
+
+/* these cards need the full width, so the 3D model steps out while one is showing */
+.deck:has(.scene.active[data-side="full"]) .robot,
+.deck:has(.scene.active[data-side="full"]) .arrow { visibility: hidden; }
+.scene[data-side="full"] .copy > * { max-width: none; width: auto; margin-left: 0; }
+@media (max-width: 759px) {
+  .deck .scene[data-side="full"] .inner { padding-top: 70px; overflow-x: hidden; }
+  .fig::before { left: -12px; }
+  .fig::after { right: -12px; }
+}
+.scene[data-side="full"] p { overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .scene[data-side="full"] .specs > div { grid-template-columns: minmax(0, 1fr); }
+  .fig text { font-size: 21px; }
+  .fig text.s { font-size: 19px; }
+  .fig text.m { font-size: 23px; }
+  .fig text.v { font-size: 25px; }
+}
+
+.fbd { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px 40px; align-items: start; }
+@media (min-width: 900px) { .fbd { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); } }
+.fbd .col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* a diagram is a sheet of paper taped to the card (same tape as the about page photos) */
+.fig {
+  position: relative; margin: 14px 0 6px; width: min(100%, 620px);
+  background: var(--paper); color: var(--ink);
+  padding: 10px 10px 12px;
+  box-shadow: 6px 8px 0 var(--ink);
+  transform: rotate(var(--tilt, -1.2deg));
+}
+.p-ink .fig { box-shadow: 6px 8px 0 var(--fuchsia); }
+.fig + .fig { --tilt: 1.1deg; }
+.fig::before, .fig::after {
+  content: ""; position: absolute; width: 92px; height: 26px; z-index: 3; pointer-events: none;
+  background: rgba(242, 233, 78, .78); box-shadow: 0 1px 0 rgba(0, 0, 0, .2);
+}
+.fig::before { left: -24px; top: 8px; transform: rotate(-38deg); }
+.fig::after { right: -24px; bottom: 14px; transform: rotate(-38deg); background: rgba(255, 31, 157, .72); }
+.rv.off.fig::before, .rv.off.fig::after { opacity: 0; }
+.fig svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fig figcaption { font-family: var(--marker); font-size: 17px; line-height: 1.15; color: var(--ink); padding: 6px 4px 0; transform: rotate(-1deg); }
+
+/* the numbers each diagram works out: the page's .specs strips, with the value in Anton */
+.specs.res dd b { font-family: var(--display); font-weight: 400; font-size: 20px; letter-spacing: .03em; }
+.verdict { font-family: var(--marker); font-size: clamp(18px, 2vw, 24px); line-height: 1.2; background: var(--acid); color: var(--ink); padding: 6px 12px 4px; box-shadow: 4px 5px 0 var(--ink); transform: rotate(-1.2deg); align-self: flex-start; }
+.verdict.warn { background: var(--fuchsia); }
+
+/* slider: a paper strip with a fat thumb */
+.dial { display: flex; flex-direction: column; gap: 4px; background: var(--card); color: var(--cardfg); padding: 9px 14px 10px; box-shadow: 4px 5px 0 var(--pop); transform: rotate(.6deg); }
+.dial label { font-family: var(--display); font-size: 17px; letter-spacing: .08em; text-transform: uppercase; color: var(--pop); display: flex; justify-content: space-between; gap: 10px; }
+.p-sky .dial label, .p-pink .dial label { color: var(--fuchsia-deep); }
+.dial output { font-family: var(--marker); letter-spacing: 0; text-transform: none; color: var(--cardfg); }
+.dial input[type="range"] { width: 100%; height: 32px; margin: 0; accent-color: var(--fuchsia); cursor: pointer; touch-action: pan-y; }
+.dial input[type="range"]:focus-visible { outline: 3px solid var(--acid); outline-offset: 3px; }
+
+/* SVG ink: the robot in sky blue with ink lines, forces as the page's arrow (ink under a colour core) */
+.fig .ground { stroke: var(--ink); stroke-width: 3; fill: none; }
+.fig .hatch { stroke: var(--ink); stroke-width: 1.5; }
+.fig .body { fill: var(--sky); stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.fig .bay { fill: var(--paper); stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.fig .grip { fill: var(--ink); }
+.fig .wheel { fill: var(--ink); }
+.fig .hub { fill: var(--paper); }
+.fig .link { stroke: var(--ink); stroke-width: 8; stroke-linecap: round; fill: none; }
+.fig .link-in { stroke: var(--sky); stroke-width: 3; stroke-linecap: round; fill: none; }
+.fig .pin { fill: var(--paper); stroke: var(--ink); stroke-width: 2.5; }
+.fig .core { fill: var(--acid); stroke: var(--ink); stroke-width: 2.5; }
+.fig .com-a { fill: var(--ink); }
+.fig .com-b { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+.fig .dim { stroke: var(--ink); stroke-width: 1.4; fill: none; }
+.fig .dash { stroke: var(--ink); stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+.fig .f-ink { stroke: var(--ink); stroke-width: 9; fill: none; stroke-linecap: round; }
+.fig .f-col { stroke-width: 4.5; fill: none; stroke-linecap: round; }
+.fig .head { stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.fig .c-w { stroke: var(--fuchsia); fill: var(--fuchsia); }
+.fig .c-n { stroke: var(--sky); fill: var(--sky); }
+.fig .c-t { stroke: var(--acid); fill: var(--acid); }
+.fig .c-i { stroke: var(--paper); fill: var(--paper); }
+.fig .f-col.c-w, .fig .f-col.c-n, .fig .f-col.c-t, .fig .f-col.c-i { fill: none; }
+.fig .arc { fill: none; stroke: var(--fuchsia-deep); stroke-width: 3.5; stroke-linecap: round; }
+.fig .arc-head { fill: var(--fuchsia-deep); }
+.fig text { font-family: var(--type); font-size: 17px; fill: var(--ink); }
+.fig text.m { font-family: var(--marker); font-size: 19px; }
+.fig text.v { font-family: var(--display); font-size: 21px; letter-spacing: .02em; }
+.fig text.s { font-size: 14px; }
+.fig text.halo { paint-order: stroke; stroke: var(--paper); stroke-width: 5px; stroke-linejoin: round; }
+.fig .axis { stroke: var(--ink); stroke-width: 2; fill: none; }
+.fig .gridl { stroke: rgba(18, 16, 19, .16); stroke-width: 1; }
+.fig .curve { fill: none; stroke: var(--fuchsia); stroke-width: 4.5; stroke-linejoin: round; }
+.fig .curve-ink { fill: none; stroke: var(--ink); stroke-width: 8.5; stroke-linejoin: round; }
+.fig .limit { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-dasharray: 9 6; }
+.fig .dot { fill: var(--acid); stroke: var(--ink); stroke-width: 2.5; }
+
+/* thirteen cards still fit the pager at 320 px */
+@media (max-width: 480px) {
+  .pager { gap: 6px; padding: 6px 7px; }
+  .pager .arrow-btn { font-size: 14px; padding: 5px 7px 3px; }
+  #dots { gap: 4px !important; }       /* the page sets 7px inline */
+  .pager .dot { width: 10px; height: 10px; }
+}

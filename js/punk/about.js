@@ -109,7 +109,7 @@
   function wipeAnim(from, to, ms) { stepDash(wipePath, from, to, 30, ms, function (f, t) { setTimeout(f, t); }); }
 
   /* ---- pager ---- */
-  var dots = document.getElementById('dots'), count = document.getElementById('count');
+  var dots = document.getElementById('dots'), count = document.getElementById('count'), announce = document.getElementById('announce');
   var prev = document.getElementById('prev'), next = document.getElementById('next');
   scenes.forEach(function (sc, i) {
     var b = document.createElement('button');
@@ -129,6 +129,7 @@
   next.addEventListener('click', function () { go(cur + 1); });
 
   function show(n) {
+    var had = scenes[cur].contains(document.activeElement);  // focus was on a link in the card that is leaving
     scenes[cur].classList.remove('active', 'leaving');
     cur = n;
     var sc = scenes[cur];
@@ -137,6 +138,14 @@
     sc.classList.add('active');
     chrome();
     placeRobot();
+    focusable();
+    announce.textContent = 'Card ' + (cur + 1) + ' of ' + scenes.length + ': ' + sc.getAttribute('aria-label');
+    if (had) { var h = sc.querySelector('.tiles'); h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+  }
+  /* a card taller than the screen scrolls inside itself, so it has to be reachable from the keyboard */
+  function focusable() {
+    var el = scenes[cur].querySelector('.inner');
+    if (el.scrollHeight > el.clientHeight + 2) el.setAttribute('tabindex', '0'); else el.removeAttribute('tabindex');
   }
 
   function go(n) {
@@ -171,8 +180,16 @@
   window.addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var k = e.key;
-    if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && e.target === document.body)) { e.preventDefault(); go(cur + 1); }
-    else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(cur - 1); }
+    var vert = k === 'ArrowDown' || k === 'ArrowUp' || k === 'PageDown' || k === 'PageUp' || k === ' ';
+    var dir = (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || k === ' ') ? 1 : (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') ? -1 : 0;
+    if (k === ' ' && e.target !== document.body) dir = 0;
+    if (dir) {
+      e.preventDefault();
+      if (vert && canScroll(dir)) {
+        var el = scenes[cur].querySelector('.inner');
+        el.scrollBy({ top: dir * (k.indexOf('Page') === 0 || k === ' ' ? el.clientHeight * 0.85 : 60), behavior: reduce ? 'auto' : 'smooth' });
+      } else go(cur + dir);
+    }
     else if (k === 'Home') go(0);
     else if (k === 'End') go(scenes.length - 1);
   });
@@ -185,9 +202,6 @@
     if (Math.abs(dy) > 60 && Math.abs(dy) > Math.abs(dx)) { var dir = dy > 0 ? 1 : -1; if (!canScroll(dir)) go(cur + dir); }
     else if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx > 0 ? 1 : -1));
   }, { passive: true });
-
-  /* ---- boil: re-seed the wobble a few times a second so lines never sit still ---- */
-  var noise = document.getElementById('boilNoise'), seed = 1;
 
   /* ---- photos: a marker outline is scrawled round each photo when its card comes up ---- */
   function wobblyRect(w, h, j) {
@@ -225,10 +239,11 @@
   dress(scenes[0]);
   chrome();
   placeRobot();
+  focusable();
   var rq = false;
   window.addEventListener('resize', function () {
     if (rq) return; rq = true;
-    requestAnimationFrame(function () { rq = false; placeRobot(); });
+    requestAnimationFrame(function () { rq = false; placeRobot(); focusable(); });
   });
   Array.prototype.forEach.call(document.querySelectorAll('.snap img'), function (img) {
     if (!img.complete) img.addEventListener('load', function () { if (img.closest('.scene') === scenes[cur]) placeRobot(); });

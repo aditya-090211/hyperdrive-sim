@@ -1,11 +1,23 @@
 <!doctype html>
-<title>About Overdrive 009</title>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>About us · Overdrive 009</title>
+<meta name="description" content="About Overdrive 009, team 009 in the National Robotics League 2026: how we work, our game strategy, our RL autonomous, BDASC outreach and Viora.">
+<meta name="theme-color" content="#232024">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Special+Elite&display=swap">
+<link rel="preload" href="/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/special-elite.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-  /* Layout: no scrolling page. Eight full-screen "cards" cut from different papers.
+  @font-face { font-family: "Anton"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/anton.woff2") format("woff2"); }
+  @font-face { font-family: "Permanent Marker"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/permanent-marker.woff2") format("woff2"); }
+  @font-face { font-family: "Special Elite"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/special-elite.woff2") format("woff2"); }
+  /* Layout: no scrolling page. Full-screen "cards" cut from different papers.
      Moving on scribbles the screen out with a marker, then erases it to show the next card.
      Headlines are pasted on letter by letter and fall off when you leave.
      Everything moves on a low frame rate, like stop-motion. */
@@ -249,6 +261,11 @@
   .pager .dot { width: 13px; height: 13px; background: transparent; outline: 2px solid var(--paper); outline-offset: -2px; }
   .pager .dot[aria-current="true"] { background: var(--fuchsia); outline-color: var(--fuchsia); transform: rotate(12deg) scale(1.25); }
   .pager button:focus-visible, .home:focus-visible { outline: 3px solid var(--acid); outline-offset: 2px; }
+  @media (max-width: 440px) {   /* 14 squares plus BACK/NEXT fit a 320px phone */
+    .pager { gap: 6px; padding: 6px 7px; }
+    .pager #dots { gap: 4px !important; }
+    .pager .dot { width: 8px; height: 8px; }
+  }
   .hint { font-family: var(--marker); font-size: 16px; opacity: .8; }
 
   .wipe { position: absolute; inset: 0; z-index: 35; pointer-events: none; overflow: visible; }
@@ -287,6 +304,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .scr { display: none; }
+    .robot, .tile { transition: none; }
     .robot { filter: drop-shadow(3px 0 0 var(--paper)) drop-shadow(-3px 0 0 var(--paper)) drop-shadow(0 3px 0 var(--paper)) drop-shadow(0 -3px 0 var(--paper)); }
   }
 
@@ -328,21 +346,18 @@
   .tiles.mini .word { gap: .07em; }
   .tiles.mini .tile b { padding: .06em .14em .02em; min-width: .55em; }
   .thanks { line-height: 2.1; }
+  .tiles[tabindex="-1"]:focus { outline: none; }   /* focus lands on the new card's headline when its link is gone */
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .chain-tight li b { font-size: 24px; }
   .specs > div { grid-template-columns: minmax(84px, 8em) 1fr; }
 </style>
-
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
-    <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.022" numOctaves="1" seed="1" result="n"></feTurbulence>
-    <feDisplacementMap in="SourceGraphic" in2="n" scale="2.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-  </filter>
-</svg>
+</head>
+<body>
 
 <main class="deck" id="deck">
-  <a class="home" href="/" aria-label="Back to Team Overdrive 009"><img src="/assets/punk/logo.png" alt="" width="34" height="34"><span>&larr; HOME</span></a>
-  <div class="count" id="count" aria-live="polite">1/13</div>
+  <a class="home" href="/" aria-label="Home: Team Overdrive 009"><img src="/assets/punk/logo.png" alt="" width="34" height="34"><span>&larr; HOME</span></a>
+  <div class="count" id="count" aria-hidden="true">1/14</div>
+  <p class="sr" id="announce" aria-live="polite"></p>
 
   <!-- 1: who we are -->
   <section class="scene active" aria-label="We are Overdrive">
@@ -354,7 +369,7 @@
         <p class="rv">We compete in the National Robotics League (NRL), a national school robotics league with hundreds of teams and its finals at IIT Bombay.</p>
       </div>
       <figure class="snap rv">
-        <img src="/assets/punk/about/team.jpg" alt="The ten members of Overdrive 009 standing together in a classroom" width="512" height="384">
+        <picture><source type="image/avif" srcset="/assets/punk/about/team.avif"><source type="image/webp" srcset="/assets/punk/about/team.webp"><img src="/assets/punk/about/team.jpg" alt="The ten members of Overdrive 009 standing together in a classroom" width="512" height="384" fetchpriority="high"></picture>
         <figcaption>team overdrive 009</figcaption>
       </figure>
     </div></div></div>
@@ -403,7 +418,7 @@
         </ol>
       </div>
       <figure class="snap rv">
-        <img src="/assets/punk/about/sim-field.jpg" alt="Our robot on the HYPERDRIVE field in the Overdrive simulator" width="576" height="260">
+        <picture><source type="image/avif" srcset="/assets/punk/about/sim-field.avif"><source type="image/webp" srcset="/assets/punk/about/sim-field.webp"><img src="/assets/punk/about/sim-field.jpg" alt="Our robot on the HYPERDRIVE field in the Overdrive simulator" width="576" height="260" loading="lazy" decoding="async"></picture>
         <figcaption>practice before the venue</figcaption>
       </figure>
     </div></div></div>
@@ -425,7 +440,7 @@
         <p class="small rv">These are the regional thresholds from Table 4.5.2. The championship numbers are still TBD. Starburst mode switches on at 10 cores, or at 4 once we have scored a payload. Our partner changes every qualification match, so we build a plan that works alone and gets better with help.</p>
       </div>
       <figure class="snap rv">
-        <img src="/assets/punk/about/field-map.jpg" alt="Top-down map of the HYPERDRIVE field with the red and blue sides" width="308" height="273">
+        <picture><source type="image/avif" srcset="/assets/punk/about/field-map.avif"><source type="image/webp" srcset="/assets/punk/about/field-map.webp"><img src="/assets/punk/about/field-map.jpg" alt="Top-down map of the HYPERDRIVE field with the red and blue sides" width="308" height="273" loading="lazy" decoding="async"></picture>
         <figcaption>the field</figcaption>
       </figure>
     </div></div></div>
@@ -520,7 +535,7 @@
         <p class="small rv">* Placeholder value, not yet measured.</p>
       </div>
       <figure class="snap rv">
-        <img src="/assets/punk/about/auto-route.jpg" alt="Map of the autonomous route on the red side of the field" width="538" height="478">
+        <picture><source type="image/avif" srcset="/assets/punk/about/auto-route.avif"><source type="image/webp" srcset="/assets/punk/about/auto-route.webp"><img src="/assets/punk/about/auto-route.jpg" alt="Map of the autonomous route on the red side of the field" width="538" height="478" loading="lazy" decoding="async"></picture>
         <figcaption>red side. blue is mirrored.</figcaption>
       </figure>
     </div></div></div>
@@ -557,13 +572,25 @@
         <div class="btns rv"><a class="go" href="/viora">Read about Viora &rarr;</a></div>
       </div>
       <figure class="snap rv">
-        <img src="/assets/punk/about/viora-saliva.jpg" alt="Test tubes of saliva with the indicator, purple to blue, labelled by hours without water" width="431" height="317">
+        <picture><source type="image/avif" srcset="/assets/punk/about/viora-saliva.avif"><source type="image/webp" srcset="/assets/punk/about/viora-saliva.webp"><img src="/assets/punk/about/viora-saliva.jpg" alt="Test tubes of saliva with the indicator, purple to blue, labelled by hours without water" width="431" height="317" loading="lazy" decoding="async"></picture>
         <figcaption>red cabbage vs. thirst</figcaption>
       </figure>
     </div></div></div>
   </section>
 
-  <!-- 13: credits -->
+  <!-- 13: sponsors and contact -->
+  <section class="scene p-ruled" aria-label="Sponsors and contact">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Sponsors · contact</p>
+      <h2 class="tiles" data-tiles="Help us build | the next robot."></h2>
+      <p class="lede rv">We are looking for sponsors. Support pays for robot parts, competition fees and travel to events.</p>
+      <ul class="chips rv"><li>Robot parts</li><li>Competition fees</li><li>Travel to events</li></ul>
+      <p class="note rv">Write to us and we will tell you what we need.</p>
+      <div class="btns rv"><a class="go" href="mailto:nrloverdrive009@gmail.com">nrloverdrive009@gmail.com</a></div>
+    </div></div>
+  </section>
+
+  <!-- 14: credits -->
   <section class="scene p-ink" aria-label="Credits">
     <div class="inner"><div class="copy"><div class="split">
       <div class="col">
@@ -575,9 +602,10 @@
           <a class="go" href="/robot">Meet the robot</a>
           <a class="go alt" href="/sim">Open the simulator</a>
         </div>
+        <p class="foot rv"><span class="links"><a href="/signin">Sign in</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="mailto:nrloverdrive009@gmail.com">Email us</a></span></p>
       </div>
       <figure class="snap rv">
-        <img src="/assets/punk/about/viora-beakers.jpg" alt="A row of beakers of red cabbage indicator in different colours on a lab bench" width="468" height="322">
+        <picture><source type="image/avif" srcset="/assets/punk/about/viora-beakers.avif"><source type="image/webp" srcset="/assets/punk/about/viora-beakers.webp"><img src="/assets/punk/about/viora-beakers.jpg" alt="A row of beakers of red cabbage indicator in different colours on a lab bench" width="468" height="322" loading="lazy" decoding="async"></picture>
         <figcaption>long hours in the lab</figcaption>
       </figure>
     </div></div></div>
@@ -586,10 +614,12 @@
   <svg class="wipe" id="wipe" aria-hidden="true"><path></path></svg>
 
   <nav class="pager" aria-label="Cards">
-    <button class="arrow" id="prev" type="button" aria-label="Previous card">BACK</button>
+    <button class="arrow" id="prev" type="button" aria-label="Back to the previous card">BACK</button>
     <span id="dots" style="display:flex;gap:7px"></span>
     <button class="arrow" id="next" type="button" aria-label="Next card">NEXT</button>
   </nav>
 </main>
 
 <script type="module" src="/js/punk/about.js"></script>
+</body>
+</html>
