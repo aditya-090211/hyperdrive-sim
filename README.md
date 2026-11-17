@@ -26,13 +26,16 @@ Add `overdrive009.in`, `www.overdrive009.in`, `scout.overdrive009.in` and `viora
 
 | Path | File | What it is |
 | --- | --- | --- |
-| `/` | `index.html`, `js/landing.js`, `css/landing.css` | Overdrive 009 landing page: the robot CAD on a plinth, then a scroll-driven camera journey over the field and arena |
+| `/` | `index.html`, `js/punk/landing.js` | Punk-poster landing page: OVERDRIVE title, a robot head that follows the cursor, links wrapped round it to /simulator and /robot |
+| `/simulator` | `simulator.html`, `js/punk/simulator.js` | Card-by-card page about the simulator and Scout, with Open the simulator (/sim) and Start scouting (/scout) |
+| `/robot` | `robot.html`, `js/punk/robot.js` | Card-by-card page about the robot with a draggable 3D model (placeholder) and arrows to each part |
+| `/old-landing` | `old-landing.html`, `js/landing.js`, `css/landing.css` | The previous landing page, kept but no longer linked |
 | `/sim` | `sim.html`, `js/main.js` … | The simulator. Home screen shows your robot (team number from Settings, `009` by default) on a plinth; Play flies it onto the field |
 | `/scout` | `scout.html`, `js/scout/*` | Overdrive Scout: match and pit scouting, team analytics, pick lists. Sign-in required |
 | `/signin` | `signin.html`, `js/signin.js`, `js/stadium.js` | The one Overdrive account for both apps (email and password: sign in, create account, reset), with a match playing at the venue behind it |
 | `/terms`, `/privacy` | `terms.html`, `privacy.html` | Terms of Use and Privacy Policy (Overdrive 009 can access all teams' scouting data: Terms §5, Privacy §2) |
 
-Shared pieces: `css/od.css` (liquid-glass design system), `js/robot-model.js` (robot CAD visual), `js/arena.js` (stands, crowd,
+The punk skin for the simulator, Scout, sign-in, terms and privacy is `css/punk.css`, loaded last on each of those pages; it only overrides design tokens and surface styles. Shared pieces: `css/od.css` (liquid-glass design system), `js/robot-model.js` (robot CAD visual), `js/arena.js` (stands, crowd,
 lighting truss, LED boards, score screens, plinth). Old links to `/?room=…` or password-reset links are forwarded to `/sim` by `js/redirect.js`.
 
 ### Overdrive Scout setup (once per Supabase project)

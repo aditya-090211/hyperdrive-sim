@@ -1,0 +1,390 @@
+<!doctype html>
+<title>Overdrive Simulator</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Special+Elite&display=swap">
+<style>
+  /* Layout: no scrolling page. Eight full-screen "cards" cut from different papers.
+     Moving on scribbles the screen out with a marker, then erases it to show the next card.
+     Headlines are pasted on letter by letter and fall off when you leave.
+     Everything moves on a low frame rate, like stop-motion. */
+  :root {
+    color-scheme: dark;
+    --ink: #121013;
+    --asphalt: #232024;
+    --fuchsia: #ff1f9d;
+    --fuchsia-deep: #b3006a;
+    --paper: #efe9dc;
+    --acid: #f2e94e;
+    --sky: #74c8ee;
+    --display: "Anton", "Haettenschweiler", "Impact", "Arial Narrow Bold", sans-serif;
+    --marker: "Permanent Marker", "Marker Felt", "Comic Sans MS", cursive;
+    --type: "Special Elite", "American Typewriter", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--asphalt);
+    color: var(--paper);
+    font-family: var(--type);
+    font-size: 16px;
+    line-height: 1.5;
+    overflow: hidden;
+  }
+  a { color: inherit; }
+
+  .deck { position: relative; height: 100%; overflow: hidden; isolation: isolate; }
+
+  /* ---------- cards ---------- */
+  .scene {
+    --bg: var(--asphalt); --fg: var(--paper); --pop: var(--fuchsia); --card: var(--ink); --cardfg: var(--paper);
+    position: absolute; inset: 0;
+    background: var(--bg); color: var(--fg);
+    visibility: hidden; pointer-events: none;
+  }
+  .scene.active { visibility: visible; pointer-events: auto; z-index: 1; }
+  .inner {
+    height: 100%;
+    overflow-y: auto; scrollbar-width: none;
+    padding-block: 66px 84px;
+    padding-left: max(22px, env(safe-area-inset-left, 0px));
+    padding-right: max(22px, env(safe-area-inset-right, 0px));
+    display: flex; flex-direction: column; gap: 22px;
+  }
+  .inner::-webkit-scrollbar { display: none; }
+  .copy { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 1180px; margin: auto; }
+  @media (min-width: 760px) {
+    .inner { padding-left: max(5vw, env(safe-area-inset-left, 0px)); padding-right: max(5vw, env(safe-area-inset-right, 0px)); }
+    .scene[data-robot="right"] .copy > * { max-width: 62%; }
+    .scene[data-robot="left"] .copy > * { max-width: 62%; margin-left: 38%; }
+  }
+  @media (max-width: 759px) {
+    .scene:not([data-robot="center"]) .inner { padding-bottom: 190px; }
+    .copy { margin-block: 0 auto; }
+  }
+
+  /* papers */
+  .p-ruled {
+    --bg: var(--paper); --fg: var(--ink); --pop: var(--fuchsia); --card: var(--ink); --cardfg: var(--paper);
+    background-image:
+      linear-gradient(90deg, transparent 0 46px, rgba(255, 31, 157, .55) 46px 48px, transparent 48px),
+      repeating-linear-gradient(transparent 0 31px, rgba(116, 200, 238, .7) 31px 32px);
+  }
+  .p-pink { --bg: var(--fuchsia); --fg: var(--ink); --pop: var(--acid); --card: var(--paper); --cardfg: var(--ink);
+    background-image: radial-gradient(circle, rgba(18, 16, 19, .22) 0 30%, transparent 32%); background-size: 13px 13px; }
+  .p-acid { --bg: var(--acid); --fg: var(--ink); --pop: var(--fuchsia); --card: var(--ink); --cardfg: var(--paper);
+    background-image: linear-gradient(rgba(18, 16, 19, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(18, 16, 19, .13) 1px, transparent 1px);
+    background-size: 26px 26px; }
+  .p-sky { --bg: var(--sky); --fg: var(--ink); --pop: var(--fuchsia); --card: var(--paper); --cardfg: var(--ink); }
+  .p-ink { --bg: var(--ink); --fg: var(--paper); --pop: var(--acid); --card: var(--asphalt); --cardfg: var(--paper);
+    background-image: linear-gradient(rgba(239, 233, 220, .06) 1px, transparent 1px); background-size: 100% 28px; }
+  .p-grid { --bg: var(--paper); --fg: var(--ink); --pop: var(--sky); --card: var(--ink); --cardfg: var(--paper);
+    background-image: linear-gradient(rgba(18, 16, 19, .1) 1px, transparent 1px), linear-gradient(90deg, rgba(18, 16, 19, .1) 1px, transparent 1px);
+    background-size: 22px 22px; }
+
+  /* grain over everything */
+  .deck::after {
+    content: ""; position: absolute; inset: 0; z-index: 40; pointer-events: none;
+    opacity: .07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.1 -.15'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- pasted-letter headlines ---------- */
+  .tiles {
+    margin: 0; font-weight: 400;
+    display: flex; flex-wrap: wrap; gap: .12em .5em;
+    font-size: clamp(24px, 3.5vw, 50px); line-height: 1;
+  }
+  .tiles.xl { font-size: clamp(46px, 11.5vw, 160px); justify-content: center; }
+  .word { display: inline-flex; gap: .07em; white-space: nowrap; }
+  .tile { display: inline-block; --r: 0deg; --spin: 40deg; transform: rotate(var(--r)); transition: transform .16s cubic-bezier(.2, 1.5, .4, 1); }
+  .tile b {
+    display: inline-block; font-weight: 400; text-transform: uppercase;
+    padding: .08em .16em .02em; min-width: .62em; text-align: center;
+    box-shadow: .06em .07em 0 var(--ink);
+  }
+  .tile.c0 b { background: var(--paper); color: var(--ink); font-family: var(--display); }
+  .tile.c1 b { background: var(--ink); color: var(--paper); font-family: var(--display); outline: 2px solid var(--paper); outline-offset: -2px; }
+  .tile.c2 b { background: var(--acid); color: var(--ink); font-family: var(--marker); }
+  .tile.c3 b { background: var(--sky); color: var(--ink); font-family: var(--display); }
+  .tile.c4 b { background: var(--fuchsia); color: var(--ink); font-family: var(--type); }
+
+  /* ---------- body bits ---------- */
+  p { margin: 0; max-width: 62ch; }
+  .lede { font-size: clamp(17px, 1.7vw, 21px); }
+  .rv { position: relative; --d: 0s; }
+  .scr { position: absolute; left: -8px; top: -5px; pointer-events: none; overflow: visible; z-index: 2; }
+  .scr path { fill: none; stroke: var(--pop); stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; stroke-dashoffset: 1.01; }
+
+  .note { font-family: var(--marker); font-size: clamp(18px, 2.2vw, 28px); line-height: 1.15; color: var(--pop); transform: rotate(-2.5deg); transform-origin: left; }
+  .p-pink .note, .p-ink .note { color: var(--pop); }
+  .scrap {
+    background: var(--card); color: var(--cardfg);
+    padding: 14px 16px 12px;
+    box-shadow: 5px 6px 0 var(--ink);
+  }
+  .p-ink .scrap { box-shadow: 5px 6px 0 var(--fuchsia); }
+  .scrap h3 { margin: 0 0 6px; font-family: var(--display); font-weight: 400; font-size: 22px; letter-spacing: .04em; text-transform: uppercase; color: var(--pop); }
+  .p-sky .scrap h3, .p-pink .scrap h3 { color: var(--fuchsia-deep); }
+  .scrap p { font-size: 14.5px; line-height: 1.45; }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 18px; }
+  .grid2 > :nth-child(odd) { transform: rotate(-.8deg); }
+  .grid2 > :nth-child(even) { transform: rotate(.9deg); }
+
+  /* numbers */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 22px 18px; }
+  .stat { background: var(--paper); color: var(--ink); padding: 12px 14px 10px; box-shadow: 6px 7px 0 var(--ink); }
+  .stat:nth-child(1) { transform: rotate(-3deg); }
+  .stat:nth-child(2) { transform: rotate(2deg) translateY(8px); background: var(--acid); }
+  .stat:nth-child(3) { transform: rotate(-1deg); background: var(--ink); color: var(--paper); box-shadow: 6px 7px 0 var(--acid); }
+  .stat:nth-child(4) { transform: rotate(3deg) translateY(6px); background: var(--sky); }
+  .stat strong { display: block; font-family: var(--display); font-weight: 400; font-size: clamp(44px, 6.5vw, 86px); line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat span { display: block; font-size: 13.5px; line-height: 1.3; margin-top: 4px; }
+
+  /* chains (real sequences) */
+  .chain { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px 34px; }
+  .chain li { position: relative; flex: 1 1 150px; background: var(--card); color: var(--cardfg); padding: 10px 12px 8px; box-shadow: 4px 5px 0 var(--pop); }
+  .chain li:nth-child(odd) { transform: rotate(-1.4deg); }
+  .chain li:nth-child(even) { transform: rotate(1.6deg); }
+  .chain li b { display: block; font-family: var(--display); font-weight: 400; font-size: 20px; letter-spacing: .03em; text-transform: uppercase; }
+  .chain li span { font-size: 13.5px; line-height: 1.3; display: block; }
+  .chain li + li::before { content: "\2192"; position: absolute; left: -29px; top: 50%; transform: translateY(-55%); font-family: var(--marker); font-size: 26px; color: var(--fg); }
+
+  /* tables */
+  .tbl { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; font-variant-numeric: tabular-nums; background: var(--card); color: var(--cardfg); box-shadow: 5px 6px 0 var(--pop); }
+  caption { caption-side: top; text-align: left; font-family: var(--marker); font-size: 20px; color: var(--pop); padding-bottom: 6px; }
+  .p-grid caption { color: var(--fuchsia-deep); }
+  th, td { text-align: left; padding: 6px 12px; border-bottom: 1px dashed rgba(239, 233, 220, .3); white-space: nowrap; }
+  th { font-family: var(--display); font-weight: 400; letter-spacing: .06em; text-transform: uppercase; font-size: 14px; color: var(--pop); }
+  td.n, th.n { text-align: right; }
+  .small { font-size: 13px; opacity: .85; }
+
+  /* recorded run */
+  .run { display: flex; height: 34px; box-shadow: 4px 5px 0 var(--ink); font-family: var(--display); font-size: 14px; letter-spacing: .04em; color: var(--ink); }
+  .run span { display: flex; align-items: center; padding-left: 8px; white-space: nowrap; overflow: hidden; border-right: 3px solid var(--ink); }
+  .run span:nth-child(1) { flex: 22.6; background: var(--fuchsia); }
+  .run span:nth-child(2) { flex: 15.1; background: var(--acid); }
+  .run span:nth-child(3) { flex: 5.8; background: var(--sky); border-right: 0; padding-left: 4px; }
+  .events { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; }
+
+  /* big link */
+  .go {
+    align-self: flex-start;
+    display: inline-block; text-decoration: none;
+    font-family: var(--display); font-size: clamp(22px, 4.2vw, 56px); line-height: 1.1; letter-spacing: .02em;
+    background: var(--acid); color: var(--ink);
+    padding: .22em .45em .14em;
+    box-shadow: .12em .14em 0 var(--ink), .2em .22em 0 var(--paper);
+    transform: rotate(-2deg);
+    overflow-wrap: anywhere;
+  }
+  .go:hover, .go:focus-visible { background: var(--paper); outline: none; transform: rotate(1.5deg) scale(1.03); }
+  .scene[data-robot="center"] .copy { align-items: center; text-align: center; }
+  .scene[data-robot="center"] .inner { justify-content: space-between; }
+  .scene[data-robot="center"] .go { align-self: center; font-size: clamp(18px, 2.6vw, 30px); }
+
+
+  /* site copy */
+  .copy > * { min-width: 0; }
+  .eyebrow { font-size: 13px; letter-spacing: .2em; text-transform: uppercase; align-self: flex-start; background: var(--fg); color: var(--bg); padding: 4px 9px 2px; transform: rotate(-1deg); }
+  .specs { margin: 0; display: flex; flex-direction: column; gap: 9px; }
+  .specs > div { display: grid; grid-template-columns: minmax(96px, 9.5em) 1fr; gap: 4px 16px; align-items: baseline; background: var(--card); color: var(--cardfg); padding: 8px 14px 6px; box-shadow: 4px 5px 0 var(--pop); }
+  .specs > div:nth-child(odd) { transform: rotate(-.7deg); }
+  .specs > div:nth-child(even) { transform: rotate(.6deg) translateX(6px); }
+  .specs dt { font-family: var(--display); font-size: 17px; letter-spacing: .08em; text-transform: uppercase; color: var(--pop); }
+  .p-sky .specs dt, .p-pink .specs dt { color: var(--fuchsia-deep); }
+  .specs dd { margin: 0; font-size: 15.5px; line-height: 1.35; }
+  .btns { display: flex; flex-wrap: wrap; gap: 18px 26px; padding: 6px 0 8px; }
+  .btns .go { font-size: clamp(19px, 2.3vw, 30px); align-self: auto; }
+  .go.alt { background: var(--ink); color: var(--paper); transform: rotate(1.6deg); box-shadow: .12em .14em 0 var(--fuchsia), .2em .22em 0 var(--paper); }
+  .go.alt:hover, .go.alt:focus-visible { background: var(--fuchsia); color: var(--ink); }
+  .foot { display: flex; flex-wrap: wrap; gap: 6px 26px; justify-content: space-between; font-size: 13px; max-width: none; }
+  .foot .links { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+  .brk { flex-basis: 100%; height: 0; }
+
+  /* ---------- the robot ---------- */
+  .robot {
+    position: absolute; z-index: 20; left: 50%; top: 60%;
+    width: 300px; aspect-ratio: 1; max-width: none;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: left .5s cubic-bezier(.3, 1.2, .4, 1), top .5s cubic-bezier(.3, 1.2, .4, 1), width .5s ease, transform .5s ease;
+    filter:
+      drop-shadow(3px 0 0 var(--paper)) drop-shadow(-3px 0 0 var(--paper))
+      drop-shadow(0 3px 0 var(--paper)) drop-shadow(0 -3px 0 var(--paper))
+      drop-shadow(7px 8px 0 var(--ink));
+  }
+  .robot canvas { display: block; width: 100%; height: 100%; }
+  .robot img { width: 100%; height: 100%; border-radius: 50%; background: #fff; object-fit: cover; }
+
+  /* ---------- chrome ---------- */
+  .home {
+    position: absolute; z-index: 30; top: 14px; left: max(16px, env(safe-area-inset-left, 0px));
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+    font-family: var(--display); font-size: 18px; letter-spacing: .06em; color: var(--paper);
+    background: var(--ink); padding: 5px 14px 5px 6px; box-shadow: 3px 3px 0 var(--fuchsia); transform: rotate(-1.5deg);
+  }
+  .home:hover, .home:focus-visible { background: var(--fuchsia); color: var(--ink); box-shadow: 3px 3px 0 var(--paper); transform: rotate(1.5deg) scale(1.05); }
+  .home img { width: 34px; height: 34px; border-radius: 50%; background: #fff; object-fit: cover; }
+  .count {
+    position: absolute; z-index: 30; top: 16px; right: max(18px, env(safe-area-inset-right, 0px));
+    font-family: var(--marker); font-size: 22px; background: var(--paper); color: var(--ink);
+    padding: 2px 12px; transform: rotate(3deg); box-shadow: 3px 3px 0 var(--ink);
+  }
+  .pager {
+    position: absolute; z-index: 30; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px;
+    background: var(--ink); padding: 7px 10px; box-shadow: 4px 4px 0 var(--fuchsia);
+  }
+  .pager button {
+    font: inherit; cursor: pointer; border: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+  }
+  .pager .arrow { font-family: var(--display); font-size: 16px; letter-spacing: .06em; padding: 5px 10px 3px; }
+  .pager .arrow:disabled { opacity: .3; cursor: default; }
+  .pager .dot { width: 13px; height: 13px; background: transparent; outline: 2px solid var(--paper); outline-offset: -2px; }
+  .pager .dot[aria-current="true"] { background: var(--fuchsia); outline-color: var(--fuchsia); transform: rotate(12deg) scale(1.25); }
+  .pager button:focus-visible, .home:focus-visible { outline: 3px solid var(--acid); outline-offset: 2px; }
+  .hint { font-family: var(--marker); font-size: 16px; opacity: .8; }
+
+  .wipe { position: absolute; inset: 0; z-index: 35; pointer-events: none; overflow: visible; }
+  .wipe path { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; stroke-dashoffset: 1.01; }
+
+  /* waiting to be pasted on / scribbled in (set and cleared by script, so nothing stays hidden if animation is off) */
+  .tile.off { opacity: 0; }
+  .tile.big { transform: scale(1.9) rotate(calc(var(--r) + 20deg)); position: relative; z-index: 1; }
+  .rv.off { color: transparent; background-color: transparent; box-shadow: none; }
+  .rv.off > :not(.scr) { opacity: 0; }
+
+  /* ---------- stop-motion ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .tile b { animation: jig 2.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -310ms); }
+    @keyframes jig {
+      0% { transform: rotate(-1.6deg); }
+      33% { transform: rotate(1.3deg) translateY(-1px); }
+      66% { transform: rotate(-.4deg) translateX(1px); }
+    }
+    @keyframes paste {
+      from { opacity: 0; transform: scale(2.4) rotate(calc(var(--r) + 24deg)); }
+      to { opacity: 1; transform: rotate(var(--r)); }
+    }
+    .scene.leaving .tile { animation: drop .55s cubic-bezier(.55, 0, .9, .45) forwards; animation-delay: calc(var(--i) * 16ms); }
+    @keyframes drop {
+      from { transform: rotate(var(--r)); }
+      to { transform: translateY(115vh) rotate(var(--spin)); }
+    }
+    @keyframes scrib {
+      0% { stroke-dashoffset: 1.01; animation-timing-function: steps(5); }
+      45% { stroke-dashoffset: 0; }
+      55% { stroke-dashoffset: 0; animation-timing-function: steps(5); }
+      100% { stroke-dashoffset: -1.01; }
+    }
+    .note { animation: jig 3.2s ease-in-out infinite alternate; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scr { display: none; }
+    .robot { filter: drop-shadow(3px 0 0 var(--paper)) drop-shadow(-3px 0 0 var(--paper)) drop-shadow(0 3px 0 var(--paper)) drop-shadow(0 -3px 0 var(--paper)); }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.022" numOctaves="1" seed="1" result="n"></feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="2.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+  </filter>
+</svg>
+
+<main class="deck" id="deck">
+  <a class="home" href="/" aria-label="Back to Team Overdrive 009"><img src="/assets/punk/logo.png" alt="" width="34" height="34"><span>&larr; HOME</span></a>
+  <div class="count" id="count" aria-live="polite">1/5</div>
+
+  <!-- hero -->
+  <section class="scene active" data-robot="right" aria-label="Practise the match. Scout the field.">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Overdrive 009 · National Robotics League 2026</p>
+      <h1 class="tiles" data-tiles="Practise the match. | Scout the field."></h1>
+      <p class="lede rv">A physics simulator and a scouting app for teams playing HYPERDRIVE. Built by Overdrive 009, free for every team in the league.</p>
+      <div class="btns rv">
+        <a class="go" href="/sim">Open the simulator</a>
+        <a class="go alt" href="/scout">Start scouting</a>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 01 -->
+  <section class="scene p-ruled" data-robot="left" aria-label="01 The robot">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">01 &nbsp; The robot</p>
+      <h2 class="tiles" data-tiles="Our robot, straight | from its CAD."></h2>
+      <p class="lede rv">This is the model our team builds from. The simulator drives the same mesh, so what you practise with is what we run.</p>
+      <dl class="specs">
+        <div class="rv"><dt>Drive</dt><dd>Four-wheel tank, 110 mm wheels</dd></div>
+        <div class="rv"><dt>Footprint</dt><dd>300 × 412 mm with bumpers</dd></div>
+        <div class="rv"><dt>Arm</dt><dd>Parallelogram, 146 mm links, claw stays level</dd></div>
+        <div class="rv"><dt>Gripper</dt><dd>Two-finger claw for COREs</dd></div>
+      </dl>
+    </div></div>
+  </section>
+
+  <!-- 02 -->
+  <section class="scene p-acid" data-robot="right" aria-label="02 Simulator">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">02 &nbsp; Simulator</p>
+      <h2 class="tiles" data-tiles="Drive HYPERDRIVE | before you | reach the venue."></h2>
+      <p class="lede rv">The official field at the IIT Bombay Open Air Theatre, both divisions, rigid-body physics and live scoring by the 2026 manual.</p>
+      <dl class="specs">
+        <div class="rv"><dt>Field</dt><dd>Space Stations, vaults, poles and tape from the NRL CAD</dd></div>
+        <div class="rv"><dt>Physics</dt><dd>Motor torque, battery sag, tyre grip, a tilting deck</dd></div>
+        <div class="rv"><dt>Online</dt><dd>Each driver on their own laptop</dd></div>
+        <div class="rv"><dt>Your code</dt><dd>Run your AUTO and TELEOP OpModes</dd></div>
+      </dl>
+      <div class="btns rv"><a class="go" href="/sim">Open the simulator &rarr;</a></div>
+    </div></div>
+  </section>
+
+  <!-- 03 -->
+  <section class="scene p-sky" data-robot="left" aria-label="03 Overdrive Scout">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">03 &nbsp; Overdrive Scout</p>
+      <h2 class="tiles" data-tiles="Scouting your drive | team will actually use."></h2>
+      <p class="lede rv">One scout, one robot, one thumb. Large counters for every scoring action, a running points tally, reports that wait on the phone when the Wi-Fi drops, and rankings as soon as they sync.</p>
+      <dl class="specs">
+        <div class="rv"><dt>Phones first</dt><dd>No zooming, no tiny buttons</dd></div>
+        <div class="rv"><dt>Offline</dt><dd>Reports queue on the device and upload later</dd></div>
+        <div class="rv"><dt>Your team</dt><dd>Join with a code and see every scout's reports</dd></div>
+        <div class="rv"><dt>Account</dt><dd>One email and password for Scout and the simulator</dd></div>
+      </dl>
+      <div class="btns rv"><a class="go" href="/scout">Start scouting &rarr;</a></div>
+    </div></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="scene p-pink" data-robot="right" aria-label="04 The team">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">04 &nbsp; The team</p>
+      <h2 class="tiles" data-tiles="Overdrive 009"></h2>
+      <p class="lede rv">A student team in the National Robotics League. We build these tools so every team can practise and scout well, not only the teams with the most people.</p>
+      <div class="btns rv">
+        <a class="go" href="/sim">Open the simulator</a>
+        <a class="go alt" href="/scout">Start scouting</a>
+      </div>
+      <p class="foot rv"><span>© 2026 Overdrive 009. Not affiliated with the National Robotics League.</span>
+        <span class="links"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/sim">Simulator</a><a href="/scout">Scout</a></span></p>
+    </div></div>
+  </section>
+
+  <div class="robot" id="robot" aria-hidden="true"></div>
+  <svg class="wipe" id="wipe" aria-hidden="true"><path></path></svg>
+
+  <nav class="pager" aria-label="Cards">
+    <button class="arrow" id="prev" type="button" aria-label="Previous card">BACK</button>
+    <span id="dots" style="display:flex;gap:7px"></span>
+    <button class="arrow" id="next" type="button" aria-label="Next card">NEXT</button>
+  </nav>
+</main>
+
+<script type="module" src="/js/punk/simulator.js"></script>

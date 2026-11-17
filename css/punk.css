@@ -1,0 +1,135 @@
+/* OVERDRIVE 009 punk skin for the apps (simulator, Scout, sign-in, terms, privacy).
+   Loaded after each page's own stylesheet. It only changes colours, type, corners and shadows through the
+   existing design tokens plus a few surface rules, so no layout or behaviour depends on it.
+   Palette and type match the poster pages: dark grey and fuchsia, photocopy paper, the logo's yellow and blue.
+   The Red and Blue alliance colours are left readable as red and blue, because the game depends on them. */
+:root {
+  --p-ink: #121013;
+  --p-asphalt: #232024;
+  --p-asphalt-2: #2e2a30;
+  --p-fuchsia: #ff1f9d;
+  --p-fuchsia-2: #ff6cbf;
+  --p-fuchsia-deep: #b3006a;
+  --p-paper: #efe9dc;
+  --p-acid: #f2e94e;
+  --p-sky: #74c8ee;
+  --p-display: 'Anton', 'Haettenschweiler', 'Impact', 'Arial Narrow Bold', sans-serif;
+  --p-marker: 'Permanent Marker', 'Marker Felt', 'Comic Sans MS', cursive;
+  --p-type: 'Special Elite', 'American Typewriter', 'Courier New', monospace;
+  --p-shadow: 4px 5px 0 var(--p-ink);
+
+  /* shared tokens (od.css: Scout, sign-in, legal) */
+  --ink: #19161a;
+  --ink-2: var(--p-asphalt);
+  --ink-3: var(--p-asphalt-2);
+  --text: var(--p-paper);
+  --cream-2: #d9d2c4;
+  --muted: #b3aca2;
+  --faint: #8f887f;
+  --line: rgba(239, 233, 220, 0.14);
+  --line-2: rgba(239, 233, 220, 0.26);
+  --cream: var(--p-acid);
+  --od: var(--p-fuchsia);
+  --od-2: var(--p-fuchsia-2);
+  --od-soft: rgba(255, 31, 157, 0.16);
+  --od-fill: var(--p-fuchsia);
+  --od-fill-hi: #e0007f;
+  --sky: var(--p-sky);
+  --gold: var(--p-acid);
+  --serif: var(--p-display);
+  --display: var(--p-display);
+  --r: 3px; --r-sm: 2px;
+  --surface: rgba(35, 32, 36, 0.97);
+  --surface-2: rgba(46, 42, 48, 0.98);
+  --pane: rgba(25, 22, 26, 0.9);
+  --pane-strong: rgba(25, 22, 26, 0.97);
+  --frost: none;
+  --g-fill: linear-gradient(var(--p-asphalt), var(--p-asphalt));
+  --g-tint: linear-gradient(rgba(25, 22, 26, 0.9), rgba(25, 22, 26, 0.9));
+  --g-rim: linear-gradient(var(--line-2), var(--line-2));
+  --g-light: none;
+  --g-drop: var(--p-shadow);
+
+  /* simulator tokens (app.css) */
+  --bg: #19161a;
+  --glass: rgba(35, 32, 36, 0.9);
+  --glass-strong: rgba(35, 32, 36, 0.95);
+  --glass-solid: rgba(35, 32, 36, 0.97);
+  --surface-solid: var(--p-asphalt);
+  --surface-3: var(--p-asphalt-2);
+  --sheen: linear-gradient(transparent, transparent);
+  --spec: none;
+  --blur: none;
+  --edge: rgba(239, 233, 220, 0.16);
+  --edge-hi: rgba(239, 233, 220, 0.3);
+  --stroke-2: rgba(239, 233, 220, 0.22);
+  --radius: 3px;
+  --radius-sm: 2px;
+  --shadow: var(--p-shadow);
+  --accent: var(--p-paper);
+  --lg-fill: rgba(35, 32, 36, 0.9);
+  --lg-fill-strong: rgba(25, 22, 26, 0.95);
+  --lg-fill-hover: rgba(58, 52, 60, 0.95);
+  --lg-blur: none;
+  --lg-blur-strong: none;
+  --lg-bloom: linear-gradient(transparent, transparent);
+  --lg-rim: linear-gradient(var(--edge), var(--edge));
+  --lg-depth: var(--p-shadow);
+}
+
+/* display type: Anton has one weight, so never fake-bold it */
+body { font-synthesis-weight: none; background-color: var(--ink); }
+:is(h1, h2, h3) em { color: var(--p-acid); font-weight: 400; }
+::selection { background: rgba(255, 31, 157, 0.4); }
+:focus-visible { outline-color: var(--p-acid); }
+
+/* headings and big numbers read as poster type */
+.logo, .gate-intro h1, .gate-card h1, .setup-head h1, .view-head h1, .empty h2, .ov-h, .modal-h h2, .center-card h2 {
+  font-family: var(--p-display) !important; font-weight: 400 !important; text-transform: uppercase; letter-spacing: 0.01em !important;
+}
+.logo span { font-style: normal !important; color: var(--p-fuchsia); }
+.eyebrow { font-family: var(--p-type); letter-spacing: 0.08em; }
+.mark, .brand-t, .mark-name { font-family: var(--p-display) !important; font-weight: 400 !important; letter-spacing: 0.04em !important; text-transform: uppercase; }
+
+/* buttons: printed stickers with a hard shadow */
+.b, .btn {
+  border-radius: 2px !important;
+  box-shadow: 3px 3px 0 var(--p-ink) !important;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  font-family: var(--p-display); font-weight: 400;
+}
+.b-primary, .btn-primary, .btn.primary {
+  background: var(--p-fuchsia) !important; color: var(--p-ink) !important;
+}
+.b-primary:hover, .btn-primary:hover, .btn.primary:hover { background: var(--p-acid) !important; }
+.b:active, .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--p-ink) !important; }
+.b::before, .b::after { display: none; }                 /* drop the glass rim pseudo-elements */
+.b-primary:disabled, .b-primary[aria-disabled="true"] { background: rgba(239, 233, 220, 0.1) !important; color: var(--faint) !important; box-shadow: none !important; }
+
+/* panels and cards: flat paper-on-asphalt, no frosted glass */
+.card, .modal, .gate-card, .center-card { border-radius: 3px !important; box-shadow: var(--p-shadow); }
+.nav, .topbar, .tabbar { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.topbar, .tabbar { background: var(--p-ink) !important; border-color: var(--p-fuchsia) !important; }
+.tabbar [aria-current="page"], .tabbar .on, .tabbar [aria-selected="true"] { color: var(--p-acid) !important; }
+
+/* simulator main menu: Play is the fuchsia sticker, the mode and tool buttons are flat cards with hard shadows */
+.mode, .tool, .nav-btn, .hud-btn, .chip, .keybtn, .tbtn { border-radius: 2px !important; }
+.mode, .tool { box-shadow: 3px 4px 0 var(--p-ink) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.mode .mt b, .tool b { font-family: var(--p-display) !important; font-weight: 400 !important; letter-spacing: 0.05em !important; text-transform: uppercase; }
+.mode .mi { border-radius: 2px !important; }
+.mode.primary { background: var(--p-fuchsia) !important; color: var(--p-ink) !important; box-shadow: 4px 5px 0 var(--p-ink), 7px 8px 0 var(--p-paper) !important; }
+.mode.primary:hover { background: var(--p-acid) !important; }
+.mode.primary .mt b { font-size: 22px; }
+.mode:hover, .tool:hover { border-color: var(--p-fuchsia) !important; }
+.tools-h { font-family: var(--p-type); letter-spacing: 0.1em; color: var(--p-acid); }
+
+/* inputs read like a form you fill in with a marker */
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, textarea { border-radius: 2px !important; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--p-acid) !important; }
+
+/* signature: a fuchsia tape strip on the simulator's main menu title and Scout's gate heading */
+.hero .logo, .gate-intro h1 { text-shadow: 0.04em 0.05em 0 var(--p-ink), 0.08em 0.09em 0 var(--p-fuchsia-deep); }
+
+@media (prefers-reduced-motion: reduce) {
+  .b:active, .btn:active { transform: none; }
+}

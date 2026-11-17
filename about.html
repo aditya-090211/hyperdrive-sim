@@ -1,0 +1,595 @@
+<!doctype html>
+<title>About Overdrive 009</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Special+Elite&display=swap">
+<style>
+  /* Layout: no scrolling page. Eight full-screen "cards" cut from different papers.
+     Moving on scribbles the screen out with a marker, then erases it to show the next card.
+     Headlines are pasted on letter by letter and fall off when you leave.
+     Everything moves on a low frame rate, like stop-motion. */
+  :root {
+    color-scheme: dark;
+    --ink: #121013;
+    --asphalt: #232024;
+    --fuchsia: #ff1f9d;
+    --fuchsia-deep: #b3006a;
+    --paper: #efe9dc;
+    --acid: #f2e94e;
+    --sky: #74c8ee;
+    --display: "Anton", "Haettenschweiler", "Impact", "Arial Narrow Bold", sans-serif;
+    --marker: "Permanent Marker", "Marker Felt", "Comic Sans MS", cursive;
+    --type: "Special Elite", "American Typewriter", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--asphalt);
+    color: var(--paper);
+    font-family: var(--type);
+    font-size: 16px;
+    line-height: 1.5;
+    overflow: hidden;
+  }
+  a { color: inherit; }
+
+  .deck { position: relative; height: 100%; overflow: hidden; isolation: isolate; }
+
+  /* ---------- cards ---------- */
+  .scene {
+    --bg: var(--asphalt); --fg: var(--paper); --pop: var(--fuchsia); --card: var(--ink); --cardfg: var(--paper);
+    position: absolute; inset: 0;
+    background: var(--bg); color: var(--fg);
+    visibility: hidden; pointer-events: none;
+  }
+  .scene.active { visibility: visible; pointer-events: auto; z-index: 1; }
+  .inner {
+    height: 100%;
+    overflow-y: auto; scrollbar-width: none;
+    padding-block: 66px 84px;
+    padding-left: max(22px, env(safe-area-inset-left, 0px));
+    padding-right: max(22px, env(safe-area-inset-right, 0px));
+    display: flex; flex-direction: column; gap: 22px;
+  }
+  .inner::-webkit-scrollbar { display: none; }
+  .copy { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 1180px; margin: auto; }
+  @media (min-width: 760px) {
+    .inner { padding-left: max(5vw, env(safe-area-inset-left, 0px)); padding-right: max(5vw, env(safe-area-inset-right, 0px)); }
+    .scene[data-robot="right"] .copy > * { max-width: 62%; }
+    .scene[data-robot="left"] .copy > * { max-width: 62%; margin-left: 38%; }
+  }
+  @media (max-width: 759px) {
+    .scene:not([data-robot="center"]) .inner { padding-bottom: 190px; }
+    .copy { margin-block: 0 auto; }
+  }
+
+  /* papers */
+  .p-ruled {
+    --bg: var(--paper); --fg: var(--ink); --pop: var(--fuchsia); --card: var(--ink); --cardfg: var(--paper);
+    background-image:
+      linear-gradient(90deg, transparent 0 46px, rgba(255, 31, 157, .55) 46px 48px, transparent 48px),
+      repeating-linear-gradient(transparent 0 31px, rgba(116, 200, 238, .7) 31px 32px);
+  }
+  .p-pink { --bg: var(--fuchsia); --fg: var(--ink); --pop: var(--acid); --card: var(--paper); --cardfg: var(--ink);
+    background-image: radial-gradient(circle, rgba(18, 16, 19, .22) 0 30%, transparent 32%); background-size: 13px 13px; }
+  .p-acid { --bg: var(--acid); --fg: var(--ink); --pop: var(--fuchsia); --card: var(--ink); --cardfg: var(--paper);
+    background-image: linear-gradient(rgba(18, 16, 19, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(18, 16, 19, .13) 1px, transparent 1px);
+    background-size: 26px 26px; }
+  .p-sky { --bg: var(--sky); --fg: var(--ink); --pop: var(--fuchsia); --card: var(--paper); --cardfg: var(--ink); }
+  .p-ink { --bg: var(--ink); --fg: var(--paper); --pop: var(--acid); --card: var(--asphalt); --cardfg: var(--paper);
+    background-image: linear-gradient(rgba(239, 233, 220, .06) 1px, transparent 1px); background-size: 100% 28px; }
+  .p-grid { --bg: var(--paper); --fg: var(--ink); --pop: var(--sky); --card: var(--ink); --cardfg: var(--paper);
+    background-image: linear-gradient(rgba(18, 16, 19, .1) 1px, transparent 1px), linear-gradient(90deg, rgba(18, 16, 19, .1) 1px, transparent 1px);
+    background-size: 22px 22px; }
+
+  /* grain over everything */
+  .deck::after {
+    content: ""; position: absolute; inset: 0; z-index: 40; pointer-events: none;
+    opacity: .07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.1 -.15'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- pasted-letter headlines ---------- */
+  .tiles {
+    margin: 0; font-weight: 400;
+    display: flex; flex-wrap: wrap; gap: .12em .5em;
+    font-size: clamp(24px, 3.5vw, 50px); line-height: 1;
+  }
+  .tiles.xl { font-size: clamp(46px, 11.5vw, 160px); justify-content: center; }
+  .word { display: inline-flex; gap: .07em; white-space: nowrap; }
+  .tile { display: inline-block; --r: 0deg; --spin: 40deg; transform: rotate(var(--r)); transition: transform .16s cubic-bezier(.2, 1.5, .4, 1); }
+  .tile b {
+    display: inline-block; font-weight: 400; text-transform: uppercase;
+    padding: .08em .16em .02em; min-width: .62em; text-align: center;
+    box-shadow: .06em .07em 0 var(--ink);
+  }
+  .tile.c0 b { background: var(--paper); color: var(--ink); font-family: var(--display); }
+  .tile.c1 b { background: var(--ink); color: var(--paper); font-family: var(--display); outline: 2px solid var(--paper); outline-offset: -2px; }
+  .tile.c2 b { background: var(--acid); color: var(--ink); font-family: var(--marker); }
+  .tile.c3 b { background: var(--sky); color: var(--ink); font-family: var(--display); }
+  .tile.c4 b { background: var(--fuchsia); color: var(--ink); font-family: var(--type); }
+
+  /* ---------- body bits ---------- */
+  p { margin: 0; max-width: 62ch; }
+  .lede { font-size: clamp(17px, 1.7vw, 21px); }
+  .rv { position: relative; --d: 0s; }
+  .scr { position: absolute; left: -8px; top: -5px; pointer-events: none; overflow: visible; z-index: 2; }
+  .scr path { fill: none; stroke: var(--pop); stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; stroke-dashoffset: 1.01; }
+
+  .note { font-family: var(--marker); font-size: clamp(18px, 2.2vw, 28px); line-height: 1.15; color: var(--pop); transform: rotate(-2.5deg); transform-origin: left; }
+  .p-pink .note, .p-ink .note { color: var(--pop); }
+  .scrap {
+    background: var(--card); color: var(--cardfg);
+    padding: 14px 16px 12px;
+    box-shadow: 5px 6px 0 var(--ink);
+  }
+  .p-ink .scrap { box-shadow: 5px 6px 0 var(--fuchsia); }
+  .scrap h3 { margin: 0 0 6px; font-family: var(--display); font-weight: 400; font-size: 22px; letter-spacing: .04em; text-transform: uppercase; color: var(--pop); }
+  .p-sky .scrap h3, .p-pink .scrap h3 { color: var(--fuchsia-deep); }
+  .scrap p { font-size: 14.5px; line-height: 1.45; }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 18px; }
+  .grid2 > :nth-child(odd) { transform: rotate(-.8deg); }
+  .grid2 > :nth-child(even) { transform: rotate(.9deg); }
+
+  /* numbers */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 22px 18px; }
+  .stat { background: var(--paper); color: var(--ink); padding: 12px 14px 10px; box-shadow: 6px 7px 0 var(--ink); }
+  .stat:nth-child(1) { transform: rotate(-3deg); }
+  .stat:nth-child(2) { transform: rotate(2deg) translateY(8px); background: var(--acid); }
+  .stat:nth-child(3) { transform: rotate(-1deg); background: var(--ink); color: var(--paper); box-shadow: 6px 7px 0 var(--acid); }
+  .stat:nth-child(4) { transform: rotate(3deg) translateY(6px); background: var(--sky); }
+  .stat strong { display: block; font-family: var(--display); font-weight: 400; font-size: clamp(44px, 6.5vw, 86px); line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat span { display: block; font-size: 13.5px; line-height: 1.3; margin-top: 4px; }
+
+  /* chains (real sequences) */
+  .chain { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px 34px; }
+  .chain li { position: relative; flex: 1 1 150px; background: var(--card); color: var(--cardfg); padding: 10px 12px 8px; box-shadow: 4px 5px 0 var(--pop); }
+  .chain li:nth-child(odd) { transform: rotate(-1.4deg); }
+  .chain li:nth-child(even) { transform: rotate(1.6deg); }
+  .chain li b { display: block; font-family: var(--display); font-weight: 400; font-size: 20px; letter-spacing: .03em; text-transform: uppercase; }
+  .chain li span { font-size: 13.5px; line-height: 1.3; display: block; }
+  .chain li + li::before { content: "\2192"; position: absolute; left: -29px; top: 50%; transform: translateY(-55%); font-family: var(--marker); font-size: 26px; color: var(--fg); }
+
+  /* tables */
+  .tbl { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; font-variant-numeric: tabular-nums; background: var(--card); color: var(--cardfg); box-shadow: 5px 6px 0 var(--pop); }
+  caption { caption-side: top; text-align: left; font-family: var(--marker); font-size: 20px; color: var(--pop); padding-bottom: 6px; }
+  .p-grid caption { color: var(--fuchsia-deep); }
+  th, td { text-align: left; padding: 6px 12px; border-bottom: 1px dashed rgba(239, 233, 220, .3); white-space: nowrap; }
+  th { font-family: var(--display); font-weight: 400; letter-spacing: .06em; text-transform: uppercase; font-size: 14px; color: var(--pop); }
+  td.n, th.n { text-align: right; }
+  .small { font-size: 13px; opacity: .85; }
+
+  /* recorded run */
+  .run { display: flex; height: 34px; box-shadow: 4px 5px 0 var(--ink); font-family: var(--display); font-size: 14px; letter-spacing: .04em; color: var(--ink); }
+  .run span { display: flex; align-items: center; padding-left: 8px; white-space: nowrap; overflow: hidden; border-right: 3px solid var(--ink); }
+  .run span:nth-child(1) { flex: 22.6; background: var(--fuchsia); }
+  .run span:nth-child(2) { flex: 15.1; background: var(--acid); }
+  .run span:nth-child(3) { flex: 5.8; background: var(--sky); border-right: 0; padding-left: 4px; }
+  .events { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; }
+
+  /* big link */
+  .go {
+    align-self: flex-start;
+    display: inline-block; text-decoration: none;
+    font-family: var(--display); font-size: clamp(22px, 4.2vw, 56px); line-height: 1.1; letter-spacing: .02em;
+    background: var(--acid); color: var(--ink);
+    padding: .22em .45em .14em;
+    box-shadow: .12em .14em 0 var(--ink), .2em .22em 0 var(--paper);
+    transform: rotate(-2deg);
+    overflow-wrap: anywhere;
+  }
+  .go:hover, .go:focus-visible { background: var(--paper); outline: none; transform: rotate(1.5deg) scale(1.03); }
+  .scene[data-robot="center"] .copy { align-items: center; text-align: center; }
+  .scene[data-robot="center"] .inner { justify-content: space-between; }
+  .scene[data-robot="center"] .go { align-self: center; font-size: clamp(18px, 2.6vw, 30px); }
+
+
+  /* site copy */
+  .copy > * { min-width: 0; }
+  .eyebrow { font-size: 13px; letter-spacing: .2em; text-transform: uppercase; align-self: flex-start; background: var(--fg); color: var(--bg); padding: 4px 9px 2px; transform: rotate(-1deg); }
+  .specs { margin: 0; display: flex; flex-direction: column; gap: 9px; }
+  .specs > div { display: grid; grid-template-columns: minmax(96px, 9.5em) 1fr; gap: 4px 16px; align-items: baseline; background: var(--card); color: var(--cardfg); padding: 8px 14px 6px; box-shadow: 4px 5px 0 var(--pop); }
+  .specs > div:nth-child(odd) { transform: rotate(-.7deg); }
+  .specs > div:nth-child(even) { transform: rotate(.6deg) translateX(6px); }
+  .specs dt { font-family: var(--display); font-size: 17px; letter-spacing: .08em; text-transform: uppercase; color: var(--pop); }
+  .p-sky .specs dt, .p-pink .specs dt { color: var(--fuchsia-deep); }
+  .specs dd { margin: 0; font-size: 15.5px; line-height: 1.35; }
+  .btns { display: flex; flex-wrap: wrap; gap: 18px 26px; padding: 6px 0 8px; }
+  .btns .go { font-size: clamp(19px, 2.3vw, 30px); align-self: auto; }
+  .go.alt { background: var(--ink); color: var(--paper); transform: rotate(1.6deg); box-shadow: .12em .14em 0 var(--fuchsia), .2em .22em 0 var(--paper); }
+  .go.alt:hover, .go.alt:focus-visible { background: var(--fuchsia); color: var(--ink); }
+  .foot { display: flex; flex-wrap: wrap; gap: 6px 26px; justify-content: space-between; font-size: 13px; max-width: none; }
+  .foot .links { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+  .brk { flex-basis: 100%; height: 0; }
+
+  /* ---------- the robot ---------- */
+  .robot {
+    position: absolute; z-index: 20; left: 50%; top: 60%;
+    width: 300px; aspect-ratio: 1; max-width: none;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: left .5s cubic-bezier(.3, 1.2, .4, 1), top .5s cubic-bezier(.3, 1.2, .4, 1), width .5s ease, transform .5s ease;
+    filter:
+      drop-shadow(3px 0 0 var(--paper)) drop-shadow(-3px 0 0 var(--paper))
+      drop-shadow(0 3px 0 var(--paper)) drop-shadow(0 -3px 0 var(--paper))
+      drop-shadow(7px 8px 0 var(--ink));
+  }
+  .robot canvas { display: block; width: 100%; height: 100%; }
+  .robot img { width: 100%; height: 100%; border-radius: 50%; background: #fff; object-fit: cover; }
+
+  /* ---------- chrome ---------- */
+  .home {
+    position: absolute; z-index: 30; top: 14px; left: max(16px, env(safe-area-inset-left, 0px));
+    display: flex; align-items: center; gap: 10px; text-decoration: none;
+    font-family: var(--display); font-size: 18px; letter-spacing: .06em; color: var(--paper);
+    background: var(--ink); padding: 5px 14px 5px 6px; box-shadow: 3px 3px 0 var(--fuchsia); transform: rotate(-1.5deg);
+  }
+  .home:hover, .home:focus-visible { background: var(--fuchsia); color: var(--ink); box-shadow: 3px 3px 0 var(--paper); transform: rotate(1.5deg) scale(1.05); }
+  .home img { width: 34px; height: 34px; border-radius: 50%; background: #fff; object-fit: cover; }
+  .count {
+    position: absolute; z-index: 30; top: 16px; right: max(18px, env(safe-area-inset-right, 0px));
+    font-family: var(--marker); font-size: 22px; background: var(--paper); color: var(--ink);
+    padding: 2px 12px; transform: rotate(3deg); box-shadow: 3px 3px 0 var(--ink);
+  }
+  .pager {
+    position: absolute; z-index: 30; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px;
+    background: var(--ink); padding: 7px 10px; box-shadow: 4px 4px 0 var(--fuchsia);
+  }
+  .pager button {
+    font: inherit; cursor: pointer; border: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+  }
+  .pager .arrow { font-family: var(--display); font-size: 16px; letter-spacing: .06em; padding: 5px 10px 3px; }
+  .pager .arrow:disabled { opacity: .3; cursor: default; }
+  .pager .dot { width: 13px; height: 13px; background: transparent; outline: 2px solid var(--paper); outline-offset: -2px; }
+  .pager .dot[aria-current="true"] { background: var(--fuchsia); outline-color: var(--fuchsia); transform: rotate(12deg) scale(1.25); }
+  .pager button:focus-visible, .home:focus-visible { outline: 3px solid var(--acid); outline-offset: 2px; }
+  .hint { font-family: var(--marker); font-size: 16px; opacity: .8; }
+
+  .wipe { position: absolute; inset: 0; z-index: 35; pointer-events: none; overflow: visible; }
+  .wipe path { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; stroke-dashoffset: 1.01; }
+
+  /* waiting to be pasted on / scribbled in (set and cleared by script, so nothing stays hidden if animation is off) */
+  .tile.off { opacity: 0; }
+  .tile.big { transform: scale(1.9) rotate(calc(var(--r) + 20deg)); position: relative; z-index: 1; }
+  .rv.off { color: transparent; background-color: transparent; box-shadow: none; }
+  .rv.off > :not(.scr) { opacity: 0; }
+
+  /* ---------- stop-motion ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .tile b { animation: jig 2.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -310ms); }
+    @keyframes jig {
+      0% { transform: rotate(-1.6deg); }
+      33% { transform: rotate(1.3deg) translateY(-1px); }
+      66% { transform: rotate(-.4deg) translateX(1px); }
+    }
+    @keyframes paste {
+      from { opacity: 0; transform: scale(2.4) rotate(calc(var(--r) + 24deg)); }
+      to { opacity: 1; transform: rotate(var(--r)); }
+    }
+    .scene.leaving .tile { animation: drop .55s cubic-bezier(.55, 0, .9, .45) forwards; animation-delay: calc(var(--i) * 16ms); }
+    @keyframes drop {
+      from { transform: rotate(var(--r)); }
+      to { transform: translateY(115vh) rotate(var(--spin)); }
+    }
+    @keyframes scrib {
+      0% { stroke-dashoffset: 1.01; animation-timing-function: steps(5); }
+      45% { stroke-dashoffset: 0; }
+      55% { stroke-dashoffset: 0; animation-timing-function: steps(5); }
+      100% { stroke-dashoffset: -1.01; }
+    }
+    .note { animation: jig 3.2s ease-in-out infinite alternate; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scr { display: none; }
+    .robot { filter: drop-shadow(3px 0 0 var(--paper)) drop-shadow(-3px 0 0 var(--paper)) drop-shadow(0 3px 0 var(--paper)) drop-shadow(0 -3px 0 var(--paper)); }
+  }
+
+  /* ===== about page: text beside taped-up photos with marker outlines ===== */
+  @media (max-width: 759px) { .scene .inner { padding-bottom: 96px !important; } }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 30px 44px; align-items: center; }
+  .split .col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  @media (min-width: 900px) { .split { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); } }
+  .stats3 { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+  .snap {
+    position: relative; margin: 14px auto; width: min(100%, 470px);
+    background: var(--p-paper, #efe9dc); padding: 10px 10px 40px;
+    box-shadow: 6px 8px 0 var(--ink);
+    transform: rotate(var(--tilt, -2deg));
+  }
+  .scene:nth-of-type(even) .snap { --tilt: 2.2deg; }
+  .snap img { display: block; width: 100%; height: auto; filter: contrast(1.08) saturate(1.1); }
+  .snap figcaption { position: absolute; left: 14px; right: 14px; bottom: 8px; font-family: var(--marker); font-size: 19px; line-height: 1.1; color: var(--ink); text-align: center; transform: rotate(-1.5deg); }
+  .snap::before, .snap::after {            /* masking tape on two corners */
+    content: ""; position: absolute; width: 92px; height: 26px; z-index: 3;
+    background: rgba(242, 233, 78, .78); box-shadow: 0 1px 0 rgba(0, 0, 0, .2);
+  }
+  .snap::before { left: -24px; top: 10px; transform: rotate(-38deg); }
+  .snap.off::before, .snap.off::after { opacity: 0; }   /* tape arrives with the photo */
+  .snap::after { right: -24px; bottom: 26px; transform: rotate(-38deg); background: rgba(255, 31, 157, .72); }
+  .scrawl { position: absolute; left: -22px; top: -22px; pointer-events: none; overflow: visible; z-index: 2; }
+  .scrawl path { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; stroke-dashoffset: 1.01; }
+  @keyframes scrawl-in { from { stroke-dashoffset: 1.01; } to { stroke-dashoffset: 0; } }
+  .steps3 { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .steps3 li { background: var(--card); color: var(--cardfg); padding: 9px 12px 7px; font-size: 15px; line-height: 1.4; box-shadow: 4px 5px 0 var(--pop); }
+  .steps3 li b { display: block; font-family: var(--display); font-weight: 400; letter-spacing: .06em; font-size: 18px; color: var(--pop); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px 10px; margin: 0; padding: 0; list-style: none; }
+  .chips li { background: var(--card); color: var(--cardfg); font-size: 14px; padding: 5px 10px 3px; box-shadow: 3px 3px 0 var(--pop); }
+  .chips li:nth-child(odd) { transform: rotate(-1.5deg); }
+  .chips li:nth-child(even) { transform: rotate(1.2deg); }
+  .chain-tight li { flex-basis: 110px; }
+  /* mentors' names pasted into the thank-you line as letter tiles */
+  .tiles.mini { display: inline-flex; flex-wrap: nowrap; gap: 0 .35em; font-size: 1.3em; vertical-align: -.18em; margin: .15em .12em; }
+  .tiles.mini .word { gap: .07em; }
+  .tiles.mini .tile b { padding: .06em .14em .02em; min-width: .55em; }
+  .thanks { line-height: 2.1; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .chain-tight li b { font-size: 24px; }
+  .specs > div { grid-template-columns: minmax(84px, 8em) 1fr; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence id="boilNoise" type="fractalNoise" baseFrequency="0.022" numOctaves="1" seed="1" result="n"></feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="2.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+  </filter>
+</svg>
+
+<main class="deck" id="deck">
+  <a class="home" href="/" aria-label="Back to Team Overdrive 009"><img src="/assets/punk/logo.png" alt="" width="34" height="34"><span>&larr; HOME</span></a>
+  <div class="count" id="count" aria-live="polite">1/13</div>
+
+  <!-- 1: who we are -->
+  <section class="scene active" aria-label="We are Overdrive">
+    <div class="inner"><div class="copy"><div class="split">
+      <div class="col">
+        <p class="eyebrow rv">BD Somani International School · Bombay</p>
+        <h1 class="tiles" data-tiles="We are | Overdrive"></h1>
+        <p class="lede rv">We are OVERDRIVE, team 009, from BD Somani International School in Bombay. We are 10 students from grades 10 to 12, and 40% of our team are girls.</p>
+        <p class="rv">We compete in the National Robotics League (NRL), a national school robotics league with hundreds of teams and its finals at IIT Bombay.</p>
+      </div>
+      <figure class="snap rv">
+        <img src="/assets/punk/about/team.jpg" alt="The ten members of Overdrive 009 standing together in a classroom" width="512" height="384">
+        <figcaption>team overdrive 009</figcaption>
+      </figure>
+    </div></div></div>
+  </section>
+
+  <!-- 2: how we work -->
+  <section class="scene p-acid" aria-label="How we work">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">How we work</p>
+      <h2 class="tiles" data-tiles="Four departments"></h2>
+      <div class="grid2">
+        <div class="scrap rv"><h3>Drive</h3><p>Drives the robot in matches and plans our match strategy.</p></div>
+        <div class="scrap rv"><h3>Programming</h3><p>Writes the robot code, autonomous, simulator and RL controller.</p></div>
+        <div class="scrap rv"><h3>Mechanical</h3><p>Designs, builds and improves the robot and its mechanisms.</p></div>
+        <div class="scrap rv"><h3>Media</h3><p>Documents our season and runs our social media.</p></div>
+      </div>
+      <p class="note rv">Each department owns its part of the robot and the season, and we work across departments whenever a problem needs it.</p>
+    </div></div>
+  </section>
+
+  <!-- 3: what sets us apart -->
+  <section class="scene p-pink" aria-label="What sets us apart">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">What sets us apart</p>
+      <h2 class="tiles" data-tiles="Beyond the robot"></h2>
+      <p class="lede rv">We built tools beyond the robot itself: a full HYPERDRIVE simulator that runs in the browser and a small neural network, trained with reinforcement learning, that drives our autonomous routine and assists the driver in the match. We released the simulator to the whole NRL community.</p>
+      <div class="stats stats3">
+        <div class="stat rv"><strong>300+</strong><span>matches played on our simulator, as of October 2026</span></div>
+        <div class="stat rv"><strong>210</strong><span>weights in the neural network that drives our autonomous</span></div>
+        <div class="stat rv"><strong>2</strong><span>new NRL teams we helped start through BDASC</span></div>
+      </div>
+      <div class="btns rv"><a class="go" href="/simulator">See the simulator &rarr;</a></div>
+    </div></div>
+  </section>
+
+  <!-- 4: goals -->
+  <section class="scene p-ruled" aria-label="Our goals this season">
+    <div class="inner"><div class="copy"><div class="split">
+      <div class="col">
+        <p class="eyebrow rv">Our goals this season</p>
+        <h2 class="tiles" data-tiles="The plan"></h2>
+        <ol class="steps3">
+          <li class="rv"><b>01</b>Compete for the Engineering Portfolio and Innovation Showcase awards.</li>
+          <li class="rv"><b>02</b>Run a reliable autonomous routine for the Autonomous Skill Challenge.</li>
+          <li class="rv"><b>03</b>Keep sharing our tools and what we learn with other NRL teams.</li>
+        </ol>
+      </div>
+      <figure class="snap rv">
+        <img src="/assets/punk/about/sim-field.jpg" alt="Our robot on the HYPERDRIVE field in the Overdrive simulator" width="576" height="260">
+        <figcaption>practice before the venue</figcaption>
+      </figure>
+    </div></div></div>
+  </section>
+
+  <!-- 5: game strategy -->
+  <section class="scene p-sky" aria-label="Game strategy">
+    <div class="inner"><div class="copy"><div class="split">
+      <div class="col">
+        <p class="eyebrow rv">Game strategy</p>
+        <h2 class="tiles" data-tiles="Our game in | one minute"></h2>
+        <p class="rv">We win by scoring more than the other squad, and we also need ranking points (RP) to climb the leaderboard. In every qualification match we're chasing up to 6 RP:</p>
+        <dl class="specs">
+          <div class="rv"><dt>3 RP</dt><dd>for the win</dd></div>
+          <div class="rv"><dt>1 RP</dt><dd>Supercharge: 12 cores scored</dd></div>
+          <div class="rv"><dt>1 RP</dt><dd>Pattern: 36 star-pole points</dd></div>
+          <div class="rv"><dt>1 RP</dt><dd>Endgame: 25 points from space station + apex</dd></div>
+        </dl>
+        <p class="small rv">These are the regional thresholds from Table 4.5.2. The championship numbers are still TBD. Starburst mode switches on at 10 cores, or at 4 once we have scored a payload. Our partner changes every qualification match, so we build a plan that works alone and gets better with help.</p>
+      </div>
+      <figure class="snap rv">
+        <img src="/assets/punk/about/field-map.jpg" alt="Top-down map of the HYPERDRIVE field with the red and blue sides" width="308" height="273">
+        <figcaption>the field</figcaption>
+      </figure>
+    </div></div></div>
+  </section>
+
+  <!-- 6: match plan -->
+  <section class="scene p-ink" aria-label="Match plan">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Match plan</p>
+      <h2 class="tiles" data-tiles="Two and a half minutes"></h2>
+      <ol class="chain">
+        <li class="rv"><b>Pre-match</b><span>30-second huddle. Read the star map on the Trifron and say the order out loud. Each robot owns one star pole and one apex pole. No contact with the opponent.</span></li>
+        <li class="rv"><b>0:00–1:00</b><span>Build the count. Grab our 3 spike cores, then fetch from the source zone, 2 cores per trip, to our high poles.</span></li>
+        <li class="rv"><b>1:00–2:00</b><span>Star map. Once Starburst is on, fetch golden cores from our vault and build in the exact map order.</span></li>
+        <li class="rv"><b>2:00–2:30</b><span>Level up. At 1:55 the Strategist calls "Station." Climb, score 2 cores on the apex (+18), then Dock (8) or Balance (15).</span></li>
+      </ol>
+      <dl class="specs">
+        <div class="rv"><dt>Floor</dt><dd>6 cores on high poles (18) + Engage (3) = 21</dd></div>
+        <div class="rv"><dt>Target</dt><dd>6 high-pole cores (18) + one star map (29) + 2 apex cores (18) + Dock (8) = 73</dd></div>
+        <div class="rv"><dt>Stretch</dt><dd>Swap Dock for Balance = 80, plus the payload if it's built</dd></div>
+      </dl>
+      <p class="small rv">Score targets are per robot and are our estimates until we test them. Checkpoints: at 0:50, if the squad isn't at about 5 cores we stay on high poles; at 1:30, if a star map isn't within reach we switch back to high poles.</p>
+    </div></div>
+  </section>
+
+  <!-- 7: roles and fouls -->
+  <section class="scene p-grid" aria-label="Who does what">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Who does what</p>
+      <h2 class="tiles" data-tiles="Roles and fouls"></h2>
+      <div class="grid2">
+        <div class="scrap rv"><h3>Driver</h3><p>Drive, score and climb. Use the one-button macros and listen for the Strategist's calls.</p></div>
+        <div class="scrap rv"><h3>Human Player</h3><p>Keep the source zone stocked (max 6 cores there at once). Stay behind the wall line when our robot is in the source zone, and never touch our robot or golden cores.</p></div>
+        <div class="scrap rv"><h3>Strategist</h3><p>Read the map, run the checkpoints, watch the clock, and watch for fouls.</p></div>
+        <div class="scrap rv"><h3>Fouls hurt</h3><p>A Major Foul hands the other squad 15 points, more than our Dock. So: no contact inside an opponent's footprint, never dock on their station, never de-score their cores, enter their source zone or launch a core, and never pin anyone for more than 3 seconds.</p></div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- 8: RL policy -->
+  <section class="scene" aria-label="RL policy">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Software · RL policy</p>
+      <h2 class="tiles" data-tiles="A robot that | learns to drive"></h2>
+      <p class="rv">Our autonomous routine drives by dead reckoning, so every flaw in a real robot ends up as position error. A CORE only scores if it is released within about 0.4 in of the pole, and 1° of heading error over 100 in puts the robot 1.75 in to the side. So we trained two small neural networks with evolution strategies, on millions of simulated robots with random defects, then tested them in the full physics simulator.</p>
+      <div class="stats">
+        <div class="stat rv"><strong>84%</strong><span>less sideways drift after a turn (1.79 to 0.28 in)</span></div>
+        <div class="stat rv"><strong>27%</strong><span>less distance error out of a turn (0.63 to 0.46 in)</span></div>
+        <div class="stat rv"><strong>9.1</strong><span>average auto points a match, up from 8.2</span></div>
+        <div class="stat rv"><strong>19/20</strong><span>robots docked at the end of auto, up from 17</span></div>
+      </div>
+      <p class="small rv">The drive policy has 10 inputs, 16 hidden units and 2 outputs: 210 weights, 840 bytes of flash, under 50 µs per run on the robot's ESP32-S3.</p>
+    </div></div>
+  </section>
+
+  <!-- 9: RL lessons -->
+  <section class="scene p-acid" aria-label="What we learned">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Software · what we learned</p>
+      <h2 class="tiles" data-tiles="v2 failed. v3 won."></h2>
+      <p class="rv">Our first real test of v2 did worse than the simple time model we were trying to beat. Finding out why taught us more than any training run.</p>
+      <ol class="chain">
+        <li class="rv"><b>The problem</b><span>After a 90° turn the IMU read about -7 in/s while standing still</span></li>
+        <li class="rv"><b>Why it hurt</b><span>v2 trusted it, so it overshot forward and stopped short in reverse</span></li>
+        <li class="rv"><b>The fix</b><span>Measure the offset on tick 2, when the robot is still, and subtract it</span></li>
+        <li class="rv"><b>Robust</b><span>Retrain with random offsets of ±15 in/s</span></li>
+      </ol>
+      <dl class="specs">
+        <div class="rv"><dt>Time model</dt><dd>0.63 in average distance error (baseline)</dd></div>
+        <div class="rv"><dt>v2</dt><dd>2.03 in, worse than baseline</dd></div>
+        <div class="rv"><dt>v3, final</dt><dd>0.46 in: 27% less than the time model, 77% less than v2</dd></div>
+      </dl>
+      <p class="note rv">A policy trained on a perfect sensor learns to rely on it. Train with the noise the real robot has.</p>
+    </div></div>
+  </section>
+
+  <!-- 10: autonomous route -->
+  <section class="scene p-ruled" aria-label="Autonomous route">
+    <div class="inner"><div class="copy"><div class="split">
+      <div class="col">
+        <p class="eyebrow rv">Autonomous challenge</p>
+        <h2 class="tiles" data-tiles="The auto route"></h2>
+        <p class="rv">Three objectives: collect a CORE, score it on the High Pole, and finish balanced on the Space Station ramp. Our priority is consistency: one route that completes all three tasks reliably before adding anything else.</p>
+        <ol class="chain chain-tight">
+          <li class="rv"><b>1</b><span>Drive between the High Poles</span></li>
+          <li class="rv"><b>2</b><span>Turn and grab the spike CORE</span></li>
+          <li class="rv"><b>3</b><span>Reverse, turn and score on the High Pole</span></li>
+          <li class="rv"><b>4</b><span>Drive to the station set point</span></li>
+          <li class="rv"><b>5</b><span>Climb the ramp and balance</span></li>
+        </ol>
+        <p class="small rv">Full route: 23.5 s*, 7 of 10 runs*. In simulation the robot reached the High Pole but did not always stop in range, so we now align the CORE, not the robot body, using the arm's reach. Station balance is the priority: no optional action is attempted if it risks the balance.</p>
+        <p class="small rv">* Placeholder value, not yet measured.</p>
+      </div>
+      <figure class="snap rv">
+        <img src="/assets/punk/about/auto-route.jpg" alt="Map of the autonomous route on the red side of the field" width="538" height="478">
+        <figcaption>red side. blue is mirrored.</figcaption>
+      </figure>
+    </div></div></div>
+  </section>
+
+  <!-- 11: BDASC -->
+  <section class="scene p-pink" aria-label="BDASC outreach">
+    <div class="inner"><div class="copy">
+      <p class="eyebrow rv">Outreach</p>
+      <h2 class="tiles" data-tiles="BDASC"></h2>
+      <p class="lede rv">The BD Somani Applied STEM Collective began as an idea in our design class and was founded by Aditya Parikh, Arav Jain and Reza Merchant. It is now a STEM club open to every student at BD Somani, from grades 6 to 12, where members learn by building real engineering projects together.</p>
+      <div class="stats stats3">
+        <div class="stat rv"><strong>50+</strong><span>students impacted, up from 20 two years ago</span></div>
+        <div class="stat rv"><strong>6–12</strong><span>grades taking part in BDASC sessions</span></div>
+        <div class="stat rv"><strong>2</strong><span>new NRL teams that came out of BDASC</span></div>
+      </div>
+      <ul class="chips rv"><li>Electricity generating shoes</li><li>Phone lockers for less social media</li><li>Money trackers for farmers</li></ul>
+      <p class="rv">Our sessions gave two more groups of students at our school the confidence to enter NRL 2026. We helped them form their teams, and BDASC teaches any concept a new member needs, so nobody needs robotics experience to join.</p>
+    </div></div>
+  </section>
+
+  <!-- 12: Viora -->
+  <section class="scene p-sky" aria-label="Viora">
+    <div class="inner"><div class="copy"><div class="split">
+      <div class="col">
+        <p class="eyebrow rv">Changemakers challenge</p>
+        <h2 class="tiles" data-tiles="Viora"></h2>
+        <p class="rv">During one of our long lab sessions a team member fainted from a very common problem: dehydration. Viora is a saliva-based colour strip made with anthocyanins from red cabbage. They change colour with pH, so the strip explores whether changes in saliva can hint at dehydration. You compare the colour with a reference chart.</p>
+        <dl class="specs">
+          <div class="rv"><dt>Salt test</dt><dd>0% to 3% salt at pH 7: no colour change</dd></div>
+          <div class="rv"><dt>Saliva test</dt><dd>A clear colour difference between hydrated and dehydrated samples</dd></div>
+        </dl>
+        <p class="small rv">For students, engineers, athletes, outdoor workers and people in hot regions. Saliva is affected by food, drink, oral hygiene, time of day, exercise and illness, so Viora can indicate a possible change but cannot confirm dehydration on its own.</p>
+        <div class="btns rv"><a class="go" href="/viora">Read about Viora &rarr;</a></div>
+      </div>
+      <figure class="snap rv">
+        <img src="/assets/punk/about/viora-saliva.jpg" alt="Test tubes of saliva with the indicator, purple to blue, labelled by hours without water" width="431" height="317">
+        <figcaption>red cabbage vs. thirst</figcaption>
+      </figure>
+    </div></div></div>
+  </section>
+
+  <!-- 13: credits -->
+  <section class="scene p-ink" aria-label="Credits">
+    <div class="inner"><div class="copy"><div class="split">
+      <div class="col">
+        <p class="eyebrow rv">Credits</p>
+        <h2 class="tiles" data-tiles="Thank you"></h2>
+        <p class="lede rv thanks">We would like to express our sincere gratitude to <span class="sr">Navroz Sir</span><span class="tiles mini" data-tiles="Navroz Sir" aria-hidden="true"></span>, <span class="sr">Ms Samreen</span><span class="tiles mini" data-tiles="Ms Samreen" aria-hidden="true"></span> and <span class="sr">Mr Rohit</span><span class="tiles mini" data-tiles="Mr Rohit" aria-hidden="true"></span> for their invaluable guidance and support in helping us build our NRL robot.</p>
+        <p class="rv">We are truly grateful for their continuous encouragement and commitment towards BDASC, which has motivated us to keep learning, innovating, and pushing our boundaries in robotics.</p>
+        <div class="btns rv">
+          <a class="go" href="/robot">Meet the robot</a>
+          <a class="go alt" href="/sim">Open the simulator</a>
+        </div>
+      </div>
+      <figure class="snap rv">
+        <img src="/assets/punk/about/viora-beakers.jpg" alt="A row of beakers of red cabbage indicator in different colours on a lab bench" width="468" height="322">
+        <figcaption>long hours in the lab</figcaption>
+      </figure>
+    </div></div></div>
+  </section>
+
+  <svg class="wipe" id="wipe" aria-hidden="true"><path></path></svg>
+
+  <nav class="pager" aria-label="Cards">
+    <button class="arrow" id="prev" type="button" aria-label="Previous card">BACK</button>
+    <span id="dots" style="display:flex;gap:7px"></span>
+    <button class="arrow" id="next" type="button" aria-label="Next card">NEXT</button>
+  </nav>
+</main>
+
+<script type="module" src="/js/punk/about.js"></script>
