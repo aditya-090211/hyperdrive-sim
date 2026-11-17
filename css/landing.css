@@ -69,8 +69,6 @@ body.stage-on .still { opacity: 0; visibility: hidden; }
 .specs div:last-child, .facts div:last-child { border-bottom: 1px solid var(--line-2); }
 .specs dt, .facts dt { font: 600 11px/1.9 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .specs dd, .facts dd { margin: 0; font-size: 15px; line-height: 1.5; }
-.facts .tbd { color: var(--faint); font-size: 14px; }
-.facts .tbd::before { content: ''; display: inline-block; width: 22px; height: 1px; margin: 0 10px 4px 0; border-top: 1px dashed currentColor; vertical-align: middle; }
 /* real numbers only, set large */
 .figures { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: var(--s-6) 0 0; border-top: 1px solid var(--line-2); }
 .figures div { padding: var(--s-4) var(--s-3) 0 0; }
