@@ -9,6 +9,8 @@ var THREE;
   var word = document.getElementById('word');
   var stage = document.getElementById('stage');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var deck = document.getElementById('deck');
+  root.classList.add('js');   // shows the paper link tags on the lettering (see .js .pages in index.html)
 
   /* ---- fit the name wall to wall ---- */
   function fitTitle() {
@@ -16,7 +18,7 @@ var THREE;
     var avail = poster.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     root.style.setProperty('--ts', '100px');
     var w = word.getBoundingClientRect().width || 420;
-    var size = Math.min(avail * 0.97 / w * 100, poster.clientHeight * 0.4);
+    var size = Math.min(avail * 0.97 / w * 100, Math.min(poster.clientHeight, window.innerHeight) * 0.4);
     root.style.setProperty('--ts', size.toFixed(1) + 'px');
   }
   fitTitle();
@@ -174,8 +176,32 @@ var THREE;
     ok = true;
   }
 
+  /* the 009 sticker: in its old bottom-right corner beside the deck when the deck's text and buttons fit to its
+     left, otherwise lifted to sit just above the deck */
+  var num = poster.querySelector('.num'), acts = deck && deck.querySelector('.acts');
+  function placeNum() {
+    if (!deck || !num) return;
+    deck.style.paddingRight = '';
+    var stacked = getComputedStyle(deck).gridRowStart !== '4', foot, beside;
+    function fits() {
+      foot = num.offsetWidth + parseFloat(getComputedStyle(num).right) - parseFloat(getComputedStyle(poster).paddingRight) + 24;
+      return !stacked && deck.clientWidth - foot >= acts.offsetWidth + 22 + 290;
+    }
+    poster.classList.remove('num-small');
+    beside = fits();
+    if (!beside && !stacked && poster.clientWidth >= 700) {   // a slightly smaller sticker often makes room
+      poster.classList.add('num-small');
+      beside = fits();                                        // (if not, the smaller sticker still covers less when lifted)
+    }
+    poster.classList.toggle('num-beside', beside);
+    if (beside) deck.style.paddingRight = foot + 'px';
+    var lift = beside || stacked ? 0 : Math.round(poster.getBoundingClientRect().bottom - deck.getBoundingClientRect().top);
+    poster.style.setProperty('--deck-h', lift + 'px');
+  }
+
   function resize() {
     fitTitle();
+    placeNum();
     var w = stage.clientWidth, h = stage.clientHeight;
     if (!w || !h) return;
     stageRect = null;
@@ -197,7 +223,8 @@ var THREE;
 
   /* ---- pointer tracking ---- */
   var tx = 0, ty = 0, lastMove = -1e9;
-  var stageRect = null;                                  // cached in resize(); the poster never scrolls
+  var stageRect = null;                                  // cached; dropped on resize and on scroll (short landscape screens scroll)
+  window.addEventListener('scroll', function () { stageRect = null; }, { passive: true });
   function onPointer(e) {
     var r = stageRect || (stageRect = stage.getBoundingClientRect());
     var cx = r.left + (geom.cx || r.width / 2), cy = r.top + (geom.cy || r.height / 2);
@@ -321,7 +348,7 @@ var THREE;
       var avail = h - m;
       R = Math.min(0.6 * a, 0.24 * avail); g = R * 1.1;
       var free = Math.max(60, avail - 2 * g);
-      var tS = 0.28 * free, tA = 0.28 * free, tR = 0.32 * free, gap = 0.05 * free;
+      var tS = 0.28 * free, tA = 0.28 * free, tR = 0.27 * free, gap = 0.05 * free;   // room under OUR ROBOT for its tag
       cx = a; cy = m + tS + g;
       var xw = Math.min(a - 8, 2.4 * g);
       var amp2 = 0.07 * tA, k2 = 2 * Math.PI / (1.3 * xw);
@@ -346,6 +373,46 @@ var THREE;
         return p[0].toFixed(1) + ',' + p[1].toFixed(1);
       }).join(' ');
       hits.querySelector('a[data-key="' + wd.key + '"] polygon').setAttribute('points', pts);
+    });
+    placeTags(w >= h * 1.8);
+  }
+
+  /* paper tags naming each block of lettering as a link: pinned to an edge of its region, clamped inside the
+     stage; a spot that would cover the robot head, its name tag, the 009 sticker or another tag gives way to the
+     next spot in the list */
+  var robby = stage.querySelector('.robby');
+  function placeTags(wide) {
+    // [edge, position along it, then a shift in half-widths / half-heights of the tag]
+    var spots = wide
+      ? { simulator: [['bot', 0.3, 0, 0.7]], about: [['bot', 0, -0.9, -0.8]], robot: [['bot', 0.25, 0, 0.7]] }
+      : { simulator: [['bot', 0.08, 0.6, 0.5]],
+          about: [['top', 0.95, -0.6, -0.2], ['bot', 1, -1, -0.75], ['bot', 0, 1, -0.75]],
+          robot: [['bot', 0.45, 0, 0.75], ['bot', 0, 1, 0.75]] };
+    var R = geom.R, sx = stage.offsetLeft, sy = stage.offsetTop;
+    function box(el) { return { x: el.offsetLeft - sx + el.offsetWidth / 2, y: el.offsetTop - sy + el.offsetHeight / 2, hw: el.offsetWidth / 2, hh: el.offsetHeight / 2 }; }
+    var avoid = [];
+    if (robby) avoid.push({ x: geom.cx, y: geom.cy + R * 0.74, hw: robby.offsetWidth / 2, hh: robby.offsetHeight / 2 });
+    if (num && getComputedStyle(num).display !== 'none') avoid.push(box(num));
+    function clear(x, y, hw, hh) {
+      var dx = Math.max(Math.abs(x - geom.cx) - hw, 0), dy = Math.max(Math.abs(y - geom.cy) - hh, 0);
+      if (Math.sqrt(dx * dx + dy * dy) < 0.8 * R) return false;                          // over the head
+      return avoid.every(function (b) { return Math.abs(x - b.x) >= hw + b.hw || Math.abs(y - b.y) >= hh + b.hh; });
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('#pages a'), function (aEl) {
+      var key = aEl.getAttribute('data-key'), r = geom.regions[key], list = spots[key];
+      if (!r || !list) return;
+      var hw = (aEl.offsetWidth || 120) / 2 + 6, hh = (aEl.offsetHeight || 40) / 2 + 4, x, y, first;
+      for (var i = 0; i < list.length; i++) {
+        var s = list[i], edge = r[s[0]], p = edge[Math.round((edge.length - 1) * s[1])];
+        x = Math.max(hw, Math.min(geom.w - hw, p[0] + s[2] * hw));
+        y = Math.max(hh, Math.min(geom.h - hh, p[1] + s[3] * hh));
+        if (!first) first = [x, y];
+        if (clear(x, y, hw - 6, hh - 4)) { first = null; break; }
+      }
+      if (first) { x = first[0]; y = first[1]; }                                        // nothing clear: first choice
+      avoid.push({ x: x, y: y, hw: hw - 6, hh: hh - 4 });
+      aEl.style.setProperty('--x', x.toFixed(1) + 'px');
+      aEl.style.setProperty('--y', y.toFixed(1) + 'px');
     });
   }
 

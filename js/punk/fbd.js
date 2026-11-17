@@ -152,11 +152,15 @@ function list(key, rows) {
 }
 function setList(key, rows) {      // update values in place once the list exists (keeps the scribble reveal sizes)
   const dl = $(`[data-list="${key}"]`);
-  if (!dl.children.length) { list(key, rows); return; }
+  // build it when it is empty, or rebuild it if the card's reveal has not left the expected rows in place
+  // (a deep link straight to a diagram card reveals it before its first values are written)
+  const fits = dl.children.length === rows.length && [...dl.children].every((row) => row.querySelector('dd b'));
+  if (!fits) { dl.replaceChildren(); list(key, rows); return; }
   rows.forEach(([, dd, src], i) => {
     const row = dl.children[i];
     row.querySelector('dd b').textContent = dd;
-    if (src) row.querySelector('dd .small').textContent = ' ' + src;
+    const note = row.querySelector('dd .small');
+    if (src && note) note.textContent = ' ' + src;
   });
 }
 // a slider that the page's own arrow-key / swipe card navigation leaves alone
@@ -403,10 +407,10 @@ function sideScene(svg, Nf, Nr, extra) {
       text(svg, c[0] + 12, c[1] + W * k + 4, 'W ' + N(W), 'v halo');
       const nr = [rc[0] - n[0] * (s.Nr * k + 6), rc[1] - n[1] * (s.Nr * k + 6)];
       text(svg, nr[0] + 8, nr[1] + 2, 'N rear ' + N(s.Nr), 's halo');
-      text(svg, 14, 30, 'θ ' + deg(th), 'v halo');
-      text(svg, 14, 54, 'W sinθ ' + N(s.along), 's halo');
-      text(svg, 14, 76, 'W cosθ ' + N(s.normal), 's halo');
-      text(svg, 14, 98, 'friction needed ' + N(s.along), 's halo');
+      text(svg, 40, 36, 'θ ' + deg(th), 'v halo');
+      text(svg, 40, 60, 'W sinθ ' + N(s.along), 's halo');
+      text(svg, 40, 82, 'W cosθ ' + N(s.normal), 's halo');
+      text(svg, 40, 104, 'friction needed ' + N(s.along), 's halo');
     });
     setList('slope', [
       ['Along the slope', N(s.along), 'W sin θ'],

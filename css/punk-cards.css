@@ -1,0 +1,99 @@
+/* punk-cards.css: getting round the card-by-card poster pages (/simulator, /about, /robot), with js/punk/cards-nav.js.
+   Uses each page's own tokens (--ink, --paper, --fuchsia, --acid, --display, --marker, --type) and its sticker look.
+   Loaded after the page's own <style>, so the same selectors win here. */
+
+/* the site bar (js/punk/nav.js, css/punk-nav.css) sits in flow above the deck and sets --nav-h; punk-nav.css
+   shortens the deck by it, so the cards, the bar along the bottom and the contents list all start below it.
+   Without the bar --nav-h is unset and these fall back to 0. */
+
+/* a sideways swipe means "next / previous card", not the browser's swipe-to-go-back */
+html, body { overscroll-behavior: none; }
+
+/* ---- squares: each is a 24 px tap target with the small square drawn inside it; the title is its name and tooltip ---- */
+.pager #dots { gap: 0 !important; }
+.pager .dot, .pager .dot[aria-current="true"] {
+  position: relative; flex: none; width: 24px; height: 24px;
+  background: transparent; outline: 0; transform: none;
+}
+.pager .dot::before {
+  content: ""; position: absolute; left: 5.5px; top: 5.5px; width: 13px; height: 13px;
+  outline: 2px solid var(--paper); outline-offset: -2px;
+}
+.pager .dot[aria-current="true"]::before { background: var(--fuchsia); outline-color: var(--fuchsia); transform: rotate(12deg) scale(1.25); }
+.pager .dot:hover::before { outline-color: var(--acid); }
+.pager .dot[aria-current="true"]:hover::before { outline-color: var(--fuchsia); }
+.pager .dot:focus-visible { outline: 3px solid var(--acid); outline-offset: -1px; }
+
+/* ---- CONTENTS sticker ---- */
+.pager .toc-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--display); font-size: 16px; letter-spacing: .06em; line-height: 1.4;
+  padding: 5px 10px 3px; background: var(--acid); color: var(--ink);
+  transform: rotate(-2deg); box-shadow: 2px 2px 0 var(--paper);
+}
+.pager .toc-btn:hover, .pager .toc-btn[aria-expanded="true"] { background: var(--fuchsia); color: var(--ink); }
+.pager .toc-btn .ico {
+  width: 13px; height: 11px; flex: none; margin-top: -2px;
+  background: linear-gradient(currentColor 0 0) 0 0 / 100% 3px no-repeat,
+              linear-gradient(currentColor 0 0) 0 50% / 80% 3px no-repeat,
+              linear-gradient(currentColor 0 0) 0 100% / 100% 3px no-repeat;
+}
+
+/* ---- the contents list: a sheet of paper taped above the bar ---- */
+.toc {
+  position: absolute; z-index: 5; left: 50%; bottom: calc(100% + 18px);
+  width: min(440px, calc(100vw - 32px));
+  transform: translateX(-50%) rotate(-.6deg);
+  background: var(--paper); color: var(--ink);
+  padding: 16px 12px 12px;
+  box-shadow: 6px 8px 0 var(--fuchsia);
+  font-family: var(--type); text-align: left;
+}
+.toc[hidden] { display: none; }
+.toc::before {                                      /* tape */
+  content: ""; position: absolute; left: 50%; top: -12px; width: 110px; height: 26px; margin-left: -55px;
+  background: rgba(242, 233, 78, .82); box-shadow: 0 1px 0 rgba(0, 0, 0, .2); transform: rotate(-3deg); pointer-events: none;
+}
+.toc-h { margin: 0 4px 8px; max-width: none; font-family: var(--marker); font-size: 20px; line-height: 1.1; color: var(--fuchsia-deep); display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.toc-h span { font-family: var(--type); font-size: 13px; color: var(--ink); opacity: .75; }
+.toc-scroll {
+  max-height: calc(100vh - var(--nav-h, 0px) - 170px); max-height: calc(100dvh - var(--nav-h, 0px) - 170px);
+  overflow-y: auto; overscroll-behavior: contain; padding: 2px 6px 6px 2px;
+}
+.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.toc a {
+  display: grid; grid-template-columns: 2.1em minmax(0, 1fr) auto; align-items: baseline; gap: 10px;
+  padding: 7px 10px 5px; min-height: 40px; text-decoration: none; color: var(--ink);
+  font-family: var(--display); font-size: 17px; line-height: 1.2; letter-spacing: .03em; text-transform: uppercase;
+}
+.toc a .n { font-family: var(--type); font-size: 13px; letter-spacing: 0; }
+.toc a .t { overflow-wrap: anywhere; }
+.toc a:hover { background: var(--acid); box-shadow: 3px 3px 0 var(--ink); }
+.toc a:focus-visible { outline: 3px solid var(--ink); outline-offset: -3px; background: var(--acid); }
+.toc a[aria-current="true"] { background: var(--ink); color: var(--paper); box-shadow: 3px 3px 0 var(--fuchsia); transform: rotate(-.8deg); }
+.toc a[aria-current="true"]:focus-visible { outline-color: var(--acid); }
+.toc a[aria-current="true"] .here::after { content: "you are here"; font-family: var(--marker); font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--acid); white-space: nowrap; }
+
+.tiles[tabindex="-1"]:focus { outline: none; }     /* a jump from the list lands focus on the card's headline */
+
+@media (prefers-reduced-motion: no-preference) {
+  .toc:not([hidden]) { animation: toc-in .18s steps(3) both; }
+  @keyframes toc-in { from { opacity: 0; transform: translateX(-50%) translateY(14px) rotate(2deg); } }
+}
+
+/* ---- phones: squares on their own row above BACK / CONTENTS / NEXT ---- */
+@media (max-width: 640px) {
+  .pager { flex-wrap: wrap; justify-content: space-between; row-gap: 9px; column-gap: 8px; padding: 8px 9px; width: max-content; max-width: calc(100vw - 24px); }
+  .pager #dots { order: -1; flex: 1 0 100%; justify-content: center; flex-wrap: wrap; }
+  .pager .dot::before { left: 6px; top: 6px; width: 12px; height: 12px; }
+  .pager .toc-btn { order: 1; }
+  .pager #next { order: 2; }
+  .pager .toc-btn, .pager #prev, .pager #next { font-size: 15px; padding: 6px 10px 4px; }
+  .toc-scroll { max-height: calc(100vh - var(--nav-h, 0px) - 220px); max-height: calc(100dvh - var(--nav-h, 0px) - 220px); }
+}
+/* too narrow for a row of 24 px squares: two rows of seven, and the cards keep clear of the taller bar */
+@media (max-width: 400px) {
+  .pager #dots { display: grid !important; grid-template-columns: repeat(7, 24px); justify-content: center; }
+  .deck .scene:not([data-robot]) .inner, .deck .scene[data-robot="center"] .inner { padding-bottom: 136px !important; }
+  .toc-scroll { max-height: calc(100vh - var(--nav-h, 0px) - 250px); max-height: calc(100dvh - var(--nav-h, 0px) - 250px); }
+}

@@ -1,6 +1,8 @@
 // robot.js: poster page script (moved out of the HTML so the site's Content-Security-Policy allows it)
 // three.js and the CAD are lazy-loaded by robot-3d.js once the model is near the viewport
 import { loadKit, toonify, disposeAll } from '/js/punk/robot-3d.js';
+// contents list, squares, deep links (#fbd-standing) and wheel/swipe/keys: js/punk/cards-nav.js
+import { cardsNav } from '/js/punk/cards-nav.js';
 var THREE, loadRobotModel, buildRobotVisual, TRAY;
 
 
@@ -114,19 +116,45 @@ var THREE, loadRobotModel, buildRobotVisual, TRAY;
   /* ---- pager ---- */
   var dots = document.getElementById('dots'), count = document.getElementById('count');
   var prev = document.getElementById('prev'), next = document.getElementById('next');
-  scenes.forEach(function (sc, i) {
-    var b = document.createElement('button');
-    b.type = 'button'; b.className = 'dot';
-    b.setAttribute('aria-label', (i + 1) + ': ' + sc.getAttribute('aria-label'));
-    b.addEventListener('click', function () { go(i); });
-    dots.appendChild(b);
+  // the robot is Aryan everywhere you pick a card; keyed like STEPS (data-step, else aria-label)
+  var nav = cardsNav({
+    scenes: scenes, deck: deck, dots: dots, pager: dots.parentNode, reduce: reduce,
+    go: function (n) { go(n); }, cur: function () { return cur; }, busy: function () { return busy; },
+    titles: {
+      'Meet Aryan': 'Meet Aryan',
+      'Drive system': "Aryan's drive system",
+      'Arm': "Aryan's arm",
+      'Grabber': "Aryan's grabber",
+      'Cargo tray': "Aryan's cargo tray",
+      'Electronics': "Aryan's electronics",
+      'By the numbers': 'Aryan by the numbers',
+      'Free body diagram: standing still': 'Free body diagram: Aryan standing still',
+      'Free body diagram: flat out': 'Free body diagram: Aryan flat out',
+      'Free body diagram: arm holding a CORE': "Free body diagram: Aryan's arm holding a CORE",
+      'Free body diagram: on the Space Station': 'Free body diagram: Aryan on the Space Station',
+      'Fixing the grabber': "Fixing Aryan's grabber",
+      'Spec sheet': "Aryan's spec sheet"
+    },
+    slugs: {
+      'Meet Aryan': 'aryan',
+      'Drive system': 'drive',
+      'Arm': 'arm-design',                 // plain "arm" is an element id on the page
+      'Cargo tray': 'tray',
+      'By the numbers': 'numbers',
+      'Free body diagram: standing still': 'fbd-standing',
+      'Free body diagram: flat out': 'fbd-flat-out',
+      'Free body diagram: arm holding a CORE': 'fbd-arm',
+      'Free body diagram: on the Space Station': 'fbd-space-station',
+      'Fixing the grabber': 'grabber-fix',
+      'Spec sheet': 'specs'
+    },
+    // any free body diagram card added later still gets an fbd-... slug
+    slug: function (label) { var m = /^free body diagram:\s*(.+)$/i.exec(label); return m ? 'fbd-' + m[1] : ''; }
   });
   function chrome() {
     count.textContent = (cur + 1) + '/' + scenes.length;
     prev.disabled = cur === 0; next.disabled = cur === scenes.length - 1;
-    Array.prototype.forEach.call(dots.children, function (d, i) {
-      if (i === cur) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current');
-    });
+    nav.update(cur);
   }
   prev.addEventListener('click', function () { go(cur - 1); });
   next.addEventListener('click', function () { go(cur + 1); });
@@ -158,36 +186,7 @@ var THREE, loadRobotModel, buildRobotVisual, TRAY;
     }, 220);
   }
 
-  /* ---- input: wheel, keys, swipe. Never a scrolling page. ---- */
-  function canScroll(dir) {
-    var el = scenes[cur].querySelector('.inner');
-    if (dir > 0) return el.scrollTop + el.clientHeight < el.scrollHeight - 2;
-    return el.scrollTop > 1;
-  }
-  window.addEventListener('wheel', function (e) {
-    if (busy || performance.now() < lockUntil || Math.abs(e.deltaY) < 18) return;
-    var dir = e.deltaY > 0 ? 1 : -1;
-    if (canScroll(dir)) { lockUntil = performance.now() + 350; return; }
-    lockUntil = performance.now() + 700;
-    go(cur + dir);
-  }, { passive: true });
-  window.addEventListener('keydown', function (e) {
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    var k = e.key;
-    if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && e.target === document.body)) { e.preventDefault(); go(cur + 1); }
-    else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); go(cur - 1); }
-    else if (k === 'Home') go(0);
-    else if (k === 'End') go(scenes.length - 1);
-  });
-  var ty0 = null, tx0 = 0;
-  window.addEventListener('touchstart', function (e) { ty0 = e.touches[0].clientY; tx0 = e.touches[0].clientX; }, { passive: true });
-  window.addEventListener('touchend', function (e) {
-    if (ty0 === null) return;
-    var dy = ty0 - e.changedTouches[0].clientY, dx = tx0 - e.changedTouches[0].clientX;
-    ty0 = null;
-    if (Math.abs(dy) > 60 && Math.abs(dy) > Math.abs(dx)) { var dir = dy > 0 ? 1 : -1; if (!canScroll(dir)) go(cur + dir); }
-    else if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx > 0 ? 1 : -1));
-  }, { passive: true });
+  /* input (wheel, keys, swipe; never a scrolling page; a tall card scrolls first) lives in cards-nav.js */
 
   /* ---- boil: re-seed the wobble a few times a second so lines never sit still ---- */
   var noise = document.getElementById('boilNoise'), seed = 1;
@@ -447,8 +446,9 @@ var THREE, loadRobotModel, buildRobotVisual, TRAY;
     if (onScreen) start3d();
   });
 
-  /* ---- start ---- */
-  dress(scenes[0]);
+  /* ---- start (on the card the URL names, if any) ---- */
+  if (nav.start) { scenes[0].classList.remove('active'); cur = nav.start; scenes[cur].classList.add('active'); }
+  dress(scenes[cur]);
   chrome();
   placeRobot();
   window.addEventListener('resize', function () { ac = null; sizeRobot(); });

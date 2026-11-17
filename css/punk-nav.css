@@ -1,0 +1,155 @@
+/* OVERDRIVE 009 site bar: one strip of black tape across the top of every content page (home, /simulator, /about,
+   /robot and Viora). Built by js/punk/nav.js. The bar sits in normal flow at the top of <body> and is exactly
+   --nav-h tall, so pages that fill the screen (the poster and the card decks) only need to subtract it. */
+@font-face { font-family: 'Anton'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/anton.woff2') format('woff2'); }
+@font-face { font-family: 'Permanent Marker'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/permanent-marker.woff2') format('woff2'); }
+@font-face { font-family: 'Special Elite'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/special-elite.woff2') format('woff2'); }
+
+/* --nav-h is only defined once the bar is on the page, so pages can write var(--nav-h, 0px) and nothing changes
+   without JavaScript */
+:root { --nav-bar: 56px; }
+@media (max-width: 719px) { :root { --nav-bar: 52px; } }
+html:has(body > .sn) { --nav-h: calc(var(--nav-bar) + env(safe-area-inset-top, 0px)); }
+
+/* full-screen pages: the poster and the card decks give the bar its height back */
+body:has(> .sn) > main.deck,
+body:has(> .sn) > main.poster { height: calc(100% - var(--nav-h)); }
+/* Viora: its own sticky header parks under the bar instead of under the top of the window */
+body:has(> .sn) header.top { top: var(--nav-h); }
+html:has(body > .sn) { scroll-padding-top: var(--nav-h); }
+
+.sn {
+  --sn-ink: #121013; --sn-asphalt: #232024; --sn-fuchsia: #ff1f9d; --sn-fuchsia-deep: #b3006a;
+  --sn-paper: #efe9dc; --sn-acid: #f2e94e; --sn-sky: #74c8ee;
+  --sn-display: 'Anton', 'Haettenschweiler', 'Impact', 'Arial Narrow Bold', sans-serif;
+  --sn-marker: 'Permanent Marker', 'Marker Felt', 'Comic Sans MS', cursive;
+  --sn-type: 'Special Elite', 'American Typewriter', 'Courier New', monospace;
+  position: sticky; top: 0; z-index: 45;
+  box-sizing: border-box; height: var(--nav-h); width: 100%;
+  padding: env(safe-area-inset-top, 0px) max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px));
+  display: flex; align-items: center; gap: 10px;
+  background: var(--sn-ink); color: var(--sn-paper);
+  border-bottom: 3px solid var(--sn-fuchsia);
+  font-family: var(--sn-display); font-weight: 400; font-size: 17px; line-height: 1;
+  font-synthesis: none; -webkit-tap-highlight-color: transparent;
+}
+.sn *, .sn *::before, .sn *::after { box-sizing: border-box; }
+.sn a { color: inherit; text-decoration: none; }
+.sn :focus-visible { outline: 3px solid var(--sn-acid); outline-offset: 2px; }
+
+/* logo: a round paper badge, as on the home poster */
+.sn-brand { display: flex; align-items: center; gap: 10px; flex: none; min-width: 0; padding: 4px 6px 4px 0; }
+.sn-brand img {
+  width: 38px; height: 38px; flex: none; border-radius: 50%; background: #fff; object-fit: cover;
+  box-shadow: 0 0 0 2px var(--sn-ink), 3px 3px 0 2px var(--sn-fuchsia); transform: rotate(-6deg);
+}
+.sn-brand span { font-size: 21px; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.sn-brand b { font-weight: 400; color: var(--sn-acid); }
+.sn-brand[aria-current] span { color: var(--sn-acid); }
+
+.sn-right { margin-left: auto; display: flex; align-items: center; gap: 6px; min-width: 0; }
+
+/* Scout: the hot-pink sticker, taped on */
+.sn-scout {
+  position: relative; flex: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 19px; letter-spacing: .07em; text-transform: uppercase;
+  background: var(--sn-fuchsia); color: var(--sn-ink) !important;
+  padding: 7px 14px 5px; margin-right: 8px;
+  box-shadow: 3px 3px 0 var(--sn-paper);
+  transform: rotate(-2.5deg);
+}
+.sn-scout::before { /* masking tape */
+  content: ""; position: absolute; left: 50%; top: -6px; width: 30px; height: 10px;
+  background: rgba(239, 233, 220, .72); transform: translateX(-50%) rotate(5deg);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .25);
+}
+.sn-scout svg { width: 15px; height: 15px; flex: none; }
+.sn-scout[aria-current] { background: var(--sn-acid); }
+
+/* the other pages: words cut out of the poster */
+.sn-links { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 2px; }
+.sn-links a {
+  display: block; padding: 7px 9px 5px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+}
+.sn-links small { display: none; }
+.sn-links a[aria-current] { background: var(--sn-acid); color: var(--sn-ink); box-shadow: 2px 2px 0 var(--sn-fuchsia); transform: rotate(1.5deg); }
+.sn-links li:nth-child(even) a[aria-current] { transform: rotate(-1.5deg); }
+.sn-links .sn-sponsor a { font-family: var(--sn-marker); font-size: 16px; letter-spacing: .02em; text-transform: none; color: var(--sn-acid); }
+.sn-links .sn-sponsor a span { border-bottom: 2px dashed currentColor; padding-bottom: 1px; }
+
+.sn-menu { display: none; }
+.sn-scrim { display: none; }
+
+@media (hover: hover) {
+  .sn-links a:hover { background: var(--sn-paper); color: var(--sn-ink); transform: rotate(-2deg); }
+  .sn-links li:nth-child(even) a:hover { transform: rotate(2deg); }
+  .sn-links .sn-sponsor a:hover { background: var(--sn-acid); color: var(--sn-ink); }
+  .sn-scout:hover { background: var(--sn-acid); transform: rotate(1.5deg) scale(1.05); }
+  .sn-brand:hover img { transform: rotate(8deg); }
+}
+.sn-scout:active { transform: rotate(-2.5deg) translate(2px, 2px); box-shadow: 1px 1px 0 var(--sn-paper); }
+
+/* phones: logo, Scout and a menu button; the rest drops down as a stack of stickers */
+@media (max-width: 719px) {
+  .sn { gap: 8px; }
+  .sn-brand span { display: inline; font-size: 18px; }
+  .sn-scout { font-size: 18px; padding: 6px 12px 4px; margin-right: 6px; }
+  .sn-menu {
+    display: inline-flex; align-items: center; gap: 7px; flex: none;
+    font: inherit; font-size: 16px; letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+    min-height: 40px; padding: 6px 10px 4px; border: 0; border-radius: 0;
+    background: var(--sn-paper); color: var(--sn-ink); box-shadow: 2px 2px 0 var(--sn-sky); transform: rotate(1.5deg);
+  }
+  .sn-menu i { position: relative; display: block; width: 16px; height: 2px; background: currentColor; }
+  .sn-menu i::before, .sn-menu i::after { content: ""; position: absolute; left: 0; width: 16px; height: 2px; background: currentColor; }
+  .sn-menu i::before { top: -5px; } .sn-menu i::after { top: 5px; }
+  .sn-menu[aria-expanded="true"] { background: var(--sn-acid); }
+  .sn-menu[aria-expanded="true"] i { background: transparent; }
+  .sn-menu[aria-expanded="true"] i::before { top: 0; transform: rotate(45deg); }
+  .sn-menu[aria-expanded="true"] i::after { top: 0; transform: rotate(-45deg); }
+
+  .sn-links {
+    display: none;
+    position: fixed; z-index: 2; left: 0; right: 0; top: var(--nav-h);
+    max-height: calc(100vh - var(--nav-h)); max-height: calc(100dvh - var(--nav-h)); overflow-y: auto; overscroll-behavior: contain;
+    flex-direction: column; align-items: stretch; gap: 14px;
+    padding: 20px max(18px, env(safe-area-inset-right, 0px)) max(26px, env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+    background: var(--sn-asphalt); border-bottom: 3px solid var(--sn-fuchsia);
+    background-image: linear-gradient(rgba(239, 233, 220, .05) 1px, transparent 1px); background-size: 100% 28px;
+  }
+  .sn.open .sn-links { display: flex; }
+  .sn-links a, .sn-links .sn-sponsor a {
+    display: flex; flex-direction: column; gap: 4px; padding: 10px 14px 8px;
+    font-family: var(--sn-display); font-size: 26px; letter-spacing: .05em; text-transform: uppercase;
+    background: var(--sn-paper); color: var(--sn-ink); box-shadow: 4px 5px 0 var(--sn-ink);
+    transform: rotate(-1deg);
+  }
+  .sn-links li:nth-child(even) a { transform: rotate(1.2deg); margin-left: 10px; }
+  .sn-links li:nth-child(3n) a { background: var(--sn-sky); }
+  .sn-links small { display: block; font-family: var(--sn-type); font-size: 13px; letter-spacing: .04em; text-transform: none; opacity: .85; }
+  .sn-links a[aria-current], .sn-links li:nth-child(even) a[aria-current] { background: var(--sn-acid); box-shadow: 4px 5px 0 var(--sn-fuchsia); }
+  .sn-links .sn-sponsor a { background: var(--sn-fuchsia); color: var(--sn-ink); }
+  .sn-links .sn-sponsor a span { border: 0; padding: 0; }
+  .sn-scrim { position: fixed; inset: var(--nav-h) 0 0; z-index: 1; background: rgba(18, 16, 19, .62); }
+  .sn.open .sn-scrim { display: block; }
+}
+@media (max-width: 719px) and (hover: hover) {
+  .sn-links a:hover, .sn-links li:nth-child(even) a:hover { background: var(--sn-acid); color: var(--sn-ink); }
+}
+/* the narrowest phones: the badge alone carries the name */
+@media (max-width: 399px) {
+  .sn-brand span { display: none; }
+  .sn-scout { padding: 6px 10px 4px; }
+  .sn-scout svg { display: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sn-links a, .sn-scout, .sn-brand img { transition: transform .16s cubic-bezier(.2, 1.5, .4, 1), background-color .12s; }
+  @media (max-width: 719px) {
+    .sn.open .sn-links li { animation: sn-slap .32s cubic-bezier(.2, 1.4, .4, 1) backwards; animation-delay: calc(var(--i, 0) * 40ms); }
+    @keyframes sn-slap { from { opacity: 0; transform: translateY(-14px) rotate(-4deg); } }
+  }
+}
+
+@media print { .sn { display: none; } body > main.deck, body > main.poster { height: auto; } }

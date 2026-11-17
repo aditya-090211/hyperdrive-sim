@@ -1,4 +1,6 @@
 // about.js: poster page script (moved out of the HTML so the site's Content-Security-Policy allows it)
+// contents list, squares, deep links (#sponsors) and wheel/swipe/keys: js/punk/cards-nav.js
+import { cardsNav } from '/js/punk/cards-nav.js';
 
 (function () {
   var root = document.documentElement;
@@ -111,19 +113,15 @@
   /* ---- pager ---- */
   var dots = document.getElementById('dots'), count = document.getElementById('count'), announce = document.getElementById('announce');
   var prev = document.getElementById('prev'), next = document.getElementById('next');
-  scenes.forEach(function (sc, i) {
-    var b = document.createElement('button');
-    b.type = 'button'; b.className = 'dot';
-    b.setAttribute('aria-label', (i + 1) + ': ' + sc.getAttribute('aria-label'));
-    b.addEventListener('click', function () { go(i); });
-    dots.appendChild(b);
+  var nav = cardsNav({
+    scenes: scenes, deck: deck, dots: dots, pager: dots.parentNode, reduce: reduce,
+    go: function (n) { go(n); }, cur: function () { return cur; }, busy: function () { return busy; },
+    slugs: { 'We are Overdrive': 'overdrive', 'Sponsors and contact': 'sponsors', 'BDASC outreach': 'outreach' }
   });
   function chrome() {
     count.textContent = (cur + 1) + '/' + scenes.length;
     prev.disabled = cur === 0; next.disabled = cur === scenes.length - 1;
-    Array.prototype.forEach.call(dots.children, function (d, i) {
-      if (i === cur) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current');
-    });
+    nav.update(cur);
   }
   prev.addEventListener('click', function () { go(cur - 1); });
   next.addEventListener('click', function () { go(cur + 1); });
@@ -164,44 +162,7 @@
     }, 220);
   }
 
-  /* ---- input: wheel, keys, swipe. Never a scrolling page. ---- */
-  function canScroll(dir) {
-    var el = scenes[cur].querySelector('.inner');
-    if (dir > 0) return el.scrollTop + el.clientHeight < el.scrollHeight - 2;
-    return el.scrollTop > 1;
-  }
-  window.addEventListener('wheel', function (e) {
-    if (busy || performance.now() < lockUntil || Math.abs(e.deltaY) < 18) return;
-    var dir = e.deltaY > 0 ? 1 : -1;
-    if (canScroll(dir)) { lockUntil = performance.now() + 350; return; }
-    lockUntil = performance.now() + 700;
-    go(cur + dir);
-  }, { passive: true });
-  window.addEventListener('keydown', function (e) {
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    var k = e.key;
-    var vert = k === 'ArrowDown' || k === 'ArrowUp' || k === 'PageDown' || k === 'PageUp' || k === ' ';
-    var dir = (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || k === ' ') ? 1 : (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') ? -1 : 0;
-    if (k === ' ' && e.target !== document.body) dir = 0;
-    if (dir) {
-      e.preventDefault();
-      if (vert && canScroll(dir)) {
-        var el = scenes[cur].querySelector('.inner');
-        el.scrollBy({ top: dir * (k.indexOf('Page') === 0 || k === ' ' ? el.clientHeight * 0.85 : 60), behavior: reduce ? 'auto' : 'smooth' });
-      } else go(cur + dir);
-    }
-    else if (k === 'Home') go(0);
-    else if (k === 'End') go(scenes.length - 1);
-  });
-  var ty0 = null, tx0 = 0;
-  window.addEventListener('touchstart', function (e) { ty0 = e.touches[0].clientY; tx0 = e.touches[0].clientX; }, { passive: true });
-  window.addEventListener('touchend', function (e) {
-    if (ty0 === null) return;
-    var dy = ty0 - e.changedTouches[0].clientY, dx = tx0 - e.changedTouches[0].clientX;
-    ty0 = null;
-    if (Math.abs(dy) > 60 && Math.abs(dy) > Math.abs(dx)) { var dir = dy > 0 ? 1 : -1; if (!canScroll(dir)) go(cur + dir); }
-    else if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx > 0 ? 1 : -1));
-  }, { passive: true });
+  /* input (wheel, keys, swipe; never a scrolling page) lives in cards-nav.js */
 
   /* ---- photos: a marker outline is scrawled round each photo when its card comes up ---- */
   function wobblyRect(w, h, j) {
@@ -235,8 +196,9 @@
     Array.prototype.forEach.call(scenes[cur].querySelectorAll('.snap'), scrawl);
   }
 
-  /* ---- start ---- */
-  dress(scenes[0]);
+  /* ---- start (on the card the URL names, if any) ---- */
+  if (nav.start) { scenes[0].classList.remove('active'); cur = nav.start; scenes[cur].classList.add('active'); }
+  dress(scenes[cur]);
   chrome();
   placeRobot();
   focusable();

@@ -13,6 +13,8 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preload" href="/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/special-elite.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/punk-nav.css">
+<script type="module" src="/js/punk/nav.js"></script>
 <style>
   @font-face { font-family: "Anton"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/anton.woff2") format("woff2"); }
   @font-face { font-family: "Permanent Marker"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/permanent-marker.woff2") format("woff2"); }
@@ -351,11 +353,11 @@
   .chain-tight li b { font-size: 24px; }
   .specs > div { grid-template-columns: minmax(84px, 8em) 1fr; }
 </style>
+<link rel="stylesheet" href="/css/punk-cards.css">
 </head>
 <body>
 
 <main class="deck" id="deck">
-  <a class="home" href="/" aria-label="Home: Team Overdrive 009"><img src="/assets/punk/logo.png" alt="" width="34" height="34"><span>&larr; HOME</span></a>
   <div class="count" id="count" aria-hidden="true">1/14</div>
   <p class="sr" id="announce" aria-live="polite"></p>
 

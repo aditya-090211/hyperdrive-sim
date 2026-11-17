@@ -1,12 +1,12 @@
 <!doctype html>
-<title>Overdrive Robot</title>
+<html lang="en">
+<title>Aryan, our robot · Overdrive 009</title>
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Special+Elite&display=swap">
 <style>
   /* Layout: no scrolling page. Eight full-screen "cards" cut from different papers.
      Moving on scribbles the screen out with a marker, then erases it to show the next card.
@@ -330,6 +330,9 @@
   .ph { font-family: var(--marker); font-size: 15px; background: var(--acid); color: var(--ink); padding: 2px 10px; transform: rotate(-2deg); align-self: flex-start; box-shadow: 3px 3px 0 var(--ink); }
 </style>
 <link rel="stylesheet" href="/css/punk-robot.css">
+<link rel="stylesheet" href="/css/punk-cards.css">
+<link rel="stylesheet" href="/css/punk-nav.css">
+<script type="module" src="/js/punk/nav.js"></script>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
@@ -339,7 +342,6 @@
 </svg>
 
 <main class="deck" id="deck">
-  <a class="home" href="/" aria-label="Back to Team Overdrive 009"><img src="/assets/punk/logo.png" alt="" width="34" height="34"><span>&larr; HOME</span></a>
   <div class="count" id="count" aria-live="polite">1/8</div>
 
   <!-- 0 -->
@@ -358,7 +360,7 @@
       <p class="eyebrow rv">Subsystem</p>
       <h2 class="tiles" data-tiles="Drive system"></h2>
       <p class="rv">Four traction wheels, each on its own motor, so the robot drives straight and turns on the spot. It stays inside the 18 × 18 in. footprint for the whole match.</p>
-      <ul class="chips rv"><li>4 motors</li><li>4 × 100 mm wheels</li></ul>
+      <ul class="chips rv"><li>4 motors</li><li>4 × 110 mm wheels</li></ul>
     </div></div>
   </section>
 
@@ -412,7 +414,7 @@
     <div class="inner"><div class="copy">
       <p class="eyebrow rv">Measured from the CAD</p>
       <h2 class="tiles" data-tiles="By the numbers"></h2>
-      <p class="rv">A script reads these straight out of our final CAD file, <span data-n="step"></span> (<span data-n="solids"></span> solids), so they change when the CAD changes.</p>
+      <p class="rv">A script reads Aryan's numbers straight out of our final CAD file, <span data-n="step"></span> (<span data-n="solids"></span> solids), so they change when the CAD changes.</p>
       <div class="fbd">
         <dl class="specs rv" data-list="dims"></dl>
         <div class="col">
@@ -434,9 +436,9 @@
       <p class="eyebrow rv">Free body diagram 1 of 4</p>
       <h2 class="tiles" data-tiles="Standing still"></h2>
       <div class="fbd">
-        <figure class="fig rv" data-fbd="still"><figcaption>Side view, front to the right. Arm in the CAD pose, payload in the tray.</figcaption></figure>
+        <figure class="fig rv" data-fbd="still"><figcaption>Aryan from the side, front to the right. Arm in the CAD pose, payload in the tray.</figcaption></figure>
         <div class="col">
-          <p class="rv">Gravity pulls the whole robot down at its centre of mass: W = m g = <span data-n="W"></span>. The floor pushes back up through the tyres. The centre of mass sits <span data-n="behind"></span> behind the middle of the wheelbase, so the rear tyres carry more of it.</p>
+          <p class="rv">Gravity pulls all of Aryan down at its centre of mass: W = m g = <span data-n="W"></span>. The floor pushes back up through the tyres. The centre of mass sits <span data-n="behind"></span> behind the middle of the wheelbase, so the rear tyres carry more of it.</p>
           <p class="rv">Taking moments about the rear tyres: N<sub>front</sub> &times; <span data-n="L"></span> = W &times; <span data-n="b"></span>.</p>
           <dl class="specs res rv" data-list="still"></dl>
         </div>
@@ -451,7 +453,7 @@
       <div class="fbd">
         <figure class="fig rv" data-fbd="accel"><figcaption>Accelerating forwards. The m&thinsp;a arrow is the robot's inertia, drawn at the centre of mass.</figcaption></figure>
         <div class="col">
-          <p class="rv">To speed up, the tyres push back on the floor and the floor pushes the robot forwards. That push has three ceilings: tyre grip (&mu; W), motor torque (4 &tau; / r), and the acceleration at which the front tyres lift off (g b / h). The lowest one wins.</p>
+          <p class="rv">To speed Aryan up, the tyres push back on the floor and the floor pushes the robot forwards. That push has three ceilings: tyre grip (&mu; W), motor torque (4 &tau; / r), and the acceleration at which the front tyres lift off (g b / h). The lowest one wins.</p>
           <div class="dial rv"><label for="acc">Acceleration <output for="acc" data-out="acc"></output></label><input id="acc" type="range" data-in="acc"></div>
           <dl class="specs res rv" data-list="accel"></dl>
           <p class="verdict rv" data-n="accelVerdict"></p>
@@ -466,7 +468,7 @@
       <h2 class="tiles" data-tiles="Holding a CORE"></h2>
       <div class="fbd">
         <div class="col">
-          <figure class="fig rv" data-fbd="arm"><figcaption>The arm from the side. The servo turns the lower links.</figcaption></figure>
+          <figure class="fig rv" data-fbd="arm"><figcaption>Aryan's arm from the side. The servo turns the lower links.</figcaption></figure>
           <figure class="fig rv" data-fbd="armChart"><figcaption>Servo torque needed to hold still, against arm angle.</figcaption></figure>
         </div>
         <div class="col">
@@ -485,7 +487,7 @@
       <p class="eyebrow rv">Free body diagram 4 of 4</p>
       <h2 class="tiles" data-tiles="On the ramp"></h2>
       <div class="fbd">
-        <figure class="fig rv" data-fbd="slope"><figcaption>Facing uphill, arm on the floor (how we drive onto the Space Station).</figcaption></figure>
+        <figure class="fig rv" data-fbd="slope"><figcaption>Aryan facing uphill, arm on the floor (how we drive onto the Space Station).</figcaption></figure>
         <div class="col">
           <p class="rv">On a slope the weight splits in two: one part along the slope, trying to roll the robot back down, and one part into the surface. To stand still the tyres need that much friction, so &mu; has to be at least tan &theta;. The robot tips over backwards once its weight line passes behind the rear tyres: tan &theta; = b / h.</p>
           <div class="dial rv"><label for="slope">Slope <output for="slope" data-out="slope"></output></label><input id="slope" type="range" data-in="slope"></div>
@@ -522,7 +524,7 @@
             <tr><td>Weight</td><td class="n">~4 to 5 kg</td></tr>
             <tr><td>Start height</td><td class="n">~230 mm, arm folded (limit 254 mm)</td></tr>
             <tr><td>Max height</td><td class="n">230 mm with the payload, ~226 mm without</td></tr>
-            <tr><td>Wheels</td><td class="n">4 × 100 mm</td></tr>
+            <tr><td>Wheels</td><td class="n">4 × 110 mm</td></tr>
             <tr><td>Drive motors</td><td class="n">4</td></tr>
             <tr><td>Arm and grabber</td><td class="n">1 servo for the arm, 1 servo for the grabber</td></tr>
             <tr><td>Controller</td><td class="n">HEXA Command Hub</td></tr>
@@ -540,7 +542,7 @@
   <svg class="wipe" id="wipe" aria-hidden="true"><path></path></svg>
 
   <nav class="pager" aria-label="Cards">
-    <button class="arrow-btn" id="prev" type="button" aria-label="Previous card">BACK</button>
+    <button class="arrow-btn" id="prev" type="button" aria-label="Back to the previous card">BACK</button>
     <span id="dots" style="display:flex;gap:7px"></span>
     <button class="arrow-btn" id="next" type="button" aria-label="Next card">NEXT</button>
   </nav>

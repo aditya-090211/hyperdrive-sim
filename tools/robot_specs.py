@@ -251,7 +251,7 @@ spec = {
     'frame': 'mm; x forward, y left, z up; origin on the floor midway between the four wheel centres. CAD pose: arm at the angle below.',
     'values': {
         'length': v(length_front - length_back, 'mm', STEP, 'overall, gripper fingers to cargo bay, arm in the CAD pose'),
-        'width': v(width_l - width_r, 'mm', STEP, 'overall, outside of the tyres'),
+        'width': v(width_l - width_r, 'mm', STEP, 'overall, across the outer faces of the wheel hubs'),
         'height': v(height, 'mm', STEP, 'top of the payload in the cargo bay, arm in the CAD pose'),
         'height_no_payload': v(height_np, 'mm', STEP, 'top of the robot without the payload, arm in the CAD pose'),
         'front_x': v(length_front, 'mm', STEP, 'gripper finger tips ahead of the origin'),

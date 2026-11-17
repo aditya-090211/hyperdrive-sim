@@ -2,6 +2,18 @@
    Reuses the page's own tokens and parts (--ink, --paper, --fuchsia, --acid, --sky, .scrap, .specs, .tbl, .note)
    and the about page's taped-up photo look for the diagrams. */
 
+/* the page's three fonts, self-hosted (same files and rules as css/punk.css) */
+@font-face { font-family: 'Anton'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/anton.woff2') format('woff2'); }
+@font-face { font-family: 'Permanent Marker'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/permanent-marker.woff2') format('woff2'); }
+@font-face { font-family: 'Special Elite'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/special-elite.woff2') format('woff2'); }
+
+/* the 3D model's box starts at the size and spot js/punk/robot.js gives it (sizeRobot), so nothing jumps when the script runs */
+.robot { width: min(84vw, 38vh); top: calc(62px + min(84vw, 38vh) / 2); }
+@media (min-width: 760px) { .robot { width: min(38vw, 66vh); top: 51%; } }
+
+/* the letters only jiggle on the card you are looking at; hidden cards stop animating */
+.scene:not(.active) .tile b, .scene:not(.active) .note { animation-play-state: paused; }
+
 /* these cards need the full width, so the 3D model steps out while one is showing */
 .deck:has(.scene.active[data-side="full"]) .robot,
 .deck:has(.scene.active[data-side="full"]) .arrow { visibility: hidden; }

@@ -14,6 +14,8 @@
 <script src="/js/redirect.js"></script>
 <link rel="preload" href="/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/special-elite.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/punk-nav.css">
+<script type="module" src="/js/punk/nav.js"></script>
 <style>
   @font-face { font-family: "Anton"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/anton.woff2") format("woff2"); }
   @font-face { font-family: "Permanent Marker"; font-style: normal; font-weight: 400; font-display: swap; src: url("/assets/fonts/permanent-marker.woff2") format("woff2"); }
@@ -42,16 +44,18 @@
     background: var(--asphalt);
     color: var(--paper);
     font-family: var(--type);
-    overflow: hidden;
+    margin: 0;
+    overflow-x: hidden;   /* the poster fits the screen; only a too-short screen (landscape phone) scrolls */
   }
 
   .poster {
     position: relative;
-    height: 100%;
+    box-sizing: border-box;
+    height: calc(100% - var(--nav-h, 0px));   /* the site bar (css/punk-nav.css) sits above, in flow */
     min-height: 520px;
     display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr);
-    padding-block: 14px 18px;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    padding-block: 14px max(14px, env(safe-area-inset-bottom, 0px));
     padding-left: max(20px, env(safe-area-inset-left, 0px));
     padding-right: max(20px, env(safe-area-inset-right, 0px));
     overflow: hidden;
@@ -151,6 +155,7 @@
 
   /* ---------- stage ---------- */
   .stage {
+    grid-row: 3;           /* the deck comes first in the source (reading and tab order) but sits under the stage */
     position: relative; z-index: 2;
     min-height: 0;
     margin-top: calc(var(--ts) * -.24);
@@ -190,6 +195,84 @@
      its region of the lettering). Without JavaScript the <noscript> rules below show them as plain poster words. */
   .pages { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .pages a:focus { outline: none; }
+  /* with the script running, each link also shows as a small paper tag stuck on its block of lettering
+     (landing.js puts it at --x/--y), so first-time visitors can see the words are links */
+  .js .pages {
+    inset: 0; width: auto; height: auto; overflow: visible; clip-path: none;
+    z-index: 4; list-style: none; pointer-events: none; white-space: normal;
+  }
+  .js .pages a {
+    position: absolute; left: var(--x, -999px); top: var(--y, -999px);
+    transform: translate(-50%, -50%) rotate(var(--tilt, -3deg));
+    display: inline-flex; align-items: center; gap: .45em; min-height: 40px; box-sizing: border-box;
+    padding: .5em .8em .38em;
+    font-family: var(--type); font-size: clamp(12px, calc(var(--rr, 120px) * .1 + 2px), 17px); line-height: 1;
+    letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; text-decoration: none;
+    color: var(--ink); background: var(--paper);
+    box-shadow: 2px 3px 0 var(--tag, var(--fuchsia));
+    pointer-events: auto;
+  }
+  .js .pages a::after { content: "\2192" / ""; font-family: var(--display); font-size: 1.25em; }
+  .js .pages a:hover { background: var(--acid); }
+  .js .pages a:focus-visible { outline: 3px dashed var(--paper); outline-offset: 4px; background: var(--acid); }
+  .js .pages .w { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .pages .cue { display: none; }
+  .js .pages .cue { display: inline; }
+  .pages li:nth-child(1) a { --tag: var(--sky); --tilt: -3deg; }
+  .pages li:nth-child(2) a { --tag: var(--paper); --tilt: 2.5deg; box-shadow: 2px 3px 0 var(--ink), 4px 5px 0 var(--paper); }
+  .pages li:nth-child(3) a { --tag: var(--fuchsia); --tilt: -2deg; }
+
+  /* ---------- deck: what this is, and the two things people come here to do ---------- */
+  .deck {
+    grid-row: 4;
+    position: relative; z-index: 6;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px;
+    padding-top: 12px;
+  }
+  .purpose {
+    margin: 0; flex: 1 1 280px; max-width: 44ch;
+    font-family: var(--type); font-size: clamp(13px, calc(.5vw + 9px), 16px); line-height: 1.35;
+    color: var(--ink); background: var(--paper);
+    padding: .45em .75em .35em;
+    transform: rotate(-1deg);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .acts { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; flex: 0 1 auto; }
+  .go {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center; gap: .35em;
+    min-height: 52px; box-sizing: border-box;
+    padding: .32em .75em .22em;
+    font-family: var(--display); font-size: clamp(20px, calc(.8vw + 12px), 26px); line-height: 1;
+    letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; text-decoration: none;
+    color: var(--ink);
+    transition: transform .15s ease-out;
+  }
+  .go::after { content: "\2192" / ""; }
+  .go-scout {
+    font-size: clamp(22px, calc(1.1vw + 13px), 32px);
+    background: var(--acid);
+    box-shadow: .09em .11em 0 var(--ink), .16em .18em 0 var(--fuchsia);
+    transform: rotate(-3deg);
+  }
+  .go-scout::before { /* masking tape, as on the 009 sticker */
+    content: ""; position: absolute; left: 50%; top: -.3em;
+    width: 2.2em; height: .5em;
+    background: color-mix(in srgb, var(--paper) 78%, transparent);
+    transform: translateX(-50%) rotate(4deg);
+    box-shadow: 0 1px 0 rgba(0,0,0,.25);
+  }
+  .go-sim {
+    background: var(--sky);
+    box-shadow: .09em .11em 0 var(--ink), .16em .18em 0 var(--paper);
+    transform: rotate(2deg);
+  }
+  .num-beside .num { bottom: max(22px, 4vh); }
+  .num-small .num { font-size: calc(var(--ts) * .4); }
+  .go:hover { transform: rotate(0deg) translate(-1px, -2px); }
+  .go:active { transform: rotate(0deg) translate(1px, 1px); }
+  .go:focus-visible { outline: 3px dashed var(--paper); outline-offset: 6px; }
+
   .stage .fallback {
     position: absolute; inset: 8% 0 0; margin: auto;
     height: 80%; aspect-ratio: 1; max-width: 80%;
@@ -199,7 +282,7 @@
   /* ---------- 009 sticker ---------- */
   .num {
     position: absolute; z-index: 5;
-    right: max(22px, 4vw); bottom: max(22px, 5vh);
+    right: max(22px, 4vw); bottom: calc(var(--deck-h, 0px) + max(14px, 2vh));   /* stuck just above the deck */
     font-family: var(--display);
     font-size: calc(var(--ts) * .5);
     line-height: .9;
@@ -227,11 +310,32 @@
      original poster, and the same links are on the last card of /about and /simulator */
   .strip .links { display: flex; gap: 0 12px; }
   .strip .links a { color: inherit; }
+  /* the site bar above carries the round logo, so the strip keeps only its NRL / season / links tags */
+  body:has(> .sn) .strip img { display: none; }
 
   @media (max-width: 560px) {
     .strip .season { display: none; }
+    body:has(> .sn) .strip { display: none; }   /* on phones the site bar above already carries the logo */
+    .acts, .acts .go { flex: 1 1 auto; }
+    .go-scout { transform: rotate(-1.5deg); }
+    .go-sim { transform: rotate(1deg); }
     .num { font-size: calc(var(--ts) * .62); }
     .team { font-size: calc(var(--ts) * .26); }
+  }
+  @media (max-width: 360px), (max-height: 700px) and (max-width: 560px) {
+    .purpose .more { display: none; }
+    .deck { gap: 10px 22px; padding-top: 8px; }
+    .go { min-height: 48px; }
+    .js .pages a { font-size: 11px; min-height: 34px; padding: .45em .65em .35em; letter-spacing: .05em; }
+  }
+  /* short landscape screens (phones on their side): title, then the deck right under it so the buttons are on
+     the first screen, then the robot and lettering at a usable size below; the page scrolls */
+  @media (max-height: 500px) and (min-aspect-ratio: 4/3) {
+    body > main#poster { height: auto; min-height: calc(100svh - var(--nav-h, 0px)); grid-template-rows: auto auto auto auto; }
+    .strip { display: none; }
+    .deck { grid-row: 3; padding-top: 6px; gap: 10px 18px; }
+    .purpose { font-size: 13px; flex-basis: 240px; }
+    .stage { grid-row: 4; height: max(320px, 82svh); margin-top: 16px; }
   }
   @media (prefers-reduced-motion: no-preference) {
     .num { animation: slap .5s cubic-bezier(.2, 1.6, .4, 1) .25s backwards; }
@@ -278,14 +382,22 @@
     <span class="word" id="word" data-t="Overdrive" aria-hidden="true">Overdrive</span>
   </h1>
 
+  <div class="deck" id="deck">
+    <p class="purpose">Scouting app and match simulator for NRL HYPERDRIVE teams. Built by Overdrive&nbsp;009<span class="more">, free for every team in the league</span>.</p>
+    <div class="acts">
+      <a class="go go-scout" href="/scout">Start scouting</a>
+      <a class="go go-sim" href="/sim">Play the simulator</a>
+    </div>
+  </div>
+
   <div class="stage" id="stage">
     <canvas id="lettering" class="lettering" aria-hidden="true"></canvas>
     <p class="robby">robby the robot</p>
     <nav aria-label="Pages">
       <ul class="pages" id="pages">
-        <li><a href="/simulator" data-key="simulator">Simulator</a></li>
-        <li><a href="/about" data-key="about">About us</a></li>
-        <li><a href="/robot" data-key="robot">Our robot</a></li>
+        <li><a href="/simulator" data-key="simulator"><span class="w">Simulator</span><span class="cue"><span class="w">, </span>See the tools</span></a></li>
+        <li><a href="/about" data-key="about"><span class="w">About us</span><span class="cue"><span class="w">, </span>Meet the team</span></a></li>
+        <li><a href="/robot" data-key="robot"><span class="w">Our robot</span><span class="cue"><span class="w">, </span>Meet Aryan</span></a></li>
       </ul>
       <svg id="hits" class="hits" aria-hidden="true">
         <a href="/simulator" data-key="simulator" tabindex="-1"><polygon></polygon></a>
