@@ -41,7 +41,7 @@ const ICON = {
   off: '<path d="M7 18a5 5 0 0 1-1.3-9.8M9.7 6.3A6 6 0 0 1 18 9a4.5 4.5 0 0 1 2.3 8.1M17 18H7M3.5 3.5l17 17"/>',
   alert: '<path d="M12 3.5l9 16H3z"/><path d="M12 10v4.5M12 17.6v.1"/>',
 };
-const MARK = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="#f2ede3" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#e2531b" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const MARK = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M22.6 7.7A11 11 0 1 0 22.6 24.3" stroke="#ececea" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M14.6 10.6l5.6 5.4-5.6 5.4" stroke="#ee7a7a" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 function h(tag, props, ...kids) {
   const el = document.createElement(tag);

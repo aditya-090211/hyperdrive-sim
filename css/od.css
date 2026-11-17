@@ -13,7 +13,7 @@
 :root {
   color-scheme: dark;
   /* Overdrive 009's palette: black ground; coral is the team (009, the mark, what is active), sky blue is information
-     (links, focus, the Blue squad), yellow is the one thing to press. Light text is a soft neutral, not white. */
+     (links, focus, the Blue squad), coral is also the one thing to press. Light text is a soft neutral, not white. */
   --ink: #000000;
   --ink-2: #0b0b0c;
   --ink-3: #151517;
@@ -23,7 +23,7 @@
   --faint: #7d7d7a;           /* 5.1:1 on black: the floor for small print */
   --line: rgba(255, 255, 255, 0.11);
   --line-2: rgba(255, 255, 255, 0.19);
-  --cream: #e9e983;           /* yellow: primary buttons and selected controls, black text on it (16:1) */
+  --cream: #7ac7ee;           /* sky blue for selected controls and highlights, black text on it (11:1) */
   --od: #ee7a7a;              /* coral, the team accent (7.4:1 on black) */
   --od-2: #f29a9a;            /* coral as small text */
   --od-soft: rgba(238, 122, 122, 0.14);
@@ -108,8 +108,8 @@ em, .it { font-style: italic; }
   transition: background-color 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s var(--ease), transform 0.2s var(--ease), opacity 0.2s; -webkit-tap-highlight-color: transparent; }
 .b:active { transform: scale(0.98); transition-duration: 0.12s; }
 .b:disabled, .b[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
-.b-primary { background: var(--cream); color: var(--ink); }
-.b-primary:hover { background: #f1f19c; }
+.b-primary { background: var(--od-fill); color: var(--ink); }
+.b-primary:hover { background: #f28c8c; }
 .b-od { background: var(--od-fill); color: var(--ink); }
 .b-od:hover { background: var(--od-fill-hi); }
 .b-glass { color: var(--text); }
@@ -276,7 +276,7 @@ label.lab, .lab { display: block; margin: 0 0 8px 2px; font: 500 10.5px/1 var(--
 .prose > :nth-child(2) { animation-delay: 0.08s; } .prose > :nth-child(3) { animation-delay: 0.16s; } .prose > :nth-child(n+4) { animation-delay: 0.24s; }
 /* touch screens keep no sticky hover state */
 @media (hover: none) {
-  .b-primary:hover { background: var(--cream); } .b-od:hover { background: var(--od-fill); }
+  .b-primary:hover { background: var(--od-fill); } .b-od:hover { background: var(--od-fill); }
   .b-glass:hover { background: var(--g-fill), var(--g-tint); } .b-ghost:hover { background: transparent; color: var(--muted); }
   .b:hover .arrow { transform: none; }
 }

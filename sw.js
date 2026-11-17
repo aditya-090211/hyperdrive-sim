@@ -8,7 +8,7 @@
 //    outbox with js/scout/outbox.js, the same code the app runs, and tells any open Scout tab to re-read its data.
 importScripts('/js/scout/outbox.js');
 
-const CACHE = 'od-scout-v7';
+const CACHE = 'od-scout-v8';
 const SHELL = ['/scout', '/js/scout/app.js', '/js/scout/store.js', '/js/scout/game.js', '/js/scout/insights.js', '/js/scout/outbox.js',
   '/js/auth-client.js', '/js/handoff.js', '/js/supabase-config.js', '/css/od.css', '/css/scout.css', '/lib/supabase.umd.js',
   '/manifest.webmanifest', '/assets/scout-icon.svg', '/assets/scout-192.png', '/assets/scout-512.png',
