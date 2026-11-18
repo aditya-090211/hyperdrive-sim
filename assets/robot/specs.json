@@ -28,6 +28,12 @@
    "source": "STEP",
    "note": "top of the robot without the payload, arm in the CAD pose"
   },
+  "height_arm_up": {
+   "value": 256.4,
+   "unit": "mm",
+   "source": "STEP + parallelogram geometry",
+   "note": "top of the gripper with the links at 90 deg (arm fully up)"
+  },
   "front_x": {
    "value": 206.4,
    "unit": "mm",
@@ -113,7 +119,7 @@
    "note": "link angle above horizontal in the CAD pose"
   },
   "arm_floor_angle": {
-   "value": -16.45,
+   "value": -16.2,
    "unit": "deg",
    "source": "config.js",
    "note": "gripper plates 0.5 mm above the floor"
@@ -130,7 +136,7 @@
    "note": "finger tips ahead of the origin in the CAD pose"
   },
   "claw_reach_floor": {
-   "value": 256.7,
+   "value": 256.8,
    "unit": "mm",
    "source": "STEP + parallelogram geometry",
    "note": "finger tips ahead of the origin with the arm on the floor"
@@ -142,7 +148,7 @@
    "note": "finger tips ahead of the origin with the links horizontal"
   },
   "claw_past_tyre_floor": {
-   "value": 128.9,
+   "value": 129.1,
    "unit": "mm",
    "source": "STEP + parallelogram geometry",
    "note": "how far the finger tips reach past the front tyres with the arm on the floor"

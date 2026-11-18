@@ -195,10 +195,10 @@ say('solids', S.solid_count.toLocaleString('en-GB'));
 const named = S.parts.filter((p) => p.counted === 'copies');
 list('dims', [
   ['Footprint', mm(V('length'), 0) + ' × ' + mm(V('width'), 0), 'long × wide; the limit is ' + mm(V('limit_footprint'), 0) + ' square'],
-  ['Height', mm(V('height'), 0), 'with the payload, ' + mm(V('height_no_payload'), 0) + ' without'],
+  ['Height', mm(V('height'), 0), 'with the payload, ' + mm(V('height_no_payload'), 0) + ' without (arm at ' + f(V('arm_cad_angle'), 0) + '°); ' + mm(V('height_arm_up'), 0) + ' with the arm at ' + f(V('arm_max_angle'), 0) + '°'],
   ['Wheels', '4 × ø' + mm(V('wheel_diameter'), 0), f(V('wheel_width'), 0) + ' mm tread'],
   ['Wheelbase', mm(V('wheelbase')), 'track ' + mm(V('track'))],
-  ['Clearance', mm(V('ground_clearance')), 'under the aligner jaws; ' + mm(V('base_clearance')) + ' under the chassis base'],
+  ['Clearance', mm(V('ground_clearance')), 'under the line sensors; ' + mm(V('base_clearance')) + ' under the chassis base'],
   ['Arm', '2 × ' + mm(V('arm_link_length')), 'parallelogram links, pivots ' + f(V('arm_pivot_lower')[1], 1) + ' and ' + f(V('arm_pivot_upper')[1], 1) + ' mm up'],
   ['Claw reach', mm(V('claw_past_tyre_floor'), 0), 'past the front tyres with the arm on the floor'],
   ['Mass', f(m, 2) + ' kg', 'estimate with the payload, ' + f(V('mass_no_payload'), 2) + ' kg without; the limit is ' + f(V('limit_mass'), 0) + ' kg'],

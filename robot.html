@@ -370,7 +370,7 @@
       <p class="eyebrow rv">Subsystem</p>
       <h2 class="tiles" data-tiles="Arm"></h2>
       <p class="rv">A parallelogram arm lifted by one servo. The linkage keeps the grabber level while it rises, so a CORE stays flat on the way up to the High Pole.</p>
-      <ul class="chips rv"><li>1 servo</li><li>230 mm max height with the payload</li><li>full lift in ~1.5 s</li><li>parallelogram linkage</li></ul>
+      <ul class="chips rv"><li>1 servo</li><li>~256 mm max height, arm fully up (230 mm in the CAD pose)</li><li>full lift in ~1.5 s</li><li>parallelogram linkage</li></ul>
       <p class="small rv">~ Approximate: from the CAD or our best estimate, not yet measured on the real robot.</p>
     </div></div>
   </section>
@@ -391,9 +391,9 @@
     <div class="inner"><div class="copy">
       <p class="eyebrow rv">Subsystem</p>
       <h2 class="tiles" data-tiles="Cargo tray"></h2>
-      <p class="rv">An open tray mounted low on the chassis. It carries the second CORE and our Payload, and keeps their weight low and centred.</p>
-      <ul class="chips rv"><li>bay 115 × 138 × 81 mm</li><li>funnel centres the payload</li><li>printed PETG, ~70 g</li><li>gate parts ~19 g</li><li>payload ~180 g</li></ul>
-      <p class="small rv">The payload is a truncated square pyramid: 66 mm at the top, 46 mm at the bottom, 60 mm tall.</p>
+      <p class="rv">An open tray mounted on top of the chassis at the back, just right of the centre line. It carries the second CORE and our Payload, on a chute tilted 30° down to the back.</p>
+      <ul class="chips rv"><li>bay 114 × 138 × 81 mm</li><li>funnel centres the payload</li><li>printed PETG, ~70 g (CAD estimate: ~110 g)</li><li>gate parts ~19 g</li><li>payload ~180 g (CAD estimate: ~100 g)</li></ul>
+      <p class="small rv">The payload is a 64 mm cube with chamfered edges and "009" on its faces.</p>
       <p class="small rv">~ Approximate: from the CAD or our best estimate, not yet measured on the real robot.</p>
     </div></div>
   </section>
@@ -403,9 +403,9 @@
     <div class="inner"><div class="copy">
       <p class="eyebrow rv">Electronics layout</p>
       <h2 class="tiles" data-tiles="Electronics"></h2>
-      <p class="flow rv">Battery <i>&rarr;</i> Main switch <i>&rarr;</i> HEXA Command Hub <i>&rarr;</i> 4 drive motors, arm servo, grabber servo</p>
+      <p class="flow rv">Battery <i>&rarr;</i> Main switch <i>&rarr;</i> HEXA Command Hub <i>&rarr;</i> 4 drive motors, arm servo, grabber servo, door servo</p>
       <p class="flow rv">IMU, encoders, ToF sensor <i>&rarr;</i> HEXA Command Hub inputs</p>
-      <p class="rv">The battery feeds the HEXA Command Hub through a main switch. The hub drives the four wheel motors, the arm servo and the grabber servo. The IMU and encoders report back to the hub.</p>
+      <p class="rv">The battery feeds the HEXA Command Hub through a main switch. The hub drives the four wheel motors, the arm servo, the grabber servo and the cargo door's micro servo. The IMU and encoders report back to the hub.</p>
     </div></div>
   </section>
 
@@ -521,9 +521,9 @@
       <div class="tbl rv">
         <table>
           <tbody>
-            <tr><td>Weight</td><td class="n">~4 to 5 kg</td></tr>
-            <tr><td>Start height</td><td class="n">~230 mm, arm folded (limit 254 mm)</td></tr>
-            <tr><td>Max height</td><td class="n">230 mm with the payload, ~226 mm without</td></tr>
+            <tr><td>Weight</td><td class="n">~4 to 5 kg (CAD estimate: ~3.3 kg)</td></tr>
+            <tr><td>Start height</td><td class="n">~230 mm, arm at 52° or lower (limit 254 mm)</td></tr>
+            <tr><td>Max height</td><td class="n">~256 mm, arm fully up (230 mm with the payload at 52°, ~226 mm without)</td></tr>
             <tr><td>Wheels</td><td class="n">4 × 110 mm</td></tr>
             <tr><td>Drive motors</td><td class="n">4</td></tr>
             <tr><td>Arm and grabber</td><td class="n">1 servo for the arm, 1 servo for the grabber</td></tr>
