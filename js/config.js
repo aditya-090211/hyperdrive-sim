@@ -99,10 +99,10 @@ export const STATION = {
   pivotStatic: 1.1, pivotKinetic: 0.75, pivotDamping: 4,
 };
 
-// ---------- robot (OVERDRIVE_009_FINAL_ROBOT_v3.step, the team's final CAD) ----------
+// ---------- robot (NRL-2026 Robot.step) ----------
 export const ROBOT = {
   mass: 3.2,                // ASSUMPTION: estimated from the CAD (aluminium plates, 4 gear motors, 3S pack); R1.2 caps it at 8 kg
-  wheelR: 0.055,            // CAD: 110 mm wheels with moulded grip
+  wheelR: 0.05506,          // CAD: 110 mm wheels with moulded grip
   motorFreeRPM: 300,        // ASSUMPTION: 37 mm 12 V 300 RPM gear motor
   motorStallTorque: 1.0,    // ASSUMPTION: N·m at the wheel at 12 V
   motorStallAmps: 5.5,      // ASSUMPTION: per motor at 12 V
@@ -111,7 +111,7 @@ export const ROBOT = {
   mu: 0.95,                 // rubber on EVA foam (static)
   muKinetic: 0.78,          // sliding / scrubbing
   rollCrr: 0.035,           // rolling resistance of a rubber tyre on 12 mm EVA foam
-  armMin: -16.2, armMax: 90, // deg (CAD: gripper 0.5 mm above the floor at -16.2°)
+  armMin: -16.45, armMax: 90, // deg (CAD: gripper plates 0.5 mm above the floor at -16.45°)
   armRate: 150, servoMax: 300, // deg/s (driver command rate, servo no-load speed)
   // claw angle per finger (rad): 0 = the CAD pose, closed around a CORE; positive opens outward
   fingerClosed: -0.17, fingerOpen: 0.44, fingerHold: 0.0, fingerTol: 0.06,

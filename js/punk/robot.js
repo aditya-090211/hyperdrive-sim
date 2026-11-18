@@ -191,7 +191,7 @@ var THREE, loadRobotModel, buildRobotVisual, TRAY;
   /* ---- boil: re-seed the wobble a few times a second so lines never sit still ---- */
   var noise = document.getElementById('boilNoise'), seed = 1;
 
-  /* ---- the robot in the middle: the team's real CAD (assets/robot.json + robot.bin, the same model the simulator drives),
+  /* ---- the robot in the middle: the team's real CAD (assets/aryan.json + aryan.bin, from OVERDRIVE_009_FINAL_ROBOT_v3.step; the simulator drives the NRL kit robot, not this one),
           drawn in flat toon shading to sit with the poster look. Drag to turn it. ---- */
   var holder = document.getElementById('robot');
   var arrow = document.getElementById('arrow'), aInk = arrow.querySelector('.a-ink'), aCol = arrow.querySelector('.a-col');
@@ -273,7 +273,7 @@ var THREE, loadRobotModel, buildRobotVisual, TRAY;
 
   // load the CAD, restyle it, and fit it to the frame
   function loadCad() {
-    return loadRobotModel('/assets/').then(function (model) {
+    return loadRobotModel('/assets/', 'aryan').then(function (model) {
       if (dead) return;
       hero = buildRobotVisual(model, { squadCol: new THREE.Color(cssCol(root, '--fuchsia')), number: '009', shadows: false });
       toonify(THREE, hero.root);                    // flat toon shading instead of the sim's metal

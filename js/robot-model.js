@@ -6,17 +6,20 @@ import { toCreasedNormals, mergeGeometries } from '../lib/BufferGeometryUtils.js
 import { CANVAS_FONT } from './config.js';
 
 const DEG = Math.PI / 180;
-// CARGO BAY: where the simulator's payload rides and tips out. The CAD's printed bay is chassis; its gate is the
-// `tray` group, which turns about the gate hinge (meta.pivots.tray) when the payload is dumped.
-export const TRAY = { hinge: [-0.130, 0.131], len: 0.108 };
+// Two models share this loader:
+//  - `robot` (assets/robot.*): the NRL-2026 kit robot that the simulator drives. Its CAD has no cargo bay, so a rear
+//    dump tray is drawn on the top plate (TRAY; see README).
+//  - `aryan` (assets/aryan.*): Overdrive 009's own robot from its final CAD, shown only on /robot. Its printed bay is
+//    part of the chassis and its gate is the `tray` group, turning about meta.pivots.tray.
+export const TRAY = { hinge: [-0.130, 0.131], len: 0.108, width: 0.13, wall: 0.035 };
 
-export async function loadRobotModel(base = 'assets/') {
+export async function loadRobotModel(base = 'assets/', name = 'robot') {
   const get = async (f, kind) => {
     const r = await fetch(base + f + '?v=3');
     if (!r.ok) throw new Error(`could not load ${f} (${r.status})`);
     return kind === 'json' ? r.json() : r.arrayBuffer();
   };
-  const [meta, bin] = await Promise.all([get('robot.json', 'json'), get('robot.bin', 'bin')]);
+  const [meta, bin] = await Promise.all([get(name + '.json', 'json'), get(name + '.bin', 'bin')]);
   const parts = await mapYielding(meta.parts, (p) => {
     const geo = new THREE.BufferGeometry();
     let pos;
@@ -75,7 +78,7 @@ export function buildRobotVisual(model, { squadCol, number = '009', shadows = tr
   root.add(mk('chassis'), mk('armLower', P.armLower), mk('armUpper', P.armUpper), mk('end'));
   g.end.add(mk('fingerL', P.fingerL)); g.end.add(mk('fingerR', P.fingerR));
   for (const w of ['wheelFL', 'wheelFR', 'wheelRL', 'wheelRR']) root.add(mk(w, P[w]));
-  root.add(mk('tray', P.tray));
+  if (P.tray) root.add(mk('tray', P.tray));          // a CAD cargo-bay gate (Aryan)
   const mats = {};
   for (const { group, key, geo, part } of mergedParts(model, P)) {
     if (!mats[key]) {
@@ -88,6 +91,16 @@ export function buildRobotVisual(model, { squadCol, number = '009', shadows = tr
     const m = new THREE.Mesh(geo, mats[key]);
     m.castShadow = shadows && part.opacity >= 1; m.receiveShadow = shadows;
     (g[group] || g.chassis).add(m);
+  }
+  if (!P.tray) {                                     // the kit robot has no bay in its CAD: draw the dump tray
+    const tray = new THREE.Group(); tray.position.set(TRAY.hinge[0], TRAY.hinge[1], 0); root.add(tray);
+    const trayMat = new THREE.MeshStandardMaterial({ color: 0x9aa3ad, roughness: 0.5, metalness: 0.4 });
+    const tb = new THREE.Mesh(new THREE.BoxGeometry(TRAY.len, 0.004, TRAY.width), trayMat); tb.position.set(TRAY.len / 2, 0.002, 0); tb.castShadow = shadows; tray.add(tb);
+    for (const sz of [-1, 1]) {
+      const w = new THREE.Mesh(new THREE.BoxGeometry(TRAY.len, TRAY.wall, 0.004), trayMat); w.position.set(TRAY.len / 2, TRAY.wall / 2, sz * TRAY.width / 2); tray.add(w);
+    }
+    const fw = new THREE.Mesh(new THREE.BoxGeometry(0.004, TRAY.wall, TRAY.width), trayMat); fw.position.set(TRAY.len, TRAY.wall / 2, 0); tray.add(fw);
+    g.tray = tray;
   }
   // team number plate (R4) on the back
   const plate = new THREE.Mesh(new THREE.PlaneGeometry(3.5 * 0.0254, 2 * 0.0254), new THREE.MeshBasicMaterial({ map: numberTexture(number, squadCol) }));

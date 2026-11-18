@@ -1,7 +1,7 @@
 # NRL 2026 HYPERDRIVE simulator — by team Overdrive 009
 
 A 3D physics simulation of the NRL 2026 season game **HYPERDRIVE**. The arena is built from the official field CAD
-(`Field Assembly Final.step`) and `NRL_2026_Official_Arena_Dimensions.pdf`, the robot model from `OVERDRIVE_009_FINAL_ROBOT_v3.step` (its physics colliders are still the ones measured on the earlier `NRL-2026 Robot.step`),
+(`Field Assembly Final.step`) and `NRL_2026_Official_Arena_Dimensions.pdf`, the simulator's robot from the NRL kit CAD `NRL-2026 Robot.step` (Overdrive 009's own robot, Aryan, from `OVERDRIVE_009_FINAL_ROBOT_v3.step`, is shown only on `/robot`, as `assets/aryan.*`),
 and the rules from `NRL/NRL_2026_HYPERDRIVE_GAME_MANUAL.pdf`.
 It has four independently controlled robots (2 Red + 2 Blue), the full 12 × 12 ft field with every
 game element, Human Player actions, the 2:30 match flow, live scoring, automatic fouls and Ranking Points.
@@ -347,7 +347,7 @@ These are all in `js/config.js`.
 
 ## Rebuilding the CAD assets
 
-`assets/field.*` and `assets/robot.*` are generated from the STEP files by the scripts in `tools/` (not deployed):
+`assets/field.*` and `assets/aryan.*` are generated from the STEP files by the scripts in `tools/` (not deployed). `assets/robot.*`, the NRL kit robot the simulator drives, was built from `NRL-2026 Robot.step` with an earlier version of the same pipeline:
 
 1. Robot only: `tools/cad_normalize_robot.py` (FreeCAD `freecadcmd`) re-poses the team's final CAD,
    `OVERDRIVE_009_FINAL_ROBOT_v3.step`, into the robot frame, drops electronics detail and fasteners, and writes

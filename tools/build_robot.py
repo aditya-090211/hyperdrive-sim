@@ -1,9 +1,11 @@
-# robot CAD -> hyperdrive-sim/assets/robot.{json,bin}
-#   python tools/build_robot.py robot_meshes.json motion.json assets
+# Overdrive 009's robot CAD -> hyperdrive-sim/assets/aryan.{json,bin} (shown on /robot; the simulator drives the NRL kit
+# robot in assets/robot.*, built earlier from NRL-2026 Robot.step)
+#   python tools/build_robot.py robot_meshes.json motion.json assets [name, default aryan]
 # robot_meshes.json: FreeCAD tessellation in the normalised CAD frame (mm, X fwd, Y left, Z up, ground z=0) from
 # tools/cad_tessellate.py; motion.json: the pivots measured on the CAD by tools/cad_normalize_robot.py
 import json, sys, re, numpy as np
 src, motion, outdir = sys.argv[1], sys.argv[2], sys.argv[3]
+NAME = sys.argv[4] if len(sys.argv) > 4 else 'aryan'
 parts = json.load(open(src))
 M = json.load(open(motion))['meta']
 PAL = [  # (regex on label, colour, metalness, roughness, opacity)
@@ -75,6 +77,6 @@ meta = {
   'wheelRadius': round(M['wheelRadius'] / 1000, 5), 'armAngle0Deg': M['armAngle0Deg'],
   'armLinkLength': round(M['armLinkLength'] / 1000, 6), 'armFloorDeg': M['armFloorDeg'], 'parts': meta_parts,
 }
-open(outdir + '/robot.bin', 'wb').write(bytes(bin_))
-json.dump(meta, open(outdir + '/robot.json', 'w'), separators=(',', ':'))
+open(outdir + '/' + NAME + '.bin', 'wb').write(bytes(bin_))
+json.dump(meta, open(outdir + '/' + NAME + '.json', 'w'), separators=(',', ':'))
 print('parts', len(meta_parts), 'bytes', len(bin_), 'tris', sum(p['iLen'] for p in meta_parts)//3)

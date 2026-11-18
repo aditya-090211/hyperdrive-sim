@@ -1,5 +1,5 @@
 // robot-3d.js: lazy loader for the /robot page's 3D model. three.js and the team's CAD
-// (assets/robot.json + robot.bin, the same model the simulator drives) are only fetched when
+// (assets/aryan.json + aryan.bin, Overdrive 009's own robot; the simulator uses the NRL kit robot) are only fetched when
 // the page asks for them, and everything can be handed back to the GPU when the page goes away.
 
 let kit = null;
