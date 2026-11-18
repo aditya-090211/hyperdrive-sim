@@ -293,8 +293,8 @@ var THREE, loadRobotModel, buildRobotVisual, TRAY;
       marker('wheel', hero.g.wheelFL, 0, 0, -0.03);
       marker('arm', hero.g.armUpper, L * 0.5 * Math.cos(th0), L * 0.5 * Math.sin(th0), 0);
       marker('grabber', hero.g.end, P.holdPoint[0], P.holdPoint[1], P.holdPoint[2]);
-      marker('tray', hero.g.tray, TRAY.len / 2, 0.02, 0);
-      marker('hub', hero.g.chassis, -0.02, 0.1, 0);
+      marker('tray', hero.g.chassis, -0.093, 0.19, 0.052);    // v3 CAD: the printed cargo bay, rear right of centre
+      marker('hub', hero.g.chassis, -0.06, 0.1, -0.03);       // v3 CAD: the HEXA hub board on the top plate, under the bay's left edge
       placeRobot();
       draw();
       if (posterEl && posterEl.parentNode) posterEl.parentNode.removeChild(posterEl);   // the real model is on screen: drop the still
