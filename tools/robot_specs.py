@@ -221,6 +221,9 @@ outline = {'source': 'STEP bounding boxes, CAD pose', 'side_plates': union(r'^SI
            'gripper': union(None, end_boxes), 'base': union(r'^ACRYLIC Chassis Base')}
 fb = union(r'^new_finger')
 outline['core_hold'] = [round((fb[0] + fb[2]) / 2, 1), round((fb[1] + fb[3]) / 2, 1)]    # CORE centre: middle of the finger plates
+# the carriage translates with the parallelogram, so its top rises by L (sin th - sin th0); the robot's height at arm angle th
+end_top = max(b[5] for b in end_boxes)
+def height_at(th_deg): return max(height, end_top + L * (math.sin(math.radians(th_deg)) - math.sin(t0)))
 
 # ---------------------------------------------------------------- part list
 counts = Counter(); mass_by = defaultdict(float); mat_by = {}
@@ -254,6 +257,7 @@ spec = {
         'width': v(width_l - width_r, 'mm', STEP, 'overall, across the outer faces of the wheel hubs'),
         'height': v(height, 'mm', STEP, 'top of the payload in the cargo bay, arm in the CAD pose'),
         'height_no_payload': v(height_np, 'mm', STEP, 'top of the robot without the payload, arm in the CAD pose'),
+        'height_arm_up': v(height_at(config['armMax']), 'mm', 'STEP + parallelogram geometry', 'top of the gripper with the links at ' + str(round(config['armMax'])) + ' deg (arm fully up)'),
         'front_x': v(length_front, 'mm', STEP, 'gripper finger tips ahead of the origin'),
         'rear_x': v(length_back, 'mm', STEP, 'rear-most point (cargo bay) behind the origin'),
         'wheel_diameter': v(2 * R_wheel, 'mm', STEP, 'outer cylinder of Wheel Grip'),

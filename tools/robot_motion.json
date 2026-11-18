@@ -1,75 +1,122 @@
 {
-  "upper": [
-    "Part__Feature1804",
-    "Part__Feature1812",
-    "Part__Feature615",
-    "Part__Feature1795",
-    "Part__Feature1810"
+ "lower": [
+  "S0425",
+  "S0863",
+  "S1658",
+  "S1755",
+  "S1762",
+  "S1770"
+ ],
+ "upper": [
+  "S0596",
+  "S1754",
+  "S1760",
+  "S1763",
+  "S1769",
+  "S1771"
+ ],
+ "grab": [
+  "S0020",
+  "S0060",
+  "S0083",
+  "S0141",
+  "S0151",
+  "S0168",
+  "S0188",
+  "S0237",
+  "S0245",
+  "S0318",
+  "S0441",
+  "S0469",
+  "S0548",
+  "S0697",
+  "S0760",
+  "S0857",
+  "S0911",
+  "S1764"
+ ],
+ "fingerL": [
+  "S0124",
+  "S0273",
+  "S0616",
+  "S0632",
+  "S1789",
+  "S1790",
+  "S1792"
+ ],
+ "fingerR": [
+  "S0224",
+  "S0265",
+  "S0682",
+  "S1787",
+  "S1788",
+  "S1791"
+ ],
+ "tray": [
+  "S1797"
+ ],
+ "meta": {
+  "source": "OVERDRIVE_009_FINAL_ROBOT_v3.step",
+  "wheelRadius": 55.0,
+  "wheels": {
+   "wheelRL": [
+    -72.76,
+    152.9,
+    54.95
+   ],
+   "wheelRR": [
+    -72.77,
+    -152.9,
+    54.94
+   ],
+   "wheelFL": [
+    72.44,
+    152.9,
+    54.94
+   ],
+   "wheelFR": [
+    73.09,
+    -152.9,
+    55.17
+   ]
+  },
+  "armLower": [
+   -9.661,
+   0.0,
+   62.643
   ],
-  "lower": [
-    "Part__Feature888",
-    "Part__Feature1796",
-    "Part__Feature442",
-    "Part__Feature1697",
-    "Part__Feature1803"
+  "armUpper": [
+   -9.661,
+   0.0,
+   102.643
   ],
-  "grab": [
-    "Part__Feature020",
-    "Part__Feature035",
-    "Part__Feature062",
-    "Part__Feature076",
-    "Part__Feature088",
-    "Part__Feature130",
-    "Part__Feature141",
-    "Part__Feature148",
-    "Part__Feature158",
-    "Part__Feature175",
-    "Part__Feature186",
-    "Part__Feature196",
-    "Part__Feature232",
-    "Part__Feature243",
-    "Part__Feature247",
-    "Part__Feature255",
-    "Part__Feature275",
-    "Part__Feature284",
-    "Part__Feature323",
-    "Part__Feature332",
-    "Part__Feature458",
-    "Part__Feature475",
-    "Part__Feature487",
-    "Part__Feature567",
-    "Part__Feature635",
-    "Part__Feature647",
-    "Part__Feature652",
-    "Part__Feature675",
-    "Part__Feature702",
-    "Part__Feature709",
-    "Part__Feature718",
-    "Part__Feature782",
-    "Part__Feature796",
-    "Part__Feature882",
-    "Part__Feature909",
-    "Part__Feature910",
-    "Part__Feature939",
-    "Part__Feature1801",
-    "Part__Feature1805",
-    "Part__Feature1811"
+  "armLinkLength": 145.715,
+  "armAngle0Deg": 52.098,
+  "armFloorDeg": -16.2,
+  "fingerL": [
+   106.354,
+   13.87,
+   0.0
   ],
-  "L": 145.71547627186447,
-  "theta": 52.09794297527092,
-  "U": [
-    -9.5,
-    0.0,
-    102.75843263974
+  "fingerR": [
+   106.354,
+   -14.37,
+   0.0
   ],
-  "P2": [
-    -9.5,
-    0.0,
-    62.75843263974
+  "holdPoint": [
+   174.325,
+   0.0,
+   173.122
   ],
-  "J": [
-    80.0149885,
-    0.0,
-    217.7369822
-  ]
+  "tray": [
+   -122.431,
+   0.0,
+   140.043
+  ],
+  "numberPlate": {
+   "rearX": -134.16,
+   "centreY": -0.6,
+   "centreZ": 66.64
+  }
+ }
 }

@@ -164,7 +164,7 @@ function setList(key, rows) {      // update values in place once the list exist
   });
 }
 // a slider that the page's own arrow-key / swipe card navigation leaves alone
-// (continuous, so an end like -16.45 deg is reachable; arrow keys move one keyStep, Page keys five)
+// (continuous, so an end like the arm's floor angle is reachable; arrow keys move one keyStep, Page keys five)
 function dial(key, min, max, keyStep, value, show, onInput) {
   const input = $(`[data-in="${key}"]`), out = $(`[data-out="${key}"]`);
   Object.assign(input, { min, max, step: 'any', value });

@@ -1,10 +1,12 @@
-# NRL-2026 Robot.step -> hyperdrive-sim/assets/robot.{json,bin}
-# input: robot_meshes.json (FreeCAD tessellation in the normalised CAD frame: mm, X fwd, Y left, Z up, ground z=0)
-import json, sys, re, struct, numpy as np
-src, outdir = sys.argv[1], sys.argv[2]
+# robot CAD -> hyperdrive-sim/assets/robot.{json,bin}
+#   python tools/build_robot.py robot_meshes.json motion.json assets
+# robot_meshes.json: FreeCAD tessellation in the normalised CAD frame (mm, X fwd, Y left, Z up, ground z=0) from
+# tools/cad_tessellate.py; motion.json: the pivots measured on the CAD by tools/cad_normalize_robot.py
+import json, sys, re, numpy as np
+src, motion, outdir = sys.argv[1], sys.argv[2], sys.argv[3]
 parts = json.load(open(src))
+M = json.load(open(motion))['meta']
 PAL = [  # (regex on label, colour, metalness, roughness, opacity)
-  (r'^Bumper', 'squad', 0.1, 0.5, 1),
   (r'^Wheel Grip', '#16181b', 0.0, 0.92, 1),
   (r'^wheel_base', '#d6dbe1', 0.35, 0.45, 1),
   (r'^Wheel insert', '#8f98a4', 0.6, 0.35, 1),
@@ -18,7 +20,9 @@ PAL = [  # (regex on label, colour, metalness, roughness, opacity)
   (r'^DC Motor__', '#c8ced7', 0.75, 0.3, 1),
   (r'^DC Motor Mount|^Base Block|^Connector|^New Number Plate', '#2c3037', 0.3, 0.5, 1),
   (r'^Battery__', '#26303c', 0.1, 0.6, 1),
-  (r'^(Gripper )?Servo Motor', '#1f2227', 0.1, 0.55, 1),
+  (r'^(Gripper )?Servo Motor|^MG90S', '#1f2227', 0.1, 0.55, 1),
+  (r'^ACRYLIC', '#16181c', 0.15, 0.25, 1),
+  (r'^PRINTED', '#2a2f37', 0.05, 0.7, 1),
   (r'^Connecting Rod', '#d3d8de', 0.8, 0.25, 1),
   (r'^(top|bottom) holder', '#1a1c20', 0.1, 0.6, 1),
   (r'^\d+(\.\d+)?mm [Ss]pacer', '#a7afb9', 0.7, 0.3, 1),
@@ -57,20 +61,19 @@ for (g, c, me, ro, op), b in buckets.items():
   iOff = len(bin_); bin_ += (F.astype(np.uint16) if i16 else F).tobytes()
   meta_parts.append(dict(group=g, names=sorted(b['names']), color=c, metalness=me, roughness=ro, opacity=op,
                          pOff=pOff, pLen=len(q), iOff=iOff, iLen=len(F), i16=bool(i16)))
-mm = lambda X, Y, Z: [round(X/1000, 5), round(Z/1000, 5), round(-Y/1000, 5)]
+mm = lambda p: [round(p[0] / 1000, 5) + 0.0, round(p[2] / 1000, 5) + 0.0, round(-p[1] / 1000, 5) + 0.0]   # + 0.0: no -0.0 in the JSON
 meta = {
-  'source': 'NRL-2026 Robot.step (Onshape export): electronics detail and fasteners dropped, meshes decimated',
+  'source': M['source'] + " (the team's final CAD): electronics detail, fasteners, the payload and the moulded 009 digits dropped, meshes decimated",
   'frame': 'meters; +X forward, +Y up, +Z right; origin on the ground midway between the axles',
   'format': 'int16', 'posScale': SCALE,
   'pivots': {
-    'armLower': mm(-9.5, 0, 62.758), 'armUpper': mm(-9.5, 0, 102.758),
-    'fingerL': mm(106.51, 13.87, 0), 'fingerR': mm(106.51, -14.37, 0),
-    'wheelFL': mm(72.9, 152.9, 55.1), 'wheelFR': mm(72.9, -152.9, 55.1),
-    'wheelRL': mm(-72.6, 152.9, 55.1), 'wheelRR': mm(-72.6, -152.9, 55.1),
-    'holdPoint': mm(176.0, 0, 171.2),
+    'armLower': mm(M['armLower']), 'armUpper': mm(M['armUpper']),
+    'fingerL': mm(M['fingerL']), 'fingerR': mm(M['fingerR']),
+    **{k: mm(v) for k, v in M['wheels'].items()},
+    'holdPoint': mm(M['holdPoint']), 'tray': mm(M['tray']),
   },
-  'wheelRadius': 0.05506, 'armAngle0Deg': 52.098, 'armLinkLength': 0.145715,
-  'armFloorDeg': -16.45, 'parts': meta_parts,
+  'wheelRadius': round(M['wheelRadius'] / 1000, 5), 'armAngle0Deg': M['armAngle0Deg'],
+  'armLinkLength': round(M['armLinkLength'] / 1000, 6), 'armFloorDeg': M['armFloorDeg'], 'parts': meta_parts,
 }
 open(outdir + '/robot.bin', 'wb').write(bytes(bin_))
 json.dump(meta, open(outdir + '/robot.json', 'w'), separators=(',', ':'))

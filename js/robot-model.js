@@ -6,8 +6,9 @@ import { toCreasedNormals, mergeGeometries } from '../lib/BufferGeometryUtils.js
 import { CANVAS_FONT } from './config.js';
 
 const DEG = Math.PI / 180;
-// CARGO BAY (not in the CAD model: a rear dump tray on the top plate, see README)
-export const TRAY = { hinge: [-0.130, 0.131], len: 0.108, width: 0.13, wall: 0.035 };
+// CARGO BAY: where the simulator's payload rides and tips out. The CAD's printed bay is chassis; its gate is the
+// `tray` group, which turns about the gate hinge (meta.pivots.tray) when the payload is dumped.
+export const TRAY = { hinge: [-0.130, 0.131], len: 0.108 };
 
 export async function loadRobotModel(base = 'assets/') {
   const get = async (f, kind) => {
@@ -36,7 +37,7 @@ export async function loadRobotModel(base = 'assets/') {
 // CAD parts that move together and share a material are drawn as one mesh (built once, shared by every copy)
 export function mergedParts(model, P) {
   if (model.merged) return model.merged;
-  const pivots = { armLower: P.armLower, armUpper: P.armUpper, fingerL: P.fingerL, fingerR: P.fingerR, wheelFL: P.wheelFL, wheelFR: P.wheelFR, wheelRL: P.wheelRL, wheelRR: P.wheelRR };
+  const pivots = { armLower: P.armLower, armUpper: P.armUpper, fingerL: P.fingerL, fingerR: P.fingerR, wheelFL: P.wheelFL, wheelFR: P.wheelFR, wheelRL: P.wheelRL, wheelRR: P.wheelRR, tray: P.tray };
   const buckets = new Map();
   for (const part of model.parts) {
     const key = [part.color, part.metalness, part.roughness, part.opacity].join('|');
@@ -74,6 +75,7 @@ export function buildRobotVisual(model, { squadCol, number = '009', shadows = tr
   root.add(mk('chassis'), mk('armLower', P.armLower), mk('armUpper', P.armUpper), mk('end'));
   g.end.add(mk('fingerL', P.fingerL)); g.end.add(mk('fingerR', P.fingerR));
   for (const w of ['wheelFL', 'wheelFR', 'wheelRL', 'wheelRR']) root.add(mk(w, P[w]));
+  root.add(mk('tray', P.tray));
   const mats = {};
   for (const { group, key, geo, part } of mergedParts(model, P)) {
     if (!mats[key]) {
@@ -87,14 +89,6 @@ export function buildRobotVisual(model, { squadCol, number = '009', shadows = tr
     m.castShadow = shadows && part.opacity >= 1; m.receiveShadow = shadows;
     (g[group] || g.chassis).add(m);
   }
-  const tray = new THREE.Group(); tray.position.set(TRAY.hinge[0], TRAY.hinge[1], 0); root.add(tray);
-  const trayMat = new THREE.MeshStandardMaterial({ color: 0x9aa3ad, roughness: 0.5, metalness: 0.4 });
-  const tb = new THREE.Mesh(new THREE.BoxGeometry(TRAY.len, 0.004, TRAY.width), trayMat); tb.position.set(TRAY.len / 2, 0.002, 0); tb.castShadow = shadows; tray.add(tb);
-  for (const sz of [-1, 1]) {
-    const w = new THREE.Mesh(new THREE.BoxGeometry(TRAY.len, TRAY.wall, 0.004), trayMat); w.position.set(TRAY.len / 2, TRAY.wall / 2, sz * TRAY.width / 2); tray.add(w);
-  }
-  const fw = new THREE.Mesh(new THREE.BoxGeometry(0.004, TRAY.wall, TRAY.width), trayMat); fw.position.set(TRAY.len, TRAY.wall / 2, 0); tray.add(fw);
-  g.tray = tray;
   // team number plate (R4) on the back
   const plate = new THREE.Mesh(new THREE.PlaneGeometry(3.5 * 0.0254, 2 * 0.0254), new THREE.MeshBasicMaterial({ map: numberTexture(number, squadCol) }));
   plate.position.set(-0.1347, 0.0668, 0); plate.rotation.y = -Math.PI / 2; root.add(plate);

@@ -1,7 +1,7 @@
 # NRL 2026 HYPERDRIVE simulator — by team Overdrive 009
 
 A 3D physics simulation of the NRL 2026 season game **HYPERDRIVE**. The arena is built from the official field CAD
-(`Field Assembly Final.step`) and `NRL_2026_Official_Arena_Dimensions.pdf`, the robot from `NRL-2026 Robot.step`,
+(`Field Assembly Final.step`) and `NRL_2026_Official_Arena_Dimensions.pdf`, the robot model from `OVERDRIVE_009_FINAL_ROBOT_v3.step` (its physics colliders are still the ones measured on the earlier `NRL-2026 Robot.step`),
 and the rules from `NRL/NRL_2026_HYPERDRIVE_GAME_MANUAL.pdf`.
 It has four independently controlled robots (2 Red + 2 Blue), the full 12 × 12 ft field with every
 game element, Human Player actions, the 2:30 match flow, live scoring, automatic fouls and Ranking Points.
@@ -349,11 +349,14 @@ These are all in `js/config.js`.
 
 `assets/field.*` and `assets/robot.*` are generated from the STEP files by the scripts in `tools/` (not deployed):
 
-1. `tools/cad_tessellate.py` (run with FreeCAD 1.0's `freecadcmd`; see the header for the environment variables) tessellates and
-   decimates the solids. The robot input is the STEP re-posed into the robot frame; `tools/robot_motion.json` lists its arm and
-   gripper solids.
-2. `python tools/build_field.py field_meshes.json assets` and `python tools/build_robot.py robot_meshes.json assets` quantise the meshes,
-   assign materials, and write the station pivot/hinge anchors and collision hulls.
+1. Robot only: `tools/cad_normalize_robot.py` (FreeCAD `freecadcmd`) re-poses the team's final CAD,
+   `OVERDRIVE_009_FINAL_ROBOT_v3.step`, into the robot frame, drops electronics detail and fasteners, and writes
+   `tools/robot_motion.json`: which solids move with each arm link, the gripper, each claw finger and the cargo-bay gate,
+   plus the pivots measured on the CAD.
+2. `tools/cad_tessellate.py` (run with FreeCAD 1.0's `freecadcmd`; see the header for the environment variables) tessellates and
+   decimates the solids.
+3. `python tools/build_field.py field_meshes.json assets` and `python tools/build_robot.py robot_meshes.json tools/robot_motion.json assets`
+   quantise the meshes, assign materials, and write the station pivot/hinge anchors, collision hulls and robot pivots.
 
 `tools/sim-harness.js` drives the physics from the browser console for testing
 (`await import('/tools/sim-harness.js')`, then `H.run(seconds, (t, robots) => { ... })`).
